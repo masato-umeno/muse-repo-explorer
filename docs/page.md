@@ -50,7 +50,8 @@ order: the viewer's choice in the settings (remembered), the initial language se
 setup (`setup --lang`, the language the user normally uses with Muse), and the browser language.
 English is the fallback.
 
-**Settings.** The gear button opens the settings: language and whether long lines wrap.
+**Settings.** The gear button opens the settings: language, whether long lines wrap, and how the
+top bar opens.
 
 **Navigation.**
 
@@ -85,9 +86,9 @@ a scope button shared by both:
 - The search runs in short slices so that the page remains responsive, and a new query cancels
   the previous one.
 
-**Header.** The button at the right of the title row collapses the repository selector, search
-field and scope panel to a single line that shows the selected repository. The state is
-remembered.
+**Header.** The repository selector, search field and scope panel open collapsed to a single line
+that shows the selected repository; the button at the right of the title row expands them. The
+settings choose how the page opens: collapsed (default), expanded, or as it was last time.
 
 **Asking Muse.**
 
