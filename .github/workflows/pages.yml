@@ -1,0 +1,54 @@
+name: pages
+
+# Publishes site/ to GitHub Pages, with a live demo built from this repository itself.
+# The demo is rebuilt on every push to main, so it always shows the current explorer.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Build the demo from this repository
+        run: |
+          set -eu
+          export HOME_DEMO="$RUNNER_TEMP/demo-home"
+          mkdir -p "$HOME_DEMO/ghq/github.com/masato-umeno"
+          git clone -q --depth 1 "file://$GITHUB_WORKSPACE" "$HOME_DEMO/ghq/github.com/masato-umeno/muse-repo-explorer"
+          # HOME points at a scratch directory so the demo shows "~/ghq/..." paths.
+          export HOME="$HOME_DEMO" GHQ_ROOT="$HOME_DEMO/ghq" REPO_EXPLORER_HOME="$RUNNER_TEMP/rx"
+          # setup installs the checksum-verified Mermaid build; ghq/gh are not needed for the demo.
+          python3 tools/repo_explorer.py setup --lang auto || true
+          python3 tools/repo_explorer.py build
+          mkdir -p _site
+          cp -R site/. _site/
+          cp -R "$REPO_EXPLORER_HOME/dist/site" _site/demo
+          touch _site/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
