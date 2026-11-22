@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>muse-repo-explorer: read your repositories on your phone and ask Muse about any line</title>
-<meta name="description" content="A private code browser that runs inside Muse. Read your repositories on your phone and ask Muse about any line. Set up with one line.">
+<meta name="description" content="A private code browser that runs as a space in Muse. Read your repositories on your phone and ask Muse about any line. Set up with one line.">
 <meta name="color-scheme" content="light">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='2' width='20' height='28' rx='5' fill='%2316233D'/%3E%3Crect x='9' y='9' width='14' height='3' rx='1' fill='%23FFC400'/%3E%3Crect x='9' y='15' width='10' height='2' rx='1' fill='%23EEF2F7'/%3E%3Crect x='9' y='20' width='12' height='2' rx='1' fill='%23EEF2F7'/%3E%3C/svg%3E">
 <style>
@@ -60,7 +60,14 @@ h2 { text-wrap: balance; word-break: auto-phrase; }
 /* phone with the live demo */
 .phone-col { display: flex; flex-direction: column; align-items: center; gap: 14px; }
 .phone { width: 340px; height: 690px; background: var(--ink); border-radius: 46px; padding: 12px; position: relative; }
-.phone iframe { width: 100%; height: 100%; border: 0; border-radius: 34px; background: var(--sheet); display: block; }
+.phone { display: flex; flex-direction: column; }
+/* the space's own top bar, as Muse shows it around a space */
+.space-bar { display: flex; align-items: center; gap: 8px; height: 52px; padding: 0 10px; background: #1F2B44; color: #fff;
+  border-radius: 34px 34px 0 0; flex: none; }
+.sb-btn { width: 34px; height: 34px; border-radius: 50%; background: rgba(255, 255, 255, .12); display: grid; place-items: center;
+  font-size: 16px; line-height: 1; flex: none; }
+.sb-title { flex: 1; text-align: center; font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.phone iframe { width: 100%; flex: 1; min-height: 0; border: 0; border-radius: 0 0 34px 34px; background: var(--sheet); display: block; }
 .phone-cap { font-size: 14px; color: var(--ink-2); text-align: center; max-width: 30em; }
 .demo-link { display: none; }
 
@@ -116,7 +123,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; }
     <div class="hero">
       <div>
         <h1><span data-t="heroA">Read your repositories on your phone.</span> <span data-t="heroB">Ask Muse about any line.</span></h1>
-        <p class="lead" data-t="heroLead">A private code browser that runs inside Muse.</p>
+        <p class="lead" data-t="heroLead">A private code browser that runs as a space in Muse.</p>
         <p class="send-label" data-t="sendLabel">To get started, send this line to Muse.</p>
         <div class="bubble">
           <p id="line">Set up muse-repo-explorer for me by following https://github.com/masato-umeno/muse-repo-explorer/blob/main/MUSE_SETUP.md (keep replying in the language we normally use)</p>
@@ -125,8 +132,8 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; }
         <a class="demo-link" href="demo/index.html#masato-umeno%2Fmuse-repo-explorer:README.md" data-t="openDemo">Try it on this repository</a>
       </div>
       <div class="phone-col">
-        <div class="phone"><iframe id="demo" title="Live demo" src="demo/index.html#masato-umeno%2Fmuse-repo-explorer:README.md" loading="lazy"></iframe></div>
-        <p class="phone-cap" data-t="demoCaption">Live demo</p>
+        <div class="phone"><div class="space-bar" aria-hidden="true"><span class="sb-btn">‹</span><span class="sb-title" data-t="spaceTitle">Repository Explorer</span><span class="sb-btn">···</span></div><iframe id="demo" title="Live demo" src="demo/index.html#masato-umeno%2Fmuse-repo-explorer:README.md" loading="lazy"></iframe></div>
+        <p class="phone-cap" data-t="demoCaption">Live demo, shown as a space in Muse</p>
       </div>
     </div>
 
@@ -168,12 +175,13 @@ var T = {
       "title": "muse-repo-explorer：リポジトリをスマホで読み、気になる行を Muse に聞く",
       "heroA": "リポジトリをスマホで読み、",
       "heroB": "気になる行を Muse に聞く。",
-      "heroLead": "Muse の中で動く、自分専用のコードブラウザです。",
+      "heroLead": "Muse のスペースとして動く、自分専用のコードブラウザです。",
       "sendLabel": "使い始めるには、次の1行を Muse に送ってください。",
       "copy": "コピー",
       "copied": "コピーしました",
       "openDemo": "このリポジトリで試す",
-      "demoCaption": "ライブデモ",
+      "demoCaption": "ライブデモ（Muse のスペースでの表示）",
+      "spaceTitle": "リポジトリエクスプローラー",
       "featuresTitle": "機能",
       "altBrowse": "コード表示の画面",
       "altSearch": "ファイル内検索の結果",
@@ -187,12 +195,13 @@ var T = {
       "title": "muse-repo-explorer：在手机上阅读仓库，就任意一行向 Muse 提问",
       "heroA": "在手机上阅读仓库，",
       "heroB": "就任意一行向 Muse 提问。",
-      "heroLead": "运行在 Muse 中的私密代码浏览器。",
+      "heroLead": "以 Muse 空间形式运行的私密代码浏览器。",
       "sendLabel": "要开始使用，请把这一行发给 Muse。",
       "copy": "复制",
       "copied": "已复制",
       "openDemo": "用本仓库试用",
-      "demoCaption": "在线演示",
+      "demoCaption": "在线演示（在 Muse 空间中的显示）",
+      "spaceTitle": "仓库浏览器",
       "featuresTitle": "功能",
       "altBrowse": "代码视图",
       "altSearch": "文件内容搜索结果",
@@ -206,12 +215,13 @@ var T = {
       "title": "muse-repo-explorer: 저장소를 스마트폰에서 읽고, 궁금한 줄을 Muse에 묻기",
       "heroA": "저장소를 스마트폰에서 읽고,",
       "heroB": "궁금한 줄을 Muse에 묻습니다.",
-      "heroLead": "Muse 안에서 동작하는 나만의 코드 브라우저입니다.",
+      "heroLead": "Muse 스페이스로 동작하는 나만의 코드 브라우저입니다.",
       "sendLabel": "시작하려면 다음 한 줄을 Muse에 보내십시오.",
       "copy": "복사",
       "copied": "복사됨",
       "openDemo": "이 저장소로 써 보기",
-      "demoCaption": "라이브 데모",
+      "demoCaption": "라이브 데모(Muse 스페이스에서의 표시)",
+      "spaceTitle": "저장소 탐색기",
       "featuresTitle": "기능",
       "altBrowse": "코드 보기 화면",
       "altSearch": "파일 내용 검색 결과",
