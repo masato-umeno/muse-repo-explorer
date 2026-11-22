@@ -9,10 +9,10 @@ muse-repo-explorer は、GitHub リポジトリのローカル clone を Muse �
 
 ## セットアップ
 
-次の1行を Muse に送信してください。英語のままで構いません。
+次の1行を Muse に送信してください。英語のままで構いません。Muse はこれまでどおりの言語で応答を続けます。
 
 ```text
-Set up muse-repo-explorer for me by following https://github.com/masato-umeno/muse-repo-explorer/blob/main/MUSE_SETUP.md
+Set up muse-repo-explorer for me by following https://github.com/masato-umeno/muse-repo-explorer/blob/main/MUSE_SETUP.md (keep replying in the language we normally use)
 ```
 
 Muse は [MUSE_SETUP.md](MUSE_SETUP.md) を読み、その後はツール自体の案内に従って1手順ずつ進めます。途中で求められる操作は、GitHub へのサインインの承認と、対象リポジトリの選択です。リポジトリは少なくとも1つ必要で、このリポジトリをサンプルとして使うこともできます。ページは、普段 Muse と話している言語で表示されます。表示言語は、ページの設定（歯車ボタン）からいつでも変更できます。あとで同じ1行を再送信しても問題ありません。完了済みの手順は省略され、既存の環境（以前の版で構築したものを含む）は最新版に更新されます。

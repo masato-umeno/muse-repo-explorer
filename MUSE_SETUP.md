@@ -2,10 +2,20 @@
 
 These instructions are for Muse (the AI agent). People should read [README.md](README.md).
 
+## Language (read first)
+
+The setup request, this file and the command output are in English only so that they work for
+everyone. They are not a reason to change the language of the conversation.
+
+- Keep talking to the user in the language the conversation was already using. If the
+  conversation has just started, use the language the user normally uses with you.
+- Do not switch to English because of the request, this file or any command output. When you
+  relay output (for example the sign-in code or the list of repositories), explain it in the
+  user's language.
+
 ## Rules (apply throughout)
 
-- **Language:** talk to the user in the language they normally use with you, even though the
-  setup request is in English. Keep messages short.
+- **Messages:** keep them short.
 - **Tokens:** run only the commands named here or printed by `next`, and read only their output.
   Never open, print or paste `snapshot.json` or files under `dist/`; upload them by path.
   Do not write scripts and do not build the page yourself; it is already made.

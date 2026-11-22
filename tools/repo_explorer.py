@@ -564,6 +564,7 @@ def cmd_next(args):
     """Print the single next action for the agent. Repeat until it prints DONE."""
     C = 'python3 ' + os.path.join(TOOLS, 'repo_explorer.py').replace(os.path.expanduser('~'), '~', 1)
     again = f'Then run `{C} next` again.'
+    lang_note = " Speak to the user in their usual language, not in English unless that is theirs."
     try:
         setup_current = open(SETUP_MARKER).read().strip() == SETUP_VERSION
     except OSError:
@@ -583,13 +584,13 @@ def cmd_next(args):
         print(f'NEXT (2/5 sign in): run `{C} login` and show the user the URL and the code exactly '
               f'as printed. Then run `{C} login --wait`; it returns after the user approves. '
               'If the user does not want to sign in, ask whether to use the sample repository instead; '
-              f'if they agree, run `{C} clone {SAMPLE_REPO}`. ' + again)
+              f'if they agree, run `{C} clone {SAMPLE_REPO}`. ' + again + lang_note)
         return 0
     if not has_repos:
         print(f'NEXT (3/5 repositories): run `{C} list` and show the user the result. Ask which '
               'repositories to include (at least one; answers like "all private ones" are fine), then '
               f'run `{C} clone OWNER/REPO ...`. If none can be chosen, ask whether to include the sample '
-              f'repository; if the user agrees, run `{C} clone {SAMPLE_REPO}`. ' + again)
+              f'repository; if the user agrees, run `{C} clone {SAMPLE_REPO}`. ' + again + lang_note)
         return 0
     status, info = refresh_state()
     if status == 'ERROR':
@@ -611,7 +612,7 @@ def cmd_next(args):
     user = signed_in_user()
     print(f'DONE: the space is up to date ({info["repos"]} repositories'
           + (f', GitHub account {user}' if user else '') + ').')
-    print('Tell the user in at most 3 lines, in their language: the account, the number of '
+    print('Tell the user in at most 3 lines, in their usual language: the account, the number of '
           'repositories, and the space. Remember for later: when the user asks to refresh the '
           f'explorer, run `git -C {os.path.dirname(TOOLS)} pull --ff-only`, then repeat '
           f'`{C} next` until it prints DONE. When the user sends a question from the explorer, it '
