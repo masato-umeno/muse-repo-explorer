@@ -27,6 +27,17 @@ After a `git pull` in any clone (merge or rebase), a git hook rebuilds the snaps
 files in the background and writes its output to `snapshot-hook.log`. The space itself is changed
 only by a refresh.
 
+## Updating to a new version
+
+Sending the setup line again updates the tool (`git pull`) and then follows `next`:
+
+- If the new version needs the setup to run again, `next` asks for `setup`; the page language
+  is kept.
+- If the page or its data format changed, `next` lists the files to upload or delete so that the
+  existing space is updated in place. Installations made before the folder form (with
+  `index.html` and `snapshot.json` in the space) are migrated the same way: the new files are
+  uploaded and `snapshot.json` is deleted.
+
 ## Maintenance
 
 | Task | Procedure |
@@ -38,7 +49,7 @@ only by a refresh.
 | Change the language for yourself | Use the gear button on the page |
 | Change the initial page language | `rx setup --lang ko` (or `en`, `ja`, `zh-CN`, `auto`), then `rx refresh` |
 | Install Mermaid later | `rx setup`, then `rx refresh` |
-| Update the tool | `git -C ~/workspace/muse-repo-explorer pull --ff-only`, then `rx refresh` |
+| Update the tool | Send the setup line to Muse again; or `git -C ~/workspace/muse-repo-explorer pull --ff-only`, then repeat `rx next` |
 | Renew the GitHub sign-in | `rx login`, then `rx login --wait` |
 
 Patterns in `exclude.txt` are matched against the path within the repository, the file name,

@@ -26,7 +26,8 @@ Muse reads [MUSE_SETUP.md](MUSE_SETUP.md) and is then guided step by step by the
 You will be asked to approve the GitHub sign-in and to choose the repositories to include. At
 least one repository is required; this repository can be used as a sample. The page is built in
 the language you normally use with Muse, and it can be changed in the page's settings (the gear
-button). Sending the line again later is safe: completed steps are skipped.
+button). Sending the same line again later is safe: completed steps are skipped, and an existing
+installation, including one made with an earlier version, is updated to the latest version.
 
 The line makes Muse follow instructions stored in this repository. To use a fixed version, replace
 `main` in the URL with a commit ID or release tag.

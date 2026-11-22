@@ -11,6 +11,7 @@ snapshot*.json
 .snapshot.lock
 .page-state.json
 .page-lang
+.setup-version
 .build.lock
 exclude.txt
 denylist.txt

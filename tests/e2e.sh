@@ -98,6 +98,22 @@ $RX mark-synced >/dev/null
 rm -rf "$GHQ_ROOT/github.com/your-org/second"
 out="$($RX refresh --no-pull)"; expect "$out" "delete from the space"; expect "$out" "your-org--second-"
 
+# ---- upgrading an installation made by an older version ----
+$RX mark-synced >/dev/null
+rm -f "$REPO_EXPLORER_HOME/.page-state.json"
+printf 'two-file' > "$REPO_EXPLORER_HOME/.page-mode"; : > "$REPO_EXPLORER_HOME/.page-synced-heads"
+out="$($RX next)"; expect "$out" "NEXT (5/5 update the space)"     # existing space is updated, not recreated
+expect "$out" "index.html"; expect "$out" "data/index.json.gz"; expect "$out" "delete from the space"; expect "$out" "snapshot.json"
+out="$($RX mark-synced)"; expect "$out" "marked as synced (folder)"
+[ -f "$REPO_EXPLORER_HOME/.page-mode" ] && fail "legacy state not cleaned up"
+out="$($RX refresh --no-pull)"; expect "$out" "UP_TO_DATE"
+# a tool update that needs setup again: `next` asks for it and keeps the language
+printf '1' > "$REPO_EXPLORER_HOME/.setup-version"
+out="$($RX next)"; expect "$out" "the tool was updated"
+$RX setup >/dev/null 2>&1 || true
+[ "$(cat "$REPO_EXPLORER_HOME/.page-lang")" = "ja" ] || fail "setup without --lang changed the language"
+out="$($RX next)"; expect "$out" "DONE"
+
 # refusing to write into an unignored git work tree
 git init -q "$T/pub"
 REPO_EXPLORER_HOME="$T/pub" python3 "$ROOT/tools/update_snapshot.py" --no-pull 2>/dev/null && fail "wrote into git work tree"
