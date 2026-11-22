@@ -68,6 +68,7 @@ your-org/your-repo/secrets/*
 | `pull failed: …` | The clone has local commits or has diverged from its upstream | Resolve it in that clone; other repositories are still processed |
 | `skipped (no upstream)` | The current branch has no tracking branch | None required; the branch is captured as it is |
 | `refusing to write: …` | The state directory is inside an unignored git working tree | Use the default location or set `REPO_EXPLORER_HOME` |
+| Muse pauses and asks whether to continue | Its safety settings ask for confirmation before a step such as creating the space | Reply that it may go ahead; the setup continues from the same step |
 | `could not get a device code` | gh could not reach GitHub | Check network access and run `rx login` again |
 | `mermaid: not installed (…)` | The download failed or the checksum did not match | Diagrams are shown as source; run `rx setup` again later |
 | `diagrams: off` in refresh output | Mermaid is not installed | Run `rx setup`, then `rx refresh` |
