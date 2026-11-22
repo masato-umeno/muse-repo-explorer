@@ -128,7 +128,7 @@ def main(argv=None):
               file=sys.stderr)
         return 1
     print(f'public safety check passed'
-          + ('' if deny else ' (no private denylist found; see docs/security.md)'))
+          + ('' if deny else ' (no private denylist found; see CONTRIBUTING.md)'))
     return 0
 
 

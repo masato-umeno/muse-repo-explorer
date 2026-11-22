@@ -1,84 +1,41 @@
-# Security & privacy
+# Security
 
-This mechanism exists to make **your private source code readable for you alone**.
-There are two sides: rules for people who *use* it, and guards for people who *edit this
-public repository*.
+This document is for users. Guidance for contributors to this public repository is in
+[CONTRIBUTING.md](../CONTRIBUTING.md).
 
-## For users
+## Data handled
 
-1. **Never publish the snapshot.** `snapshot.json` contains the full source of every cloned
-   repository. Keep it outside any git repository (the default `~/workspace/repo-explorer`
-   is), never upload it to a file-sharing service.
-   `update_snapshot.py` refuses to write if its output directory is inside a git work tree
-   that does not ignore `snapshot.json`, and writes it (and `dist/`) owner-only (600 / 700).
-2. **Never share the explorer page publicly.** A public link lets anyone with the link read
-   your code. Keep the space private.
-3. **Never put credentials in chat or files.** Sign in only with the device flow
-   (`gh auth login --web`). Credentials then live only in `~/.config/gh/`.
-4. **Understand the gh token scope.** The default flow grants the `repo` scope (read/write).
-   When you stop using this, run `gh auth logout`, or revoke the app on GitHub
-   (Settings → Applications → Authorized OAuth Apps).
-5. **Clone only what you are allowed to.** For shared/organization repositories, follow that
-   project's rules; never expose other people's code without permission.
-6. **Let the agent upload files, not read them.** The README prompt tells Muse to upload
-   `dist/` files by path and never print them, so your code does not pass through the chat.
-7. **Hide sensitive files from the page.** Even private, the page is one share away from
-   anyone. List globs such as `.env*`, `*.pem`, `your-org/your-repo/secrets/*` in
-   `~/workspace/repo-explorer/exclude.txt`; matching files appear in the tree without content.
-   Symlinks and submodules are never followed.
-
-## For contributors
-
-This repository is **public**. Only scripts, instructions and specs belong here — never real
-repository names, organization names, personal names, e-mail addresses, or snapshots.
-Use placeholders such as `your-org/your-repo`.
-
-### Three layers of protection
-
-| Layer | What | When |
+| Data | Where it is stored | Sensitivity |
 | --- | --- | --- |
-| `.gitignore` | Snapshots, logs, sync state, `exclude.txt`, keys, `.env` | Always |
-| pre-commit hook | `scripts/check_public_safety.py --staged` | Every local commit |
-| GitHub Actions | `.github/workflows/public-safety.yml` (all tracked files) | Every push / PR |
+| Source code of included repositories | Clones, `snapshot.json`, `dist/`, the Muse space | As sensitive as the repositories themselves |
+| GitHub credentials | `~/.config/gh/` (managed by gh) | Grants access to every repository the account can reach |
+| Repository names and commit IDs | State files in `~/workspace/repo-explorer` | May reveal private project names |
 
-The check blocks:
+## Built-in safeguards
 
-- forbidden files (`snapshot*.json`, `*.log`, `.page-synced-heads`, `exclude.txt`, keys, `.env`, …)
-- snapshot-shaped JSON under any name
-- tokens and keys (GitHub, AWS, Slack, Anthropic, OpenAI, Google, private keys)
-- e-mail addresses other than `@users.noreply.github.com` and `@example.*`
-- files over 200 KB
-- any word in your **private denylist**
+- The snapshot is built from committed content only. Symbolic links and submodules are listed
+  but never followed, so files outside a repository cannot be included.
+- Files matching `exclude.txt` appear in the tree without their content.
+- `snapshot.json` and `dist/` are written with owner-only permissions (600 and 700).
+- `update_snapshot.py` refuses to write into a git working tree unless `snapshot.json` is
+  ignored there, which prevents the snapshot from being committed by mistake.
+- The page makes no external requests and sets `noindex` and `no-referrer`. File content is
+  escaped before display and is never interpreted as markup.
+- The setup prompt instructs the agent to upload page files by path and not to read them, so
+  source code does not pass through the conversation.
 
-### Setup (once per machine)
+## Recommendations
 
-```sh
-sh scripts/install-dev-hooks.sh
-```
-
-Then put the real names that must never appear here — your organizations, private repository
-names, colleagues' names — one per line in:
-
-```
-~/.config/muse-repo-explorer/denylist.txt
-```
-
-That file lives outside the repository on purpose, so the list itself is never published.
-(CI cannot see it; it protects you locally.)
-
-### Also recommended
-
-- In the GitHub repository settings, enable **Secret scanning** and **Push protection**
-  (Settings → Code security). They are free for public repositories.
-- Commit with your GitHub noreply address (`<id>+<user>@users.noreply.github.com`) and enable
-  "Block command line pushes that expose my email" in your GitHub e-mail settings.
-- Never bypass the hook with `git commit --no-verify`. If the check fires, fix the content.
-
-### If something sensitive was pushed
-
-Deleting it in a new commit is **not** enough — it stays in history and may already be cloned.
-
-1. Revoke/rotate any leaked credential immediately.
-2. Remove it from history (`git filter-repo`), force-push, and ask GitHub Support to purge
-   cached views if needed.
-3. Treat leaked source code as public from that moment.
+1. **Keep the explorer page private.** A public link gives anyone who has it access to the
+   code. Do not create one.
+2. **Do not copy `snapshot.json` elsewhere.** Keep it out of git repositories and file-sharing
+   services.
+3. **Sign in only through the device flow.** Never paste a password or token into a
+   conversation.
+4. **Exclude sensitive files.** Add patterns such as `.env*`, `*.pem` or
+   `your-org/your-repo/secrets/*` to `exclude.txt`, even though the page is private.
+5. **Include only repositories you are authorized to access,** and follow the policies of
+   shared or organization repositories.
+6. **Revoke access when you stop using the tool.** The default gh token has the `repo` scope
+   (read and write). Run `gh auth logout`, or revoke the authorization under GitHub
+   Settings → Applications → Authorized OAuth Apps.
