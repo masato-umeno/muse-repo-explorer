@@ -1,15 +1,27 @@
 #!/bin/sh
 # Offline end-to-end test: fake ghq root with local repositories, no network, no GitHub.
 # Usage: sh tests/e2e.sh
+# Set REPO_EXPLORER_MERMAID_FILE to a local mermaid.min.js to also test diagram embedding.
 set -eu
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 T="$(mktemp -d)"
 trap 'rm -rf "$T"' EXIT
-export GHQ_ROOT="$T/ghq" REPO_EXPLORER_HOME="$T/home"
+export GHQ_ROOT="$T/ghq" REPO_EXPLORER_HOME="$T/home" HOME="$T/userhome"
 export GIT_AUTHOR_NAME=t GIT_AUTHOR_EMAIL=t@example.com GIT_COMMITTER_NAME=t GIT_COMMITTER_EMAIL=t@example.com
+mkdir -p "$HOME"
 RX="python3 $ROOT/tools/repo_explorer.py"
 fail() { echo "FAIL: $*" >&2; exit 1; }
 expect() { echo "$1" | grep -q -- "$2" || { echo "$1" >&2; fail "expected: $2"; }; }
+unzip_json() { python3 -c "import gzip,sys; sys.stdout.write(gzip.open(sys.argv[1],'rt').read())" "$1"; }
+
+# no repositories yet -> refresh must stop and point to the sample
+mkdir -p "$REPO_EXPLORER_HOME"
+set +e; out="$($RX refresh)"; rc=$?; set -e
+[ $rc -eq 3 ] || fail "refresh without repositories should exit 3"
+expect "$out" "NO_REPOSITORIES"; expect "$out" "masato-umeno/muse-repo-explorer"
+
+# page language is stored for the build
+printf 'ja' > "$REPO_EXPLORER_HOME/.page-lang"
 
 # upstream with tricky content
 U="$T/up"; git init -q "$U"
@@ -21,28 +33,49 @@ echo SECRET > "$U/.env"
 echo outside-secret > "$T/outside"; ln -s "$T/outside" "$U/link"
 git -C "$U" add -A; git -C "$U" commit -qm init
 git clone -q "$U" "$GHQ_ROOT/github.com/your-org/your-repo"
-mkdir -p "$REPO_EXPLORER_HOME"; echo '.env' > "$REPO_EXPLORER_HOME/exclude.txt"
+git clone -q "$U" "$GHQ_ROOT/github.com/your-org/second"
+echo '.env' > "$REPO_EXPLORER_HOME/exclude.txt"
 
 out="$($RX refresh)"; expect "$out" "PAGE_UPDATE_NEEDED"; expect "$out" "first time"
-S="$REPO_EXPLORER_HOME/snapshot.json"
+S="$REPO_EXPLORER_HOME/snapshot.json"; SITE="$REPO_EXPLORER_HOME/dist/site"
 grep -q outside-secret "$S" && fail "symlink target leaked"
 grep -q SECRET "$S" && fail "excluded file leaked"
 grep -q '"skipped":"symlink"' "$S" || fail "symlink not marked"
 grep -q 'メモ.md' "$S" || fail "non-ASCII path quoted"
-grep -q '<img' "$REPO_EXPLORER_HOME/dist/explorer.html" && fail "unescaped < in single-file page"
 [ "$(stat -c %a "$S")" = 600 ] || fail "snapshot not mode 600"
 [ -f "$GHQ_ROOT/github.com/your-org/your-repo/.git/hooks/post-merge" ] || fail "hook missing"
 
+# folder form: small index without content, one content file per repository
+[ -f "$SITE/index.html" ] && [ -f "$SITE/data/index.json.gz" ] || fail "folder form incomplete"
+[ "$(ls "$SITE"/data/*--*.json.gz | wc -l)" -eq 2 ] || fail "expected one content file per repository"
+unzip_json "$SITE/data/index.json.gz" | grep -q 'onerror' && fail "index contains file content"
+grep -q 'data-lang="ja"' "$SITE/index.html" || fail "language not built into the page"
+grep -q '<img src=x' "$REPO_EXPLORER_HOME/dist/explorer.html" && fail "unescaped content in single-file page"
+if [ -n "${REPO_EXPLORER_MERMAID_FILE:-}" ]; then
+  $RX setup >/dev/null 2>&1 || true
+  $RX refresh --no-pull >/dev/null
+  [ -f "$SITE/data/mermaid.js.gz" ] || fail "mermaid not embedded"
+fi
+
 $RX mark-synced >/dev/null 2>&1 && fail "mark-synced without --mode should fail"
-out="$($RX mark-synced --mode two-file)"; expect "$out" "marked 1 repos"
+out="$($RX mark-synced --mode folder)"; expect "$out" "marked as synced"
 out="$($RX refresh)"; expect "$out" "UP_TO_DATE"
 
-# a pull through the hook rebuilds in the background
+# a pull through the hook rebuilds in the background; only that repository's file changes
 echo more >> "$U/src/a.py"; git -C "$U" commit -qam 2
 git -C "$GHQ_ROOT/github.com/your-org/your-repo" pull -q
 i=0; until [ -f "$REPO_EXPLORER_HOME/.snapshot-dirty" ] || [ $i -ge 20 ]; do sleep 0.5; i=$((i+1)); done
 [ -f "$REPO_EXPLORER_HOME/.snapshot-dirty" ] || fail "hook did not rebuild"
-out="$($RX refresh --no-pull)"; expect "$out" "replace the page asset snapshot.json"
+sleep 1
+out="$($RX refresh --no-pull)"
+expect "$out" "data/index.json.gz"
+expect "$out" "your-org--your-repo-"
+echo "$out" | grep -q "your-org--second-" && fail "unchanged repository listed for upload"
+
+# removing a repository lists its file for deletion
+$RX mark-synced >/dev/null
+rm -rf "$GHQ_ROOT/github.com/your-org/second"
+out="$($RX refresh --no-pull)"; expect "$out" "delete from the space"; expect "$out" "your-org--second-"
 
 # refusing to write into an unignored git work tree
 git init -q "$T/pub"

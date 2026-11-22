@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-lang="">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -31,7 +31,6 @@ header { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bot
 .grow { flex: 1; min-width: 0; }
 h1 { font-size: 16px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 select, input[type=search] { background: var(--bg2); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; width: 100%; }
-#lang { width: auto; padding: 4px 6px; font-size: 13px; }
 .meta { color: var(--fg2); font-size: 12px; margin-top: 4px; overflow-wrap: anywhere; }
 main { display: flex; min-height: calc(100vh - 120px); }
 #side { width: 100%; }
@@ -75,6 +74,30 @@ ul.tree { list-style: none; margin: 0; padding: 0; }
 .btn[aria-pressed="true"] { background: var(--bg3); border-color: var(--accent); color: var(--accent); }
 .t-c { color: var(--c-com); font-style: italic; } .t-s { color: var(--c-str); }
 .t-n { color: var(--c-num); } .t-k { color: var(--c-kw); font-weight: 600; }
+.md { padding: 12px 16px 24px; line-height: 1.65; overflow-wrap: anywhere; }
+.md > :first-child { margin-top: 0; }
+.md h1, .md h2 { border-bottom: 1px solid var(--line); padding-bottom: .25em; }
+.md h1 { font-size: 1.6em; } .md h2 { font-size: 1.35em; } .md h3 { font-size: 1.15em; } .md h4, .md h5, .md h6 { font-size: 1em; }
+.md h1, .md h2, .md h3, .md h4, .md h5, .md h6 { margin: 1.4em 0 .6em; line-height: 1.3; }
+.md p, .md ul, .md ol, .md blockquote, .md table, .md pre { margin: 0 0 1em; }
+.md ul, .md ol { padding-left: 1.6em; }
+.md li + li { margin-top: .2em; }
+.md li.task { list-style: none; }
+.md li.task > input { margin: 0 .4em 0 -1.4em; }
+.md a { color: var(--accent); text-decoration: none; } .md a:hover { text-decoration: underline; }
+.md code { font: .9em var(--mono); background: var(--bg2); padding: .1em .35em; border-radius: 4px; }
+.md pre.md-code { background: var(--bg2); padding: 10px 12px; border-radius: 8px; white-space: pre-wrap; overflow-wrap: anywhere; font: 12.5px/1.55 var(--mono); }
+.md pre.md-code code { background: none; padding: 0; font: inherit; }
+.md blockquote { border-left: 4px solid var(--line); padding: 0 1em; color: var(--fg2); }
+.md table { display: block; overflow-x: auto; border-collapse: collapse; }
+.md th, .md td { border: 1px solid var(--line); padding: 5px 10px; }
+.md th { background: var(--bg2); }
+.md hr { border: 0; border-top: 1px solid var(--line); margin: 1.5em 0; }
+.md .md-img { color: var(--fg2); font-size: .9em; }
+.mermaid-block { margin: 0 0 1em; padding: 8px; background: var(--bg2); border-radius: 8px; overflow-x: auto; text-align: center; }
+.mermaid-block svg { max-width: 100%; height: auto; }
+.mermaid-block .notice { margin: 0 0 8px; text-align: left; }
+.mermaid-block pre { text-align: left; }
 footer { color: var(--fg2); font-size: 12px; padding: 12px; }
 </style>
 </head>
@@ -82,10 +105,6 @@ footer { color: var(--fg2); font-size: 12px; padding: 12px; }
 <header>
   <div class="row">
     <h1 class="grow" data-i18n="title">Repository Explorer</h1>
-    <select id="lang" aria-label="Language">
-      <option value="en">EN</option><option value="ja">日本語</option>
-      <option value="zh-CN">中文</option><option value="ko">한국어</option>
-    </select>
   </div>
   <div class="row" style="margin-top:8px">
     <select id="repo" class="grow" aria-label="Repository"></select>
@@ -101,8 +120,9 @@ footer { color: var(--fg2); font-size: 12px; padding: 12px; }
 </main>
 <footer id="foot"></footer>
 
-<!-- build_page.py fills this for the single-file version; empty = load snapshot.json -->
-<script id="snapshot-data" type="application/json"></script>
+<!-- Single-file form only: build_page() replaces the next line with the data files (base64 gzip).
+     In the folder form the same files are fetched from data/ when they are needed. -->
+<!-- embedded-data -->
 <script>
 (function () {
 'use strict';
@@ -112,7 +132,7 @@ var I18N = {
   en: {
     title: 'Repository Explorer', search: 'Search files in all repositories', snapshot: 'Snapshot',
     copy: 'Copy', copied: 'Copied', back: 'Back', loading: 'Loading…',
-    loadError: 'Could not load snapshot.json.', noRepos: 'No repositories in the snapshot.',
+    loadError: 'Could not load the data.', unsupported: 'This browser cannot read the data. Please update it.', noRepos: 'No repositories in the snapshot.',
     noResults: 'No matching files.', results: function (n, more) { return n + (more ? '+' : '') + ' files'; },
     empty: 'No files', pick: 'Select a file from the tree.', lines: 'lines',
     'skipped.binary': 'Binary file — cannot be displayed.',
@@ -122,12 +142,14 @@ var I18N = {
     'skipped.submodule': 'Submodule (not included).',
     'skipped.other': 'This file cannot be displayed.',
     wrap: 'Wrap',
+    preview: 'Preview', diagramUnavailable: 'Diagrams cannot be rendered on this page. Showing the source.',
+    diagramError: 'This diagram could not be rendered.',
     noHighlight: 'Large file: shown without colors.'
   },
   ja: {
     title: 'リポジトリエクスプローラー', search: '全リポジトリのファイルを検索', snapshot: 'スナップショット',
     copy: 'コピー', copied: 'コピーしました', back: '戻る', loading: '読み込み中…',
-    loadError: 'snapshot.json を読み込めませんでした。', noRepos: 'スナップショットにリポジトリがありません。',
+    loadError: 'データを読み込めませんでした。', unsupported: 'このブラウザではデータを読み込めません。ブラウザを更新してください。', noRepos: 'スナップショットにリポジトリがありません。',
     noResults: '一致するファイルはありません。', results: function (n, more) { return n + (more ? '+' : '') + ' 件'; },
     empty: 'ファイルがありません', pick: 'ツリーからファイルを選んでください。', lines: '行',
     'skipped.binary': 'バイナリファイルのため表示できません。',
@@ -137,12 +159,14 @@ var I18N = {
     'skipped.submodule': 'サブモジュール（含まれません）。',
     'skipped.other': 'このファイルは表示できません。',
     wrap: '折り返し',
+    preview: 'プレビュー', diagramUnavailable: 'このページでは図を描画できないため、ソースを表示しています。',
+    diagramError: 'この図を描画できませんでした。',
     noHighlight: '大きいファイルのため色付けなしで表示しています。'
   },
   'zh-CN': {
     title: '仓库浏览器', search: '在所有仓库中搜索文件', snapshot: '快照',
     copy: '复制', copied: '已复制', back: '返回', loading: '加载中…',
-    loadError: '无法加载 snapshot.json。', noRepos: '快照中没有仓库。',
+    loadError: '无法加载数据。', unsupported: '此浏览器无法读取数据，请更新浏览器。', noRepos: '快照中没有仓库。',
     noResults: '没有匹配的文件。', results: function (n, more) { return n + (more ? '+' : '') + ' 个文件'; },
     empty: '没有文件', pick: '请从目录树中选择文件。', lines: '行',
     'skipped.binary': '二进制文件，无法显示。',
@@ -152,12 +176,14 @@ var I18N = {
     'skipped.submodule': '子模块（未包含）。',
     'skipped.other': '无法显示此文件。',
     wrap: '自动换行',
+    preview: '预览', diagramUnavailable: '此页面无法渲染图表，显示源代码。',
+    diagramError: '无法渲染此图表。',
     noHighlight: '文件较大，未启用语法高亮。'
   },
   ko: {
     title: '저장소 탐색기', search: '모든 저장소에서 파일 검색', snapshot: '스냅샷',
     copy: '복사', copied: '복사됨', back: '뒤로', loading: '불러오는 중…',
-    loadError: 'snapshot.json 을 불러올 수 없습니다.', noRepos: '스냅샷에 저장소가 없습니다.',
+    loadError: '데이터를 불러올 수 없습니다.', unsupported: '이 브라우저에서는 데이터를 읽을 수 없습니다. 브라우저를 업데이트해 주십시오.', noRepos: '스냅샷에 저장소가 없습니다.',
     noResults: '일치하는 파일이 없습니다.', results: function (n, more) { return n + (more ? '+' : '') + '개 파일'; },
     empty: '파일이 없습니다', pick: '트리에서 파일을 선택하세요.', lines: '줄',
     'skipped.binary': '바이너리 파일이라 표시할 수 없습니다.',
@@ -167,17 +193,19 @@ var I18N = {
     'skipped.submodule': '서브모듈(포함되지 않음).',
     'skipped.other': '이 파일은 표시할 수 없습니다.',
     wrap: '줄바꿈',
+    preview: '미리보기', diagramUnavailable: '이 페이지에서는 다이어그램을 렌더링할 수 없어 소스를 표시합니다.',
+    diagramError: '이 다이어그램을 렌더링할 수 없습니다.',
     noHighlight: '파일이 커서 색상 없이 표시합니다.'
   }
 };
-var LANGS = ['en', 'ja', 'zh-CN', 'ko'];
-
 function store(k, v) {
   try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; }
 }
+/* The language is chosen when the page is built (data-lang, from the setup conversation).
+   If none was set, the browser language is used; English is the fallback. */
 function pickLang() {
-  var saved = store('rx.lang');
-  if (saved && I18N[saved]) return saved;
+  var built = document.documentElement.getAttribute('data-lang');
+  if (built && I18N[built]) return built;
   var navs = (navigator.languages || [navigator.language || 'en']);
   for (var i = 0; i < navs.length; i++) {
     var l = String(navs[i]).toLowerCase();
@@ -260,18 +288,332 @@ function highlightLines(src, path, plain) {
   return lines;
 }
 
+
+/* ---------- markdown preview (escape-first; no raw HTML is ever rendered) ---------- */
+var MD_RE = /\.(md|markdown|mdown|mkd)$/i, MMD_RE = /\.(mmd|mermaid)$/i;
+var LANG_EXT = { python: 'py', py: 'py', bash: 'sh', sh: 'sh', shell: 'sh', console: 'sh', zsh: 'sh',
+  yaml: 'yml', yml: 'yml', toml: 'toml', ruby: 'rb', javascript: 'js', js: 'js', jsx: 'js', typescript: 'ts',
+  ts: 'ts', tsx: 'ts', json: 'json', html: 'html', xml: 'xml', sql: 'sql', go: 'go', rust: 'rs', java: 'java',
+  kotlin: 'kt', swift: 'swift', c: 'c', cpp: 'cpp', csharp: 'cs', php: 'php', lua: 'lua', dockerfile: 'dockerfile' };
+function attr(s) { return esc(String(s)).replace(/"/g, '&quot;'); }
+function decodeSafe(s) { try { return decodeURIComponent(s); } catch (e) { return s; } }
+function slugify(s, used) {
+  var base;
+  try { base = s.toLowerCase().replace(/<[^>]*>/g, '').replace(/[^\p{L}\p{N}\s_-]/gu, ''); }
+  catch (e) { base = s.toLowerCase().replace(/[!-,./:-@[-^`{-~]/g, ''); }
+  base = base.trim().replace(/\s/g, '-');
+  var slug = base, n = 1;
+  while (used[slug]) slug = base + '-' + (n++);
+  used[slug] = 1;
+  return slug;
+}
+function resolvePath(dir, rel) {
+  var stack = rel.charAt(0) === '/' ? [] : (dir ? dir.split('/') : []);
+  rel.split('/').forEach(function (p) {
+    if (p === '..') stack.pop(); else if (p && p !== '.') stack.push(p);
+  });
+  return stack.join('/');
+}
+function mdLink(href, inner, ctx) {
+  if (/^(https?:|mailto:)/i.test(href)) {
+    return '<a href="' + attr(href) + '" target="_blank" rel="noopener noreferrer">' + inner + '</a>';
+  }
+  if (href.charAt(0) === '#') return '<a href="#" data-anchor="' + attr(decodeSafe(href.slice(1)).toLowerCase()) + '">' + inner + '</a>';
+  if (/^[a-z][a-z0-9+.-]*:/i.test(href) || href.indexOf('//') === 0) return inner; // other schemes: text only
+  var hash = href.indexOf('#'), path = hash < 0 ? href : href.slice(0, hash);
+  return '<a href="#" data-path="' + attr(resolvePath(ctx.dir, decodeSafe(path))) + '"' +
+    (hash < 0 ? '' : ' data-anchor="' + attr(decodeSafe(href.slice(hash + 1)).toLowerCase()) + '"') + '>' + inner + '</a>';
+}
+function mdEmph(s) { // s is already escaped
+  return s.replace(/\*\*(?=\S)([\s\S]*?\S)\*\*/g, '<strong>$1</strong>')
+    .replace(/(^|[^\w])__(?=\S)([\s\S]*?\S)__(?!\w)/g, '$1<strong>$2</strong>')
+    .replace(/(^|[^*\w])\*(?=[^\s*])([^*]*?[^\s*])\*(?!\*)/g, '$1<em>$2</em>')
+    .replace(/(^|[^_\w])_(?=[^\s_])([^_]*?[^\s_])_(?![_\w])/g, '$1<em>$2</em>')
+    .replace(/~~(?=\S)([\s\S]*?\S)~~/g, '<del>$1</del>');
+}
+function mdInline(s, ctx) {
+  var keep = [];
+  function hold(html) { keep.push(html); return '' + (keep.length - 1) + ''; }
+  s = s.replace(/(`+)([^`]|[^`][\s\S]*?[^`])\1(?!`)/g, function (m, a, c) {
+    return hold('<code>' + esc(c.replace(/^ ([\s\S]*) $/, '$1')) + '</code>');
+  });
+  s = s.replace(/\\([\\`*_{}\[\]()#+\-.!|~<>])/g, function (m, c) { return hold(esc(c)); });
+  s = s.replace(/<!--[\s\S]*?-->/g, '').replace(/<(script|style)\b[\s\S]*?<\/\1\s*>/gi, '');
+  s = s.replace(/!\[([^\]]*)\]\(\s*<?((?:[^()\s<>]|\([^()\s]*\))*)>?(?:\s+["'][^"']*["'])?\s*\)/g, function (m, alt, src) {
+    return hold('<span class="md-img">[' + esc(alt || src.split('/').pop() || 'image') + ']</span>');
+  });
+  s = s.replace(/\[((?:[^\[\]]|\[[^\]]*\])+)\]\(\s*<?((?:[^()\s<>]|\([^()\s]*\))*)>?(?:\s+["'][^"']*["'])?\s*\)/g, function (m, text, href) {
+    return hold(mdLink(href, mdEmph(esc(text)), ctx));
+  });
+  s = s.replace(/<((?:https?:\/\/|mailto:)[^>\s]+)>/gi, function (m, u) { return hold(mdLink(u, esc(u), ctx)); });
+  s = s.replace(/<br\s*\/?>/gi, function () { return hold('<br>'); });
+  s = s.replace(/<\/?[A-Za-z][\w-]*(?:\s[^<>]*)?\/?>/g, ''); // other inline HTML: keep the text only
+  s = esc(s);
+  s = s.replace(/\bhttps?:\/\/[^\s<]*[^\s<.,:;"'!?)\]]/g, function (u) {
+    return hold(mdLink(u.replace(/&amp;/g, '&'), u, ctx));
+  });
+  s = mdEmph(s).replace(/ {2,}\n|\\\n/g, '<br>').replace(/\n/g, ' ');
+  for (var guard = 0; guard < 5 && s.indexOf('') !== -1; guard++) {
+    s = s.replace(/(\d+)/g, function (m, i) { return keep[+i]; });
+  }
+  return s;
+}
+var MD = {
+  fence: /^ {0,3}(`{3,}|~{3,})\s*([^`\s]*)[^`]*$/,
+  head: /^ {0,3}(#{1,6})(?:[ \t]+(.*?))?[ \t]*#*[ \t]*$/,
+  hr: /^ {0,3}([-*_])(?:[ \t]*\1){2,}[ \t]*$/,
+  list: /^( *)([-*+]|\d{1,9}[.)])( +|$)(.*)$/,
+  quote: /^ {0,3}> ?/,
+  html: /^ {0,3}<(?:!--|\/?[A-Za-z][\w-]*(?:[\s>\/]|$))/,
+  tsep: /^ *\|? *:?-+:? *(?:\| *:?-+:? *)*\|? *$/
+};
+function isBlank(l) { return !/\S/.test(l); }
+function startsBlock(l) {
+  return MD.fence.test(l) || MD.head.test(l) || MD.hr.test(l) || MD.quote.test(l) || MD.list.test(l) || MD.html.test(l);
+}
+function splitRow(l) {
+  return l.trim().replace(/^\|/, '').replace(/\|$/, '').replace(/\\\|/g, '').split('|')
+    .map(function (c) { return c.replace(//g, '|').trim(); });
+}
+function mdCode(src, lang) {
+  var ext = LANG_EXT[lang] || lang || 'txt';
+  return '<pre class="md-code"><code>' + highlightLines(src, 'x.' + ext, src.length > 80000).join('\n') + '</code></pre>';
+}
+function mermaidSlot(src, ctx) {
+  ctx.mermaid.push(src);
+  return '<div class="mermaid-block" data-mmd="' + (ctx.mermaid.length - 1) + '"></div>';
+}
+function mdList(lines, start, ctx) {
+  var m0 = lines[start].match(MD.list), indent = m0[1].length, ordered = /\d/.test(m0[2]);
+  var items = [], cur = null, i = start, n = lines.length, loose = false;
+  while (i < n) {
+    var l = lines[i], m = l.match(MD.list);
+    if (m && m[1].length === indent && /\d/.test(m[2]) === ordered) {
+      cur = { lines: [m[4]], pad: m[1].length + m[2].length + Math.max(1, Math.min(m[3].length, 4)) };
+      items.push(cur); i++; continue;
+    }
+    if (isBlank(l)) {
+      var j = i + 1;
+      while (j < n && isBlank(lines[j])) j++;
+      if (j < n) {
+        var lm = lines[j].match(MD.list), ind = lines[j].match(/^ */)[0].length;
+        if ((lm && lm[1].length === indent && /\d/.test(lm[2]) === ordered) || ind > indent) {
+          loose = true; cur.lines.push(''); i++; continue;
+        }
+      }
+      break;
+    }
+    var ind2 = l.match(/^ */)[0].length;
+    if (ind2 > indent) { cur.lines.push(l.slice(Math.min(ind2, cur.pad))); i++; continue; }
+    if (m || startsBlock(l)) break;
+    cur.lines.push(l); i++; // lazy continuation
+  }
+  var startNum = ordered ? parseInt(m0[2], 10) : 1;
+  var html = items.map(function (it) {
+    var first = it.lines[0], task = first.match(/^\[([ xX])\][ \t]+/), cls = '';
+    if (task) {
+      it.lines[0] = first.slice(task[0].length);
+      cls = ' class="task"';
+    }
+    var body = mdBlocks(it.lines, ctx);
+    if (!loose) body = body.replace(/<\/?p>/g, '');
+    if (task) body = '<input type="checkbox" disabled' + (task[1] === ' ' ? '' : ' checked') + '> ' + body;
+    return '<li' + cls + '>' + body + '</li>';
+  }).join('');
+  var tag = ordered ? 'ol' : 'ul';
+  return { html: '<' + tag + (ordered && startNum !== 1 ? ' start="' + startNum + '"' : '') + '>' + html + '</' + tag + '>', next: i };
+}
+function mdBlocks(lines, ctx) {
+  var out = [], i = 0, n = lines.length, m;
+  while (i < n) {
+    var l = lines[i];
+    if (isBlank(l)) { i++; continue; }
+    if ((m = l.match(MD.fence))) {
+      var ch = m[1].charAt(0), len = m[1].length, lang = m[2].toLowerCase(), body = [];
+      var close = new RegExp('^ {0,3}\\' + ch + '{' + len + ',}[ \\t]*$');
+      i++;
+      while (i < n && !close.test(lines[i])) body.push(lines[i++]);
+      i++;
+      out.push(lang === 'mermaid' ? mermaidSlot(body.join('\n'), ctx) : mdCode(body.join('\n'), lang));
+      continue;
+    }
+    if ((m = l.match(MD.head))) {
+      var txt = m[2] || '', lv = m[1].length;
+      out.push('<h' + lv + ' id="md-' + attr(slugify(txt, ctx.used)) + '">' + mdInline(txt, ctx) + '</h' + lv + '>');
+      i++; continue;
+    }
+    if (MD.hr.test(l)) { out.push('<hr>'); i++; continue; }
+    if (MD.quote.test(l)) {
+      var q = [];
+      while (i < n && !isBlank(lines[i])) q.push(lines[i++].replace(MD.quote, ''));
+      out.push('<blockquote>' + mdBlocks(q, ctx) + '</blockquote>');
+      continue;
+    }
+    if (l.indexOf('|') !== -1 && i + 1 < n && lines[i + 1].indexOf('-') !== -1 && MD.tsep.test(lines[i + 1])) {
+      var head = splitRow(l), aligns = splitRow(lines[i + 1]).map(function (a) {
+        return /^:-+:$/.test(a) ? 'center' : /-:$/.test(a) ? 'right' : /^:-/.test(a) ? 'left' : '';
+      });
+      i += 2;
+      var rows = [];
+      while (i < n && !isBlank(lines[i]) && lines[i].indexOf('|') !== -1) rows.push(splitRow(lines[i++]));
+      var cell = function (tag, c, k) {
+        return '<' + tag + (aligns[k] ? ' style="text-align:' + aligns[k] + '"' : '') + '>' + mdInline(c || '', ctx) + '</' + tag + '>';
+      };
+      out.push('<table><thead><tr>' + head.map(function (c, k) { return cell('th', c, k); }).join('') + '</tr></thead><tbody>' +
+        rows.map(function (r) { return '<tr>' + head.map(function (_, k) { return cell('td', r[k], k); }).join('') + '</tr>'; }).join('') +
+        '</tbody></table>');
+      continue;
+    }
+    if (MD.list.test(l)) { var res = mdList(lines, i, ctx); out.push(res.html); i = res.next; continue; }
+    if (MD.html.test(l)) {
+      var h = [];
+      while (i < n && (!isBlank(lines[i]) || /<!--(?![\s\S]*-->)/.test(h.join('\n')))) h.push(lines[i++]);
+      var inner = mdInline(h.join('\n').replace(/<!--[\s\S]*?-->/g, ''), ctx);
+      if (inner.replace(/<[^>]*>/g, '').trim()) out.push('<p>' + inner + '</p>');
+      continue;
+    }
+    var p = [l], level = 0;
+    i++;
+    while (i < n && !isBlank(lines[i])) {
+      if (/^ {0,3}=+[ \t]*$/.test(lines[i])) { level = 1; i++; break; }
+      if (/^ {0,3}-+[ \t]*$/.test(lines[i])) { level = 2; i++; break; }
+      if (startsBlock(lines[i])) break;
+      p.push(lines[i++]);
+    }
+    var ptxt = p.join('\n');
+    out.push(level ? '<h' + level + ' id="md-' + attr(slugify(ptxt, ctx.used)) + '">' + mdInline(ptxt, ctx) + '</h' + level + '>'
+                   : '<p>' + mdInline(ptxt, ctx) + '</p>');
+  }
+  return out.join('\n');
+}
+function mdRender(text, ctx) {
+  var lines = text.replace(/\r\n?/g, '\n').replace(/^\t+/gm, function (t) { return new Array(t.length + 1).join('    '); }).split('\n');
+  var front = '';
+  if (lines[0] === '---') {
+    for (var k = 1; k < Math.min(lines.length, 60); k++) {
+      if (lines[k] === '---' || lines[k] === '...') {
+        front = mdCode(lines.slice(1, k).join('\n'), 'yaml');
+        lines = lines.slice(k + 1);
+        break;
+      }
+    }
+  }
+  return front + mdBlocks(lines, ctx);
+}
+
+/* ---------- Mermaid (embedded, verified library; loaded only when a diagram is shown) ---------- */
+var mermaidReady = null, mermaidSeq = 0;
+function loadMermaid() {
+  if (mermaidReady) return mermaidReady;
+  mermaidReady = readText('data/mermaid.js.gz').then(function (code) {
+    if (!window.mermaid) {
+      var s = document.createElement('script');
+      s.text = code;
+      document.head.appendChild(s);
+    }
+    if (!window.mermaid) throw new Error('unavailable');
+    var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    window.mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', theme: dark ? 'dark' : 'default' });
+    return window.mermaid;
+  }, function () { throw new Error('unavailable'); });
+  return mermaidReady;
+}
+function renderMermaid(holder, src) {
+  holder.appendChild(el('div', 'meta', t('loading')));
+  loadMermaid().then(function (m) {
+    return m.render('mmd-' + (++mermaidSeq), src).then(function (res) {
+      holder.innerHTML = res.svg; // sanitized by Mermaid (securityLevel: strict)
+      if (res.bindFunctions) res.bindFunctions(holder);
+    });
+  }).catch(function (e) {
+    holder.textContent = '';
+    holder.appendChild(el('div', 'notice', e && e.message === 'unavailable' ? t('diagramUnavailable') : t('diagramError')));
+    var pre = el('pre', 'md-code'); pre.textContent = src; holder.appendChild(pre);
+  });
+}
+function renderPreview(body, f, kind, text) {
+  var dir = f.path.lastIndexOf('/') < 0 ? '' : f.path.slice(0, f.path.lastIndexOf('/'));
+  var ctx = { dir: dir, used: {}, mermaid: [] };
+  var div = el('div', 'md');
+  div.innerHTML = kind === 'mmd' ? mermaidSlot(text, ctx) : mdRender(text, ctx);
+  body.appendChild(div);
+  var slots = div.querySelectorAll('[data-mmd]');
+  for (var i = 0; i < slots.length; i++) renderMermaid(slots[i], ctx.mermaid[+slots[i].getAttribute('data-mmd')]);
+}
+function scrollToAnchor(slug) {
+  var target = slug && document.getElementById('md-' + slug);
+  if (target) target.scrollIntoView();
+}
+var pendingAnchor = null;
+
 /* ---------- data ---------- */
 var DATA = null, byId = {}, trees = {}, current = null, activeBtn = null;
 
-function loadData() {
-  var tag = $('snapshot-data');
-  if (tag && tag.textContent.trim()) {
-    try { return Promise.resolve(JSON.parse(tag.textContent)); } catch (e) { return Promise.reject(e); }
+/* Data files are gzip-compressed. In the single-file form they are embedded as base64;
+   in the folder form they are fetched. Only the small index is read at start-up; a repository's
+   file content is read when that repository is first shown (and prefetched in the background). */
+function readBytes(name) {
+  var tags = document.querySelectorAll('script[data-file]');
+  for (var i = 0; i < tags.length; i++) {
+    if (tags[i].getAttribute('data-file') === name) {
+      var bin = atob(tags[i].textContent.replace(/\s+/g, '')), bytes = new Uint8Array(bin.length);
+      for (var k = 0; k < bin.length; k++) bytes[k] = bin.charCodeAt(k);
+      return Promise.resolve(bytes);
+    }
   }
-  return fetch('snapshot.json', { cache: 'no-store' }).then(function (r) {
+  if (tags.length) return Promise.reject(new Error('missing'));
+  return fetch(name).then(function (r) {
     if (!r.ok) throw new Error(r.status);
-    return r.json();
+    return r.arrayBuffer();
+  }).then(function (b) { return new Uint8Array(b); });
+}
+function readText(name) {
+  return readBytes(name).then(function (bytes) {
+    // A server may already have removed the gzip layer (Content-Encoding); check the magic bytes.
+    if (bytes[0] !== 0x1f || bytes[1] !== 0x8b) return new TextDecoder('utf-8').decode(bytes);
+    if (typeof DecompressionStream === 'undefined') throw new Error('unsupported');
+    var stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+    return new Response(stream).text();
   });
+}
+function loadData() {
+  return readText('data/index.json.gz').then(function (txt) {
+    var data = JSON.parse(txt);
+    data.repos.forEach(function (r) {
+      r.files = r.files.map(function (a) { return a[2] ? { path: a[0], size: a[1], skipped: a[2] } : { path: a[0], size: a[1] }; });
+    });
+    return data;
+  });
+}
+var contentCache = [], CACHE_REPOS = 4;
+function loadContent(repo) {
+  for (var i = 0; i < contentCache.length; i++) {
+    if (contentCache[i].key === repo.key) {
+      var hit = contentCache.splice(i, 1)[0];
+      contentCache.unshift(hit);
+      return hit.promise;
+    }
+  }
+  var entry = { key: repo.key, promise: readText('data/' + repo.key + '.json.gz').then(JSON.parse) };
+  entry.promise.catch(function () {
+    contentCache = contentCache.filter(function (e) { return e !== entry; });
+  });
+  contentCache.unshift(entry);
+  if (contentCache.length > CACHE_REPOS) contentCache.pop();
+  return entry.promise;
+}
+function prefetch(repo) {
+  if (!repo) return;
+  var run = function () { loadContent(repo).catch(function () {}); };
+  if (window.requestIdleCallback) requestIdleCallback(run, { timeout: 800 }); else setTimeout(run, 50);
+}
+function repoFile(repo, path) {
+  if (!repo) return null;
+  if (!repo.byPath) {
+    repo.byPath = {};
+    repo.files.forEach(function (f) { repo.byPath[f.path] = f; });
+  }
+  return repo.byPath[path] || null;
 }
 function buildTree(repo) {
   if (trees[repo.id]) return trees[repo.id];
@@ -290,7 +632,6 @@ function buildTree(repo) {
 /* ---------- rendering ---------- */
 function applyStaticText() {
   document.documentElement.lang = lang;
-  $('lang').value = lang;
   document.querySelectorAll('[data-i18n]').forEach(function (e) { e.textContent = t(e.getAttribute('data-i18n')); });
   document.title = t('title');
   $('q').placeholder = t('search');
@@ -383,10 +724,11 @@ function setActive(b) {
   if (activeBtn) activeBtn.classList.remove('active');
   activeBtn = b; if (b) b.classList.add('active');
 }
+var renderSeq = 0;
 function renderFile(path) {
+  var seq = ++renderSeq;
   var view = $('view'); view.textContent = '';
-  var r = byId[current];
-  var f = r && r.files.filter(function (x) { return x.path === path; })[0];
+  var r = byId[current], f = repoFile(r, path);
   if (!f) { document.body.classList.remove('file-open'); view.appendChild(el('div', 'empty', t('pick'))); return; }
   document.body.classList.add('file-open');
 
@@ -394,45 +736,77 @@ function renderFile(path) {
   var back = el('button', 'btn', '← ' + t('back')); back.id = 'back';
   back.addEventListener('click', function () { go(current, null); });
   row.appendChild(back);
-  var info = el('div', 'grow');
+  var info = el('div', 'grow'), meta = el('div', 'meta', fmtSize(f.size));
   info.appendChild(el('div', 'path', f.path));
-  var lines = f.content !== undefined ? f.content.replace(/\n$/, '').split('\n').length : 0;
-  info.appendChild(el('div', 'meta', fmtSize(f.size) + (lines ? ' · ' + lines + ' ' + t('lines') : '')));
+  info.appendChild(meta);
   row.appendChild(info);
-  if (f.content !== undefined) {
-    var copy = el('button', 'btn', t('copy'));
-    copy.addEventListener('click', function () {
-      copyText(f.content).then(function () {
-        copy.textContent = t('copied'); setTimeout(function () { copy.textContent = t('copy'); }, 1500);
-      });
-    });
-    var wrapBtn = el('button', 'btn', t('wrap'));
-    wrapBtn.setAttribute('aria-pressed', String(wrapOn()));
-    wrapBtn.addEventListener('click', function () {
-      var on = !wrapOn();
-      store('rx.wrap', on ? '1' : '0');
-      wrapBtn.setAttribute('aria-pressed', String(on));
-      var c = view.querySelector('.code'); if (c) c.classList.toggle('wrap', on);
-    });
-    row.appendChild(wrapBtn);
-    row.appendChild(copy);
-  }
   bar.appendChild(row); view.appendChild(bar);
+  window.scrollTo(0, 0);
 
-  if (f.content === undefined) {
-    var reason = 'skipped.' + (f.skipped || 'other');
+  if (f.skipped) {
+    var reason = 'skipped.' + f.skipped;
     view.appendChild(el('div', 'notice', I18N.en[reason] ? t(reason) : t('skipped.other')));
     return;
   }
-  var text = f.content.replace(/\n$/, '');
-  var big = text.length > 80000;
-  if (big) view.appendChild(el('div', 'meta', t('noHighlight'))).style.padding = '6px 12px';
-  var htmlLines = highlightLines(text, f.path, big);
-  var code = el('div', 'code' + (wrapOn() ? ' wrap' : '')), pre = el('pre');
-  code.style.setProperty('--gw', String(htmlLines.length).length + 'ch');
-  pre.innerHTML = '<span class="l">' + htmlLines.join('</span><span class="l">') + '</span>';
-  code.appendChild(pre); view.appendChild(code);
-  window.scrollTo(0, 0);
+  var body = el('div');
+  body.appendChild(el('div', 'empty', t('loading')));
+  view.appendChild(body);
+  loadContent(r).then(function (map) {
+    if (seq !== renderSeq) return; // the user has already moved on
+    var content = map[f.path];
+    if (content === undefined) throw new Error('missing');
+    showContent(row, meta, body, f, content);
+    if (pendingAnchor) { scrollToAnchor(pendingAnchor); pendingAnchor = null; }
+  }).catch(function (e) {
+    if (seq !== renderSeq) return;
+    body.textContent = '';
+    body.appendChild(el('div', 'notice', e && e.message === 'unsupported' ? t('unsupported') : t('loadError')));
+  });
+}
+function showContent(row, meta, body, f, content) {
+  var text = content.replace(/\n$/, '');
+  meta.textContent = fmtSize(f.size) + ' · ' + text.split('\n').length + ' ' + t('lines');
+  var kind = MD_RE.test(f.path) ? 'md' : MMD_RE.test(f.path) ? 'mmd' : null;
+  var preview = !!kind;
+  if (kind) {
+    var prevBtn = el('button', 'btn', t('preview'));
+    prevBtn.setAttribute('aria-pressed', 'true');
+    prevBtn.addEventListener('click', function () {
+      preview = !preview;
+      prevBtn.setAttribute('aria-pressed', String(preview));
+      paint();
+    });
+    row.appendChild(prevBtn);
+  }
+  var wrapBtn = el('button', 'btn', t('wrap'));
+  wrapBtn.setAttribute('aria-pressed', String(wrapOn()));
+  wrapBtn.addEventListener('click', function () {
+    var on = !wrapOn();
+    store('rx.wrap', on ? '1' : '0');
+    wrapBtn.setAttribute('aria-pressed', String(on));
+    var c = body.querySelector('.code'); if (c) c.classList.toggle('wrap', on);
+  });
+  var copy = el('button', 'btn', t('copy'));
+  copy.addEventListener('click', function () {
+    copyText(content).then(function () {
+      copy.textContent = t('copied'); setTimeout(function () { copy.textContent = t('copy'); }, 1500);
+    });
+  });
+  row.appendChild(wrapBtn);
+  row.appendChild(copy);
+  function paint() {
+    body.textContent = '';
+    wrapBtn.hidden = preview;
+    if (preview) { renderPreview(body, f, kind, content); return; }
+    var big = text.length > 80000;
+    if (big) body.appendChild(el('div', 'meta', t('noHighlight'))).style.padding = '6px 12px';
+    var htmlLines = highlightLines(text, f.path, big);
+    var code = el('div', 'code' + (wrapOn() ? ' wrap' : '')), pre = el('pre');
+    code.style.setProperty('--gw', String(htmlLines.length).length + 'ch');
+    pre.innerHTML = '<span class="l">' + htmlLines.join('</span><span class="l">') + '</span>';
+    code.appendChild(pre); body.appendChild(code);
+  }
+  paint();
 }
 // Wrapping is the default (phone-first); the choice is remembered.
 function wrapOn() { return store('rx.wrap') !== '0'; }
@@ -466,6 +840,7 @@ function route() {
     $('repo').value = repoId || '';
     renderMeta();
     if (!$('q').value) renderTree();
+    prefetch(byId[repoId]);
   }
   renderFile(path);
   if (path && !$('q').value) {
@@ -477,10 +852,6 @@ function route() {
 /* ---------- boot ---------- */
 applyStaticText();
 $('status').textContent = t('loading');
-$('lang').addEventListener('change', function () {
-  lang = this.value; store('rx.lang', lang); applyStaticText(); renderMeta(); route();
-  if ($('q').value) renderSearch($('q').value);
-});
 loadData().then(function (data) {
   DATA = data || { repos: [] };
   DATA.repos = DATA.repos || [];
@@ -500,9 +871,20 @@ loadData().then(function (data) {
     timer = setTimeout(function () { if (q) renderSearch(q); else { $('side').textContent = ''; renderTree(); } }, 150);
   });
   window.addEventListener('hashchange', route);
+  $('view').addEventListener('click', function (e) {
+    var a = e.target.closest ? e.target.closest('a[data-path], a[data-anchor]') : null;
+    if (!a) return;
+    e.preventDefault();
+    var p = a.getAttribute('data-path'), anchor = a.getAttribute('data-anchor');
+    if (p === null) { scrollToAnchor(anchor); return; }
+    var has = function (x) { return !!repoFile(byId[current], x); };
+    var dirReadme = (p ? p.replace(/\/$/, '') + '/' : '') + 'README.md';
+    var target = has(p) ? p : has(dirReadme) ? dirReadme : null;
+    if (target) { pendingAnchor = anchor; go(current, target); }
+  });
   route();
-}).catch(function () {
-  $('status').textContent = t('loadError');
+}).catch(function (e) {
+  $('status').textContent = e && e.message === 'unsupported' ? t('unsupported') : t('loadError');
 });
 })();
 </script>

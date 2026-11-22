@@ -28,7 +28,7 @@ MAX_BYTES = 200_000
 SELF = 'scripts/check_public_safety.py'
 
 FORBIDDEN_NAMES = [
-    'snapshot*.json', '*.log', '.page-synced-heads', '.snapshot-dirty',
+    'snapshot*.json', '*.log', '.page-state.json', '.page-lang', '.snapshot-dirty',
     '.snapshot.lock', 'exclude.txt', 'denylist.txt', '.env', '.env.*',
     '*.pem', '*.key', '*.p12', '*.pfx', 'id_rsa*', 'id_ed25519*', 'hosts.yml',
     '*.bak-repo-explorer',
@@ -128,7 +128,7 @@ def main(argv=None):
               file=sys.stderr)
         return 1
     print(f'public safety check passed'
-          + ('' if deny else ' (no private denylist found; see docs/security.md)'))
+          + ('' if deny else ' (no private denylist found; see CONTRIBUTING.md)'))
     return 0
 
 

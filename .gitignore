@@ -9,7 +9,9 @@ snapshot*.json
 *.log
 .snapshot-dirty
 .snapshot.lock
-.page-synced-heads
+.page-state.json
+.page-lang
+.build.lock
 exclude.txt
 denylist.txt
 *.bak-repo-explorer
