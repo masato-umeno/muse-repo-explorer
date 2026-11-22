@@ -5,7 +5,7 @@
 | Component | Location | Role |
 | --- | --- | --- |
 | Clones | `~/ghq/github.com/<owner>/<repo>` | Local copies of the selected repositories, managed by ghq |
-| Tool | `~/workspace/muse-repo-explorer` | This repository: the CLI, hook scripts and the explorer page |
+| Tool | `~/workspace/muse-repo-explorer` | This repository: the CLI, hook scripts, the explorer page and the agent instructions (`MUSE_SETUP.md`) |
 | State | `~/workspace/repo-explorer` | Snapshot, built page files, Mermaid, sync state; outside any repository |
 | Explorer space | Muse space | A private page that displays the built files |
 
@@ -63,6 +63,12 @@ the amount of code in other repositories.
 a pinned version and keeps it only if its SHA-256 matches the value in the CLI. It is loaded by
 the page only when a diagram is displayed.
 
+**A one-line setup.** The user sends a single line that points Muse to `MUSE_SETUP.md`. Those
+instructions only tell Muse to run `next` repeatedly. `next` inspects the current state
+(installation, sign-in, repositories, the space) and prints the one action required, so the setup
+logic is in tested code rather than in a long prompt, and the same instructions serve both the
+first setup and later refreshes.
+
 **Change detection in scripts.** Whether the space needs updating, and which files, is decided by
 the CLI, not by the agent. In a period without new commits, a refresh costs one command and one
 line of output.
@@ -74,7 +80,7 @@ line of output.
 | Reading source code | Local search and partial reads instead of whole files via a connector |
 | Creating the page | Uploading bundled files instead of generating a page |
 | Handling large files | Uploading by file path; the prompt forbids reading them into context |
-| Running the setup | One command per step; each command is idempotent |
+| Running the setup | A one-line request; `next` prints one action at a time; every command is idempotent |
 | Interpreting results | Output limited to a few lines; per-repository lines appear only on failure |
 | Deciding whether to update | Determined by `refresh` |
 | Updating the space | Only the index and the files of changed repositories are uploaded |

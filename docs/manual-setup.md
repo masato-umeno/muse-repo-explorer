@@ -1,7 +1,8 @@
 # Manual setup
 
-This document describes the steps performed by the setup prompt, for users who prefer to run
-them directly or with Claude Code.
+This document describes the steps that `next` guides Muse through, for users who prefer to run
+them directly or with Claude Code. Running `rx next` repeatedly also works for a person: it
+prints the one action required at each point.
 
 ## Requirements
 

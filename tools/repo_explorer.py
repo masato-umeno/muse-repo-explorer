@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """One command per step, short output. Designed so an AI agent spends as few tokens as possible.
 
+    python3 repo_explorer.py next                  print the single next action; repeat until DONE
     python3 repo_explorer.py setup [--lang en|ja|zh-CN|ko]
                                                    install ghq, gh and Mermaid if missing;
                                                    set the page language; check sign-in
@@ -463,49 +464,122 @@ def no_repositories():
     return 3
 
 
-def cmd_refresh(args):
+def refresh_state(pull=True):
+    """Pull, rebuild and compare with the space. Prints only problems and one stats line.
+
+    Returns (status, info): status is NO_REPOSITORIES, ERROR, FIRST_TIME, UPDATE or UP_TO_DATE.
+    """
     if not cloned_ids():
-        return no_repositories()
+        return 'NO_REPOSITORIES', {}
     install_hooks()
-    rc, out = snapshot(pull='--no-pull' not in args)
+    rc, out = snapshot(pull=pull)
     for line in out.splitlines():
         if 'pull failed' in line or line.startswith('refusing'):
             print(line)
     if rc != 0:
-        return rc
+        return 'ERROR', {'rc': rc}
     build_page()
     with open(os.path.join(HOME, 'snapshot.json'), encoding='utf-8') as fh:
         snap = json.load(fh)
-    nfiles = sum(len(r['files']) for r in snap['repos'])
-    total = sum(os.path.getsize(os.path.join(SITE, p)) for p in file_hashes())
-    print(f'repos: {len(snap["repos"])}, files: {nfiles}, page data: {total / 1024 / 1024:.1f} MB'
-          + ('' if mermaid_ok() else ', diagrams: off (run setup)'))
-
-    state, now = load_state(), file_hashes()
+    now = file_hashes()
+    total = sum(os.path.getsize(os.path.join(SITE, p)) for p in now)
+    print(f'repos: {len(snap["repos"])}, files: {sum(len(r["files"]) for r in snap["repos"])}, '
+          f'page data: {total / 1024 / 1024:.1f} MB' + ('' if mermaid_ok() else ', diagrams: off'))
+    state = load_state()
     mode, synced = state.get('mode'), state.get('files', {})
-    changed = sorted(p for p in now if synced.get(p) != now[p])
-    removed = sorted(p for p in synced if p not in now)
-    if mode and not changed and not removed:
+    info = {'mode': mode, 'repos': len(snap['repos']),
+            'changed': sorted(p for p in now if synced.get(p) != now[p]),
+            'removed': sorted(p for p in synced if p not in now)}
+    if not mode:
+        return 'FIRST_TIME', info
+    if info['changed'] or info['removed']:
+        return 'UPDATE', info
+    return 'UP_TO_DATE', info
+
+
+def print_upload(info):
+    if info['mode'] == 'single-file':
+        print(f'replace the page file in the space with: {SINGLE}')
+        return
+    print(f'upload to the space (paths relative to {SITE}/):')
+    for p in info['changed']:
+        print(f'  {p}')
+    if info['removed']:
+        print('delete from the space:')
+        for p in info['removed']:
+            print(f'  {p}')
+
+
+def print_first_time():
+    print('create a private space from either')
+    print(f'  folder (preferred): every file under {SITE}/ (keep the data/ folder)')
+    print(f'  single file:        {SINGLE}')
+
+
+def cmd_refresh(args):
+    status, info = refresh_state(pull='--no-pull' not in args)
+    if status == 'NO_REPOSITORIES':
+        return no_repositories()
+    if status == 'ERROR':
+        return info['rc']
+    if status == 'UP_TO_DATE':
         print('UP_TO_DATE: the space already shows this build. Nothing to do.')
         return 0
     print('PAGE_UPDATE_NEEDED')
-    if not mode:
-        print('first time: create the space from either')
-        print(f'  folder (preferred): every file under {SITE}/ (keep the data/ folder)')
-        print(f'  single file:        {SINGLE}')
+    if status == 'FIRST_TIME':
+        print_first_time()
         print('then run: repo_explorer.py mark-synced --mode folder   (or --mode single-file)')
         return 0
-    if mode == 'single-file':
-        print(f'replace the page file with: {SINGLE}')
-    else:
-        print(f'upload to the space (paths relative to {SITE}/):')
-        for p in changed:
-            print(f'  {p}')
-        if removed:
-            print('delete from the space:')
-            for p in removed:
-                print(f'  {p}')
+    print_upload(info)
     print('then run: repo_explorer.py mark-synced')
+    return 0
+
+
+def cmd_next(args):
+    """Print the single next action for the agent. Repeat until it prints DONE."""
+    C = 'python3 ' + os.path.join(TOOLS, 'repo_explorer.py').replace(os.path.expanduser('~'), '~', 1)
+    again = f'Then run `{C} next` again.'
+    if not (find_bin('ghq') and find_bin('gh')) or not os.path.exists(LANG_FILE):
+        print(f'NEXT (1/5 install): run `{C} setup --lang LANG`, where LANG is the language the user '
+              'is writing in (en, ja, zh-CN or ko; for any other language omit --lang). ' + again)
+        return 0
+    has_repos = bool(cloned_ids())
+    if not has_repos and not signed_in_user():
+        print(f'NEXT (2/5 sign in): run `{C} login` and show the user the URL and the code exactly '
+              f'as printed. Then run `{C} login --wait`; it returns after the user approves. '
+              'If the user does not want to sign in, ask whether to use the sample repository instead; '
+              f'if they agree, run `{C} clone {SAMPLE_REPO}`. ' + again)
+        return 0
+    if not has_repos:
+        print(f'NEXT (3/5 repositories): run `{C} list` and show the user the result. Ask which '
+              'repositories to include (at least one; answers like "all private ones" are fine), then '
+              f'run `{C} clone OWNER/REPO ...`. If none can be chosen, ask whether to include the sample '
+              f'repository; if the user agrees, run `{C} clone {SAMPLE_REPO}`. ' + again)
+        return 0
+    status, info = refresh_state()
+    if status == 'ERROR':
+        print('STOP: the snapshot could not be built (see the lines above). Report them to the user.')
+        return info['rc']
+    if status == 'FIRST_TIME':
+        print('NEXT (4/5 create the space): upload the files below unchanged, by path, without '
+              'opening them, to a new private Muse space named "Repository Explorer" in the '
+              "user's language. Never create a public link.")
+        print_first_time()
+        print(f'Then run `{C} mark-synced --mode folder` (or `--mode single-file`). ' + again)
+        return 0
+    if status == 'UPDATE':
+        print('NEXT (5/5 update the space): change only these files in the space, by path, without '
+              'opening them.')
+        print_upload(info)
+        print(f'Then run `{C} mark-synced`. ' + again)
+        return 0
+    user = signed_in_user()
+    print(f'DONE: the space is up to date ({info["repos"]} repositories'
+          + (f', GitHub account {user}' if user else '') + ').')
+    print('Tell the user in at most 3 lines, in their language: the account, the number of '
+          'repositories, and the space. Remember for later: when the user asks to refresh the '
+          f'explorer, run `git -C {os.path.dirname(TOOLS)} pull --ff-only`, then repeat '
+          f'`{C} next` until it prints DONE.')
     return 0
 
 
@@ -552,7 +626,7 @@ def cmd_status(args):
 
 
 COMMANDS = {
-    'setup': cmd_setup, 'login': cmd_login, 'list': cmd_list, 'clone': cmd_clone,
+    'next': cmd_next, 'setup': cmd_setup, 'login': cmd_login, 'list': cmd_list, 'clone': cmd_clone,
     'refresh': cmd_refresh, 'build': cmd_build, 'mark-synced': cmd_mark_synced,
     'status': cmd_status,
 }
