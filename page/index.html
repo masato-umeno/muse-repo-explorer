@@ -1293,6 +1293,12 @@ $('setWrap').addEventListener('change', function () {
 });
 
 document.body.classList.toggle('hdr-collapsed', store('rx.hdr') === '0');
+// Sticky offsets follow the real header height (it changes when data, language or panels change).
+if (window.ResizeObserver) {
+  new ResizeObserver(function () {
+    document.documentElement.style.setProperty('--hh', document.querySelector('header').offsetHeight + 'px');
+  }).observe(document.querySelector('header'));
+}
 applyStaticText();
 setHeader(headerCollapsed());
 $('status').textContent = t('loading');

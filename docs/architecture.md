@@ -12,7 +12,7 @@
 ## Data flow
 
 ```mermaid
-flowchart LR
+flowchart TB
   GH[GitHub] -- "git pull (HTTPS, gh credentials)" --> CL[Clones]
   CL -- "post-merge / post-rewrite hooks" --> SN[snapshot.json]
   SN --> DI["dist/site/ and dist/explorer.html"]
