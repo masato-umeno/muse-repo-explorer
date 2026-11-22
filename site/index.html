@@ -3,116 +3,77 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>muse-repo-explorer: read your repositories on your phone and ask Muse about any line</title>
-<meta name="description" content="A private code browser that runs as a space in Muse. Read your repositories on your phone and ask Muse about any line. Set up with one line.">
+<title>muse-repo-explorer</title>
+<meta name="description" content="Read your GitHub repositories on your phone, in a Muse space. When part of the code is unclear, select the lines and ask Muse about them.">
 <meta name="color-scheme" content="light">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='2' width='20' height='28' rx='5' fill='%2316233D'/%3E%3Crect x='9' y='9' width='14' height='3' rx='1' fill='%23FFC400'/%3E%3Crect x='9' y='15' width='10' height='2' rx='1' fill='%23EEF2F7'/%3E%3Crect x='9' y='20' width='12' height='2' rx='1' fill='%23EEF2F7'/%3E%3C/svg%3E">
 <style>
 :root {
-  --paper: #EEF2F7;   /* cool page background */
-  --sheet: #FFFFFF;   /* surfaces: chat bubble, phone screen */
-  --ink: #16233D;     /* text, phone body */
-  --ink-2: #4A5876;   /* secondary text */
-  --line: #CDD6E3;    /* rules and outlines */
-  --blue: #2F6FDE;    /* the explorer's selection colour: links, actions */
-  --amber: #FFC400;   /* the explorer's search-match colour: used for one highlight only */
-  --pale: #DCE6F5;    /* offset blocks behind screenshots */
+  --bg: #FFFFFF;
+  --text: #1D2433;
+  --muted: #5A6377;
+  --line: #DADFE7;
+  --soft: #F4F6F9;
+  --blue: #2F6FDE;   /* the explorer's own accent */
   --sans: system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans CJK JP",
           "PingFang SC", "Microsoft YaHei", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Noto Sans Mono", monospace;
 }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
-body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.65 var(--sans); }
-a { color: var(--blue); text-underline-offset: .18em; }
-a:focus-visible, button:focus-visible, select:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
-.wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 var(--sans); }
+a { color: var(--blue); }
+a:focus-visible, button:focus-visible, select:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
 
-/* ---------- top bar ---------- */
-.top { display: flex; align-items: center; gap: 20px; padding: 18px 0; }
-.mark { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; color: var(--ink); text-decoration: none; letter-spacing: -.01em; }
-.mark svg { width: 22px; height: 22px; }
-.top nav { display: flex; gap: 18px; margin-left: auto; font-size: 15px; }
-.top nav a { color: var(--ink-2); text-decoration: none; }
-.top nav a:hover { color: var(--ink); }
-.top select { font: inherit; font-size: 14px; color: var(--ink); background: var(--sheet); border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px; }
+.top { display: flex; justify-content: flex-end; align-items: center; gap: 18px; padding: 16px 0; font-size: 14px; }
+.top a { color: var(--muted); }
+.top select { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; }
 
-/* ---------- hero ---------- */
-.hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 56px; align-items: center; padding: 40px 0 88px; }
-.hero h1 { font-size: clamp(2.1rem, 3.8vw, 3.2rem); line-height: 1.1; letter-spacing: -.03em; margin: 0 0 20px; font-weight: 800; max-width: 20ch;
-  word-break: auto-phrase; }
-.hero h1 span { display: block; }
-h2 { text-wrap: balance; word-break: auto-phrase; }
-:lang(ja) .hero h1, :lang(zh-CN) .hero h1, :lang(ko) .hero h1 { letter-spacing: -.01em; line-height: 1.3; max-width: none; font-size: clamp(1.55rem, 2.9vw, 2.45rem); }
-.lead { font-size: 19px; color: var(--ink-2); max-width: 34em; margin: 0 0 34px; }
-.send-label { font-weight: 600; margin: 0 0 10px; }
-.lead, .send-label, .phone-cap { word-break: auto-phrase; }
-/* the one line, shown as the message the user sends */
-.bubble { position: relative; background: var(--ink); color: #fff; border-radius: 20px 20px 6px 20px; padding: 16px 18px 14px;
-  max-width: 34em; font-size: 15px; line-height: 1.55; overflow-wrap: anywhere; }
-.bubble p { margin: 0 0 12px; }
-.bubble button { font: inherit; font-size: 14px; font-weight: 600; color: var(--ink); background: var(--amber); border: 0; border-radius: 999px; padding: 6px 14px; cursor: pointer; }
-@media (prefers-reduced-motion: no-preference) {
-  .bubble { animation: send .7s cubic-bezier(.2, .8, .2, 1) .25s both; }
-  @keyframes send { from { opacity: 0; transform: translate(-18px, 14px) scale(.97); } to { opacity: 1; transform: none; } }
-}
+.intro-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 64px; align-items: start; padding: 32px 0 64px; }
+h1 { font-size: 2rem; line-height: 1.3; font-weight: 700; margin: 24px 0 16px; }
+.intro { font-size: 17px; max-width: 34em; margin: 0 0 32px; word-break: auto-phrase; }
+.send-label { margin: 0 0 8px; color: var(--muted); font-size: 15px; word-break: auto-phrase; }
+.line { border: 1px solid var(--line); background: var(--soft); border-radius: 8px; padding: 12px 14px; max-width: 36em; }
+.line code { display: block; font: 14px/1.6 var(--mono); overflow-wrap: anywhere; margin-bottom: 10px; }
+.line button { font: inherit; font-size: 14px; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 12px; cursor: pointer; }
+.line button:hover { border-color: var(--muted); }
+.demo-link { display: none; margin-top: 20px; }
 
-/* phone with the live demo */
-.phone-col { display: flex; flex-direction: column; align-items: center; gap: 14px; }
-.phone { width: 340px; height: 690px; background: var(--ink); border-radius: 46px; padding: 12px; position: relative; }
-.phone { display: flex; flex-direction: column; }
-/* the space's own top bar, as Muse shows it around a space */
-.space-bar { display: flex; align-items: center; gap: 8px; height: 52px; padding: 0 10px; background: #1F2B44; color: #fff;
-  border-radius: 34px 34px 0 0; flex: none; }
-.sb-btn { width: 34px; height: 34px; border-radius: 50%; background: rgba(255, 255, 255, .12); display: grid; place-items: center;
-  font-size: 16px; line-height: 1; flex: none; }
-.sb-title { flex: 1; text-align: center; font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.phone iframe { width: 100%; flex: 1; min-height: 0; border: 0; border-radius: 0 0 34px 34px; background: var(--sheet); display: block; }
-.phone-cap { font-size: 14px; color: var(--ink-2); text-align: center; max-width: 30em; }
-.demo-link { display: none; }
+/* the demo, framed the way Muse shows a space: its own top bar above the page */
+.demo { margin: 0; }
+.demo .screen { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; height: 640px; display: flex; flex-direction: column; }
+.space-bar { display: flex; align-items: center; gap: 8px; height: 46px; padding: 0 8px; background: #1F2B44; color: #fff; flex: none; }
+.sb-btn { width: 30px; height: 30px; border-radius: 50%; background: rgba(255, 255, 255, .12); display: grid; place-items: center; font-size: 14px; line-height: 1; flex: none; }
+.sb-title { flex: 1; text-align: center; font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.demo iframe { flex: 1; min-height: 0; width: 100%; border: 0; display: block; }
+.demo figcaption, .shots figcaption { font-size: 14px; color: var(--muted); margin-top: 8px; word-break: auto-phrase; }
 
-/* ---------- sections ---------- */
-section { padding: 72px 0; }
-section + section { border-top: 1px solid var(--line); }
-h2 { font-size: clamp(1.7rem, 3vw, 2.4rem); line-height: 1.15; letter-spacing: -.025em; margin: 0 0 40px; font-weight: 800; }
-
-
-/* features: three screens side by side, each with a one-line caption */
-.shots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; }
+.shots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; padding: 8px 0 72px; }
 .shots figure { margin: 0; }
 .shots img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; object-position: top;
-  border-radius: 22px; border: 1px solid var(--line); background: var(--sheet); }
+  border: 1px solid var(--line); border-radius: 12px; }
 .shots img.low { object-position: center 78%; }
-.shots figcaption { margin-top: 16px; font-size: 1.15rem; font-weight: 700; line-height: 1.35; text-wrap: balance; word-break: auto-phrase; }
+.shots figcaption { color: var(--text); font-size: 15px; }
 
-footer { padding: 36px 0 56px; border-top: 1px solid var(--line); font-size: 15px; color: var(--ink-2); }
-footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; }
+footer { border-top: 1px solid var(--line); padding: 24px 0 40px; font-size: 14px; color: var(--muted); }
+footer .wrap { display: flex; gap: 20px; }
 
-/* ---------- small screens ---------- */
-@media (max-width: 900px) {
-  .hero { grid-template-columns: 1fr; gap: 36px; padding-bottom: 56px; }
-  .phone-col { display: none; }
-  .demo-link { display: inline-block; margin-top: 18px; font-weight: 600; }
-  .shots { grid-template-columns: 1fr; gap: 44px; max-width: 340px; }
-  .top nav a { display: none; }
+@media (max-width: 860px) {
+  .intro-grid { grid-template-columns: 1fr; gap: 0; padding-bottom: 48px; }
+  .demo { display: none; }
+  .demo-link { display: inline-block; }
+  .shots { grid-template-columns: 1fr; max-width: 340px; gap: 36px; }
 }
 @media (max-width: 520px) {
   .wrap { padding: 0 18px; }
-  body { font-size: 16px; }
-  section { padding: 56px 0; }
+  h1 { font-size: 1.7rem; margin-top: 8px; }
 }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
-    <a class="mark" href="./">
-      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="6" y="2" width="20" height="28" rx="5" fill="#16233D"/><rect x="9" y="9" width="14" height="3" rx="1" fill="#FFC400"/><rect x="9" y="15" width="10" height="2" rx="1" fill="#EEF2F7"/><rect x="9" y="20" width="12" height="2" rx="1" fill="#EEF2F7"/></svg>
-      muse-repo-explorer
-    </a>
-    <nav>
-      <a href="https://github.com/masato-umeno/muse-repo-explorer">GitHub</a>
-    </nav>
+    <a href="https://github.com/masato-umeno/muse-repo-explorer">GitHub</a>
     <select id="lang" aria-label="Language">
       <option value="en">English</option><option value="ja">日本語</option>
       <option value="zh-CN">简体中文</option><option value="ko">한국어</option>
@@ -120,42 +81,40 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; }
   </header>
 
   <main>
-    <div class="hero">
+    <div class="intro-grid">
       <div>
-        <h1><span data-t="heroA">Read your repositories on your phone.</span> <span data-t="heroB">Ask Muse about any line.</span></h1>
-        <p class="lead" data-t="heroLead">A private code browser that runs as a space in Muse.</p>
+        <h1>muse-repo-explorer</h1>
+        <p class="intro" data-t="intro">Read your GitHub repositories on your phone, in a Muse space. When part of the code is unclear, select the lines and ask Muse about them.</p>
         <p class="send-label" data-t="sendLabel">To get started, send this line to Muse.</p>
-        <div class="bubble">
-          <p id="line">Set up muse-repo-explorer for me by following https://github.com/masato-umeno/muse-repo-explorer/blob/main/MUSE_SETUP.md (keep replying in the language we normally use)</p>
+        <div class="line">
+          <code id="line">Set up muse-repo-explorer for me by following https://github.com/masato-umeno/muse-repo-explorer/blob/main/MUSE_SETUP.md (keep replying in the language we normally use)</code>
           <button type="button" id="copyLine" data-t="copy">Copy</button>
         </div>
         <a class="demo-link" href="demo/index.html#masato-umeno%2Fmuse-repo-explorer:README.md" data-t="openDemo">Try it on this repository</a>
       </div>
-      <div class="phone-col">
-        <div class="phone"><div class="space-bar" aria-hidden="true"><span class="sb-btn">‹</span><span class="sb-title" data-t="spaceTitle">Repository Explorer</span><span class="sb-btn">···</span></div><iframe id="demo" title="Live demo" src="demo/index.html#masato-umeno%2Fmuse-repo-explorer:README.md" loading="lazy"></iframe></div>
-        <p class="phone-cap" data-t="demoCaption">Live demo, shown as a space in Muse</p>
-      </div>
+      <figure class="demo">
+        <div class="screen">
+          <div class="space-bar" aria-hidden="true"><span class="sb-btn">‹</span><span class="sb-title" data-t="spaceTitle">Repository Explorer</span><span class="sb-btn">···</span></div>
+          <iframe id="demo" title="Demo" src="demo/index.html#masato-umeno%2Fmuse-repo-explorer:README.md" loading="lazy"></iframe>
+        </div>
+        <figcaption data-t="demoCaption">Demo: this repository, as it appears in a Muse space.</figcaption>
+      </figure>
     </div>
 
-    <section id="features">
-      <h2 data-t="featuresTitle">Features</h2>
-      <div class="shots">
-        <figure>
-          <img src="assets/en/browse.webp" data-shot="browse" width="780" height="1560" loading="lazy" alt="" data-alt="altBrowse">
-          <figcaption data-t="f1Title">Made for reading on a phone</figcaption>
-        </figure>
-        <figure>
-          <img src="assets/en/search.webp" data-shot="search" width="780" height="1560" loading="lazy" alt="" data-alt="altSearch">
-          <figcaption data-t="f2Title">Search file names and contents</figcaption>
-        </figure>
-        <figure>
-          <img class="low" src="assets/en/ask.webp" data-shot="ask" width="780" height="1560" loading="lazy" alt="" data-alt="altAsk">
-          <figcaption data-t="f4Title">Ask Muse about specific lines</figcaption>
-        </figure>
-      </div>
-    </section>
-
-
+    <div class="shots">
+      <figure>
+        <img src="assets/en/browse.webp" data-shot="browse" width="780" height="1560" loading="lazy" alt="Code view" data-alt="altBrowse">
+        <figcaption data-t="f1Title">Reading code</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/en/search.webp" data-shot="search" width="780" height="1560" loading="lazy" alt="Search results inside files" data-alt="altSearch">
+        <figcaption data-t="f2Title">Searching names and contents</figcaption>
+      </figure>
+      <figure>
+        <img class="low" src="assets/en/ask.webp" data-shot="ask" width="780" height="1560" loading="lazy" alt="Writing a question for Muse about selected lines" data-alt="altAsk">
+        <figcaption data-t="f4Title">Asking Muse about selected lines</figcaption>
+      </figure>
+    </div>
   </main>
 </div>
 
@@ -170,79 +129,80 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; }
 (function () {
 'use strict';
 var T = {
-  en: null, // English is the text in the HTML above
+  "en": {
+    "title": "muse-repo-explorer",
+    "intro": "Read your GitHub repositories on your phone, in a Muse space. When part of the code is unclear, select the lines and ask Muse about them.",
+    "sendLabel": "To get started, send this line to Muse.",
+    "copy": "Copy",
+    "copied": "Copied",
+    "openDemo": "Try it on this repository",
+    "demoCaption": "Demo: this repository, as it appears in a Muse space.",
+    "spaceTitle": "Repository Explorer",
+    "f1Title": "Reading code",
+    "f2Title": "Searching names and contents",
+    "f4Title": "Asking Muse about selected lines",
+    "altBrowse": "Code view",
+    "altSearch": "Search results inside files",
+    "altAsk": "Writing a question for Muse about selected lines",
+    "footLicense": "MIT License"
+  },
   "ja": {
-      "title": "muse-repo-explorer：リポジトリをスマホで読み、気になる行を Muse に聞く",
-      "heroA": "リポジトリをスマホで読み、",
-      "heroB": "気になる行を Muse に聞く。",
-      "heroLead": "Muse のスペースとして動く、自分専用のコードブラウザです。",
-      "sendLabel": "使い始めるには、次の1行を Muse に送ってください。",
-      "copy": "コピー",
-      "copied": "コピーしました",
-      "openDemo": "このリポジトリで試す",
-      "demoCaption": "ライブデモ（Muse のスペースでの表示）",
-      "spaceTitle": "リポジトリエクスプローラー",
-      "featuresTitle": "機能",
-      "altBrowse": "コード表示の画面",
-      "altSearch": "ファイル内検索の結果",
-      "altAsk": "行を指定して Muse への質問を作る画面",
-      "f1Title": "スマホで読みやすい表示",
-      "f2Title": "ファイル名と内容の検索",
-      "f4Title": "行を指定して Muse に質問",
-      "footLicense": "MIT ライセンス"
+    "title": "muse-repo-explorer",
+    "intro": "GitHub のリポジトリを、Muse のスペースでスマホから読めるようにするツールです。分からないところがあれば、行を選んでそのまま Muse に質問できます。",
+    "sendLabel": "使い始めるには、次の1行を Muse に送ってください。",
+    "copy": "コピー",
+    "copied": "コピーしました",
+    "openDemo": "このリポジトリで試す",
+    "demoCaption": "デモ：このリポジトリを Muse のスペースで表示した状態です。",
+    "spaceTitle": "リポジトリエクスプローラー",
+    "f1Title": "コードを読む",
+    "f2Title": "ファイル名と内容を検索する",
+    "f4Title": "選んだ行について Muse に聞く",
+    "altBrowse": "コード表示の画面",
+    "altSearch": "ファイル内検索の結果",
+    "altAsk": "行を指定して Muse への質問を作る画面",
+    "footLicense": "MIT ライセンス"
   },
   "zh-CN": {
-      "title": "muse-repo-explorer：在手机上阅读仓库，就任意一行向 Muse 提问",
-      "heroA": "在手机上阅读仓库，",
-      "heroB": "就任意一行向 Muse 提问。",
-      "heroLead": "以 Muse 空间形式运行的私密代码浏览器。",
-      "sendLabel": "要开始使用，请把这一行发给 Muse。",
-      "copy": "复制",
-      "copied": "已复制",
-      "openDemo": "用本仓库试用",
-      "demoCaption": "在线演示（在 Muse 空间中的显示）",
-      "spaceTitle": "仓库浏览器",
-      "featuresTitle": "功能",
-      "altBrowse": "代码视图",
-      "altSearch": "文件内容搜索结果",
-      "altAsk": "指定行并编写给 Muse 的问题",
-      "f1Title": "适合在手机上阅读",
-      "f2Title": "搜索文件名和内容",
-      "f4Title": "指定行向 Muse 提问",
-      "footLicense": "MIT 许可证"
+    "title": "muse-repo-explorer",
+    "intro": "在 Muse 空间里用手机阅读 GitHub 仓库的工具。遇到看不懂的代码，可以选中相应的行，直接向 Muse 提问。",
+    "sendLabel": "要开始使用，请把这一行发给 Muse。",
+    "copy": "复制",
+    "copied": "已复制",
+    "openDemo": "用本仓库试用",
+    "demoCaption": "演示：在 Muse 空间中显示本仓库的效果。",
+    "spaceTitle": "仓库浏览器",
+    "f1Title": "阅读代码",
+    "f2Title": "搜索文件名和内容",
+    "f4Title": "就选中的行向 Muse 提问",
+    "altBrowse": "代码视图",
+    "altSearch": "文件内容搜索结果",
+    "altAsk": "指定行并编写给 Muse 的问题",
+    "footLicense": "MIT 许可证"
   },
   "ko": {
-      "title": "muse-repo-explorer: 저장소를 스마트폰에서 읽고, 궁금한 줄을 Muse에 묻기",
-      "heroA": "저장소를 스마트폰에서 읽고,",
-      "heroB": "궁금한 줄을 Muse에 묻습니다.",
-      "heroLead": "Muse 스페이스로 동작하는 나만의 코드 브라우저입니다.",
-      "sendLabel": "시작하려면 다음 한 줄을 Muse에 보내십시오.",
-      "copy": "복사",
-      "copied": "복사됨",
-      "openDemo": "이 저장소로 써 보기",
-      "demoCaption": "라이브 데모(Muse 스페이스에서의 표시)",
-      "spaceTitle": "저장소 탐색기",
-      "featuresTitle": "기능",
-      "altBrowse": "코드 보기 화면",
-      "altSearch": "파일 내용 검색 결과",
-      "altAsk": "줄을 지정해 Muse에 보낼 질문을 작성하는 화면",
-      "f1Title": "스마트폰에서 읽기 쉬운 표시",
-      "f2Title": "파일명과 내용 검색",
-      "f4Title": "줄을 지정해 Muse에 질문",
-      "footLicense": "MIT 라이선스"
+    "title": "muse-repo-explorer",
+    "intro": "GitHub 저장소를 Muse 스페이스에서 스마트폰으로 읽을 수 있게 해 주는 도구입니다. 이해하기 어려운 부분은 줄을 골라 바로 Muse에 물어볼 수 있습니다.",
+    "sendLabel": "시작하려면 다음 한 줄을 Muse에 보내십시오.",
+    "copy": "복사",
+    "copied": "복사됨",
+    "openDemo": "이 저장소로 써 보기",
+    "demoCaption": "데모: 이 저장소를 Muse 스페이스에서 표시한 모습입니다.",
+    "spaceTitle": "저장소 탐색기",
+    "f1Title": "코드 읽기",
+    "f2Title": "파일명과 내용 검색",
+    "f4Title": "고른 줄에 대해 Muse에 묻기",
+    "altBrowse": "코드 보기 화면",
+    "altSearch": "파일 내용 검색 결과",
+    "altAsk": "줄을 지정해 Muse에 보낼 질문을 작성하는 화면",
+    "footLicense": "MIT 라이선스"
   }
 };
-var EN = {};
-document.querySelectorAll('[data-t]').forEach(function (e) { EN[e.getAttribute('data-t')] = e.textContent; });
-EN.title = document.title; EN.copied = 'Copied';
-EN.altBrowse = 'Code view'; EN.altSearch = 'Search results inside files';
-EN.altAsk = 'Writing a question for Muse about selected lines';
-
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
 function detect() {
   var q = (location.search.match(/[?&]lang=([\w-]+)/) || [])[1];
   var c = q || store('site.lang');
-  if (c && (c === 'en' || T[c])) return c;
+  if (c && T[c]) return c;
   var navs = navigator.languages || [navigator.language || 'en'];
   for (var i = 0; i < navs.length; i++) {
     var l = String(navs[i]).toLowerCase();
@@ -254,15 +214,15 @@ function detect() {
   return 'en';
 }
 var lang;
-function str(k) { var d = T[lang] || EN; return d[k] !== undefined ? d[k] : EN[k]; }
+function str(k) { return (T[lang] && T[lang][k] !== undefined) ? T[lang][k] : T.en[k]; }
 function apply(l, fromUser) {
   lang = l;
   document.documentElement.lang = l;
-  document.title = str('title');
   document.querySelectorAll('[data-t]').forEach(function (e) { e.textContent = str(e.getAttribute('data-t')); });
   document.querySelectorAll('[data-alt]').forEach(function (e) { e.alt = str(e.getAttribute('data-alt')); });
   // Screenshots are taken in each language, with a sample question in that language.
   document.querySelectorAll('[data-shot]').forEach(function (e) { e.src = 'assets/' + l + '/' + e.getAttribute('data-shot') + '.webp'; });
+  document.querySelector('meta[name=description]').content = str('intro');
   document.getElementById('lang').value = l;
   // The demo is on the same origin: show it in the same language.
   try { localStorage.setItem('rx.lang', l); } catch (e) {}
@@ -273,7 +233,6 @@ function apply(l, fromUser) {
 }
 apply(detect(), false);
 document.getElementById('lang').addEventListener('change', function () { store('site.lang', this.value); apply(this.value, true); });
-
 document.getElementById('copyLine').addEventListener('click', function () {
   var b = this, text = document.getElementById('line').textContent;
   function done() { b.textContent = str('copied'); setTimeout(function () { b.textContent = str('copy'); }, 1600); }
