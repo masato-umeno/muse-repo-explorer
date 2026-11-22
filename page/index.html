@@ -805,17 +805,10 @@ function applyStaticText() {
 function renderRepoSelect() {
   var sel = $('repo');
   sel.textContent = '';
-  var groups = {};
-  DATA.repos.forEach(function (r) {
-    var owner = r.id.split('/')[0];
-    (groups[owner] = groups[owner] || []).push(r);
-  });
-  Object.keys(groups).sort().forEach(function (owner) {
-    var g = el('optgroup'); g.label = owner;
-    groups[owner].forEach(function (r) {
-      var o = el('option', null, r.id); o.value = r.id; g.appendChild(o);
-    });
-    sel.appendChild(g);
+  // A flat list sorted by "owner/repo": the owner is already in each label, and Android draws
+  // option groups with uneven dividers and indentation.
+  DATA.repos.map(function (r) { return r.id; }).sort().forEach(function (id) {
+    var o = el('option', null, id); o.value = id; sel.appendChild(o);
   });
 }
 function renderMeta() {

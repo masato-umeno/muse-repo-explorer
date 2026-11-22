@@ -55,7 +55,7 @@ top bar opens.
 
 **Navigation.**
 
-- Repositories are selected from a list grouped by owner. The branch, commit ID, commit date
+- Repositories are selected from a list sorted by `owner/repo`. The branch, commit ID, commit date
   and file count are shown for the selected repository.
 - The folder tree expands on demand.
 - The search field searches file names or file contents (see **Search** below).
