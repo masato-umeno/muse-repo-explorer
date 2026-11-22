@@ -2,64 +2,37 @@
 
 **English** | [日本語](README.ja.md) | [简体中文](README.zh-CN.md) | [한국어](README.ko.md)
 
-Keep local clones of your GitHub repositories inside Muse (your personal AI agent), so that:
+Read your GitHub code from your phone, and let Muse (your personal AI agent) read it cheaply.
 
-- **Muse reads code from local files** — faster and far fewer tokens than going through a connector.
-- **You read code from your phone** — in a private "file explorer" page (a Muse space) with a snapshot of the code embedded.
+- **Muse reads code from local clones**: faster than a connector, and far fewer tokens.
+- **You browse code on your phone** in a private explorer page (a Muse space). The page is
+  bundled here, available in English / 日本語 / 中文 / 한국어, with light and dark themes.
 
 ## Get started: paste this into Muse
 
-Copy the whole block below and send it to Muse. Muse will only stop to ask you two things:
-(1) the one-time code for GitHub sign-in, and (2) which repositories to clone.
+Copy the whole block and send it to Muse. You only need to do two things:
+approve the GitHub sign-in code, and choose which repositories to include.
 
 ````text
-Please set up "muse-repo-explorer" (https://github.com/masato-umeno/muse-repo-explorer) in my environment. Follow the privacy rules at the end strictly.
+Set up "muse-repo-explorer" for me, following these rules the whole time:
+- Save tokens: run only the commands below and read only their short output. Never open, print or paste snapshot.json, index.html or explorer.html: upload them by file path. Do not write your own scripts or build the page yourself; it is already made.
+- Privacy: keep the page private and never create a public link. Never ask me for a password or token. Clone only the repositories I choose.
 
-1. Install tools (under my home directory, so they survive VM replacement)
-   - Download the latest ghq release binary (github.com/x-motemen/ghq) to ~/.local/bin/ghq.
-   - Download the latest gh (GitHub CLI) release binary (github.com/cli/cli) to ~/.local/bin/gh.
-   - Check both with --version.
+In the steps, C means: python3 ~/workspace/muse-repo-explorer/tools/repo_explorer.py
 
-2. GitHub sign-in (device flow, HTTPS only)
-   - Run `gh auth login --hostname github.com --git-protocol https --web`.
-   - Show me the one-time code and https://github.com/login/device, then wait until I approve it in my browser.
-   - Then report the account name from `gh auth status` and run `gh auth setup-git`.
-   - Do not use SSH. Never ask me to paste a password or token.
+1. Get the tool. If ~/workspace/muse-repo-explorer exists, run `git -C ~/workspace/muse-repo-explorer pull --ff-only`; otherwise run `git clone https://github.com/masato-umeno/muse-repo-explorer ~/workspace/muse-repo-explorer`. Then run `C setup`.
+2. Sign in (skip if setup printed "signed in"). Run `C login` and show me the URL and code exactly as printed. Then run `C login --wait`; it finishes when I approve.
+3. Choose repositories. Run `C list` and show me the result. Ask me which ones to include (I may answer like "all private ones"). Run `C clone owner/repo ...` with my choice.
+4. Build. Run `C refresh`.
+5. Create the page. Make a private Muse space named "Repository Explorer" by uploading, unchanged, the files that refresh printed: preferably the two files index.html and snapshot.json; if a space can hold only one HTML file, upload explorer.html instead. Then run `C mark-synced --mode two-file` (or `--mode single-file`).
+6. Report to me in at most 3 lines: the GitHub account, the number of repositories, and the page.
 
-3. Clone my repositories
-   - List the repositories I can access (`gh repo list`, including my organizations), ask me which ones to clone, then run `ghq get <owner>/<repo>` for each.
-   - Skip archived repositories unless I ask for them.
-
-4. Install the snapshot tools
-   - Run `ghq get https://github.com/masato-umeno/muse-repo-explorer`.
-   - Copy everything in its tools/ directory to ~/workspace/repo-explorer/ (NOT inside any git repository) and make the scripts executable.
-   - Run `python3 ~/workspace/repo-explorer/update_snapshot.py` and confirm snapshot.json is created.
-   - Ask me whether any files should be hidden from the page (for example `.env*`, `*.pem`, `secrets/*`). If so, write those globs to ~/workspace/repo-explorer/exclude.txt and run update_snapshot.py again.
-
-5. Install the pull hooks
-   - Run `~/workspace/repo-explorer/install-hooks.sh`.
-   - Pull one repository, then confirm snapshot.json was regenerated.
-
-6. Create the explorer page (a Muse space)
-   - Build it as specified in docs/explorer-page-spec.md of that repository. Keep snapshot.json as a single separate asset so the page can be refreshed by replacing it.
-   - Use my language for the page UI.
-   - Keep the page private. Never create a public link.
-
-7. Refreshing
-   - When I say "refresh the explorer": run update_snapshot.py, then sync_status.py. Only if sync_status.py exits with code 10, replace the page's snapshot asset and then run `sync_status.py --mark`.
-   - Optional: if I already have a recurring job (such as a weekly check), you may append this refresh step to it without reporting in chat.
-
-8. Report
-   - The output of `ghq list`, the snapshot size, the page you created, and anything that failed with the reason.
-
-Privacy rules:
-- Never put snapshot.json under git, in a public repository, or on a file-sharing service.
-- Never share the explorer page publicly.
-- Never write credentials (passwords, tokens) to chat, files or logs.
-- Only clone repositories I am legitimately allowed to access.
+Remember this for later: when I say "refresh the explorer", or at the end of a recurring job I already have, run `C refresh`. If it prints UP_TO_DATE, stop there. If it prints PAGE_UPDATE_NEEDED, replace only the file(s) it names in the page, then run `C mark-synced`.
 ````
 
-## Before you start — three rules
+Pasting it again later is safe: every step skips work that is already done.
+
+## Before you start: three rules
 
 1. **The snapshot is your full source code.** Keep `snapshot.json` out of git and out of anything shared.
 2. **Keep the explorer page private.** A public link lets anyone with the link read your code.
@@ -71,11 +44,11 @@ Details: [docs/security.md](docs/security.md)
 
 | Document | What it covers |
 | --- | --- |
-| [How it works](docs/design.md) | Architecture and design decisions |
+| [How it works](docs/design.md) | Architecture, design decisions, how tokens are saved |
 | [Security & privacy](docs/security.md) | Rules for users, and the safety checks for this public repository |
-| [Manual setup](docs/manual-setup.md) | Setting it up yourself (or with Claude Code) without the prompt |
+| [Manual setup](docs/manual-setup.md) | Setting it up yourself (or with Claude Code), command reference |
 | [Operations](docs/operations.md) | Refreshing, hooks, excluding files, uninstalling |
-| [Explorer page spec](docs/explorer-page-spec.md) | Snapshot format and UI requirements for the page |
+| [Explorer page spec](docs/explorer-page-spec.md) | Snapshot format and the bundled page |
 
 ## Contributing
 
@@ -90,4 +63,4 @@ your private denylist. CI runs the same check on every push. See [docs/security.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).

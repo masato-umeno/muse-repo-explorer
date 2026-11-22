@@ -1,54 +1,69 @@
 # Operations
 
+`rx` below means `python3 ~/workspace/muse-repo-explorer/tools/repo_explorer.py`.
+
 ## Refreshing the page
 
 ```sh
-cd ~/workspace/repo-explorer
-python3 update_snapshot.py      # pull everything, rebuild snapshot.json (no tokens)
-python3 sync_status.py          # exit 0: up to date / exit 10: page needs update
-# only if exit code was 10:
-#   replace the page's snapshot asset with snapshot.json, then
-python3 sync_status.py --mark
+rx refresh
 ```
 
-`sync_status.py` compares the HEADs in `snapshot.json` with `.page-synced-heads`
-(written by `--mark`), so in a week where nothing changed the agent does nothing.
+- `UP_TO_DATE: …` → nothing to do (no tokens spent beyond this one command).
+- `PAGE_UPDATE_NEEDED: …` → replace exactly the file(s) it names in the page, then `rx mark-synced`.
 
-To piggyback on an existing recurring job (e.g. a weekly check), append the steps above to
-that job's instructions.
+| Page form | Usually replaced | When the tool's page changed |
+| --- | --- | --- |
+| two-file | `dist/snapshot.json` | also `dist/index.html` |
+| single-file | `dist/explorer.html` | `dist/explorer.html` (same) |
+
+To piggyback on an existing recurring job (e.g. a weekly check), add the two lines above to the
+end of that job.
+
+## Updating the tool itself
+
+```sh
+git -C ~/workspace/muse-repo-explorer pull --ff-only
+rx refresh          # reports "new page version" if the page changed
+```
+
+Pasting the README prompt again does the same.
 
 ## What runs automatically
 
-- After `git pull` (merge or rebase) in any clone, the hook rebuilds `snapshot.json` in the
-  background and logs to `snapshot-hook.log`.
-- `.snapshot-dirty` appears whenever a HEAD changes and disappears on `sync_status.py --mark`.
+- After `git pull` (merge or rebase) in any clone, the hook rebuilds `snapshot.json` and `dist/`
+  in the background (log: `snapshot-hook.log`). The page itself is only changed by you/Muse.
+- `.snapshot-dirty` appears whenever a HEAD changes and disappears on `mark-synced`.
 
 ## State files in `~/workspace/repo-explorer`
 
 | File | Meaning |
 | --- | --- |
-| `snapshot.json` | The data embedded in the page (private source code, mode 600) |
-| `.page-synced-heads` | HEADs last pushed to the page |
+| `snapshot.json` | All repositories' text files (private source code, mode 600) |
+| `dist/` | Page files ready to upload (mode 600, directory 700) |
+| `.page-synced-heads` | HEADs the page currently shows |
+| `.page-mode` | `two-file` or `single-file` |
+| `.page-template-hash` | Version of the page file currently uploaded |
 | `.snapshot-dirty` | A HEAD changed since the page was last updated |
 | `exclude.txt` | Your globs for files to hide (optional) |
-| `snapshot-hook.log` | Output of hook-triggered runs |
+| `snapshot-hook.log`, `.login.log` | Logs |
 
 ## Common situations
 
-- **Cloned a new repository / re-cloned one:** run `install-hooks.sh` again (safe to repeat).
-- **`pull failed` in the output:** the clone has local commits or diverged; fix it in that
-  clone. Other repositories are still processed.
-- **`skipped (no upstream)`:** the branch has no tracking branch; it is snapshotted as is.
-- **Page is slow / snapshot too large:** add big generated directories (e.g. `dist/*`,
-  `vendor/*`) to `exclude.txt`.
+- **Added a repository:** `rx clone owner/repo`, then `rx refresh`.
+- **Removed a repository:** delete its clone directory, then `rx refresh` (reported as changed).
+- **`pull failed` lines:** that clone has local commits or diverged; fix it there. Others still update.
+- **`skipped (no upstream)`:** the branch tracks nothing; it is snapshotted as is.
+- **Page slow / snapshot large:** add generated directories (`dist/*`, `vendor/*`, `*.min.js`) to
+  `exclude.txt`, then `rx refresh --no-pull`.
+- **Sign-in expired:** `rx login`, then `rx login --wait`.
 
 ## Uninstalling
 
 ```sh
 gh auth logout
-rm -rf ~/workspace/repo-explorer
-# hooks: remove .git/hooks/post-merge and post-rewrite from each clone
-#        (restore *.bak-repo-explorer if you had your own)
+rm -rf ~/workspace/repo-explorer ~/workspace/muse-repo-explorer
+# in each clone, remove .git/hooks/post-merge and post-rewrite
+# (restore *.bak-repo-explorer if you had your own hooks)
 ```
 
-Clones are ordinary git repositories; delete them as you like. Delete the explorer page in Muse.
+Clones are ordinary git repositories; delete them as you like. Delete the page in Muse.

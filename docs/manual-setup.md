@@ -1,45 +1,27 @@
 # Manual setup
 
-For people (or Claude Code) who want to set it up without the prompt in the README.
-Steps 1–5 reproduce everything except the explorer page; for the page, see
-[explorer-page-spec.md](explorer-page-spec.md).
+For people (or Claude Code) who want to run the steps themselves instead of pasting the prompt.
 
-Requirements: `git`, `python3` (3.8+), a POSIX shell.
-
-## 1. Install ghq and gh
-
-Place the latest release binaries of [ghq](https://github.com/x-motemen/ghq) and
-[gh](https://github.com/cli/cli) in `~/.local/bin`, then:
+Requirements: Linux, `git`, `python3` (3.8+). `ghq` and `gh` are installed by `setup` if missing
+(into `~/.local/bin`).
 
 ```sh
-ghq --version
-gh --version
+git clone https://github.com/masato-umeno/muse-repo-explorer ~/workspace/muse-repo-explorer
+alias rx='python3 ~/workspace/muse-repo-explorer/tools/repo_explorer.py'
+
+rx setup                   # install ghq / gh if missing, show sign-in state
+rx login                   # prints a URL and a one-time code
+rx login --wait            # returns when you approve in the browser; configures git
+rx list                    # repositories you can access (archived hidden; --all to show)
+rx clone your-org/your-repo your-name/another-repo
+rx refresh                 # pull, snapshot, build dist/, say what to upload
 ```
 
-## 2. Sign in to GitHub (HTTPS, device flow)
+Then create the page from `~/workspace/repo-explorer/dist/` (see
+[explorer-page-spec.md](explorer-page-spec.md#delivery)) and record it:
 
 ```sh
-gh auth login --hostname github.com --git-protocol https --web
-gh auth status
-gh auth setup-git
-```
-
-## 3. Clone repositories
-
-```sh
-gh repo list                 # your repositories
-gh repo list your-org        # an organization's repositories
-ghq get your-org/your-repo
-```
-
-## 4. Install the tools
-
-```sh
-ghq get https://github.com/masato-umeno/muse-repo-explorer
-mkdir -p ~/workspace/repo-explorer
-cp "$(ghq root)"/github.com/masato-umeno/muse-repo-explorer/tools/* ~/workspace/repo-explorer/
-chmod +x ~/workspace/repo-explorer/*.sh ~/workspace/repo-explorer/*.py
-python3 ~/workspace/repo-explorer/update_snapshot.py
+rx mark-synced --mode two-file      # or: --mode single-file
 ```
 
 Optional — hide files from the page:
@@ -51,28 +33,37 @@ cat > ~/workspace/repo-explorer/exclude.txt <<'EOF'
 *.pem
 your-org/your-repo/secrets/*
 EOF
+rx refresh --no-pull
 ```
 
-## 5. Install the pull hooks
+## Command reference
 
-```sh
-~/workspace/repo-explorer/install-hooks.sh
-```
-
-Existing `post-merge` / `post-rewrite` hooks are backed up as `*.bak-repo-explorer`.
+| Command | Output (short) | Notes |
+| --- | --- | --- |
+| `setup` | `ghq: ok`, `gh: ok`, sign-in state | Downloads latest release binaries if missing |
+| `login` | URL + code | Starts `gh auth login --web` in the background |
+| `login --wait` | `signed in as …` | Polls up to 15 min, then `gh auth setup-git` |
+| `list [--all]` | `owner/repo  [private,fork,cloned]` | Your account and your organizations |
+| `clone OWNER/REPO …` | `cloned: N ok, M failed` | Uses `ghq get`; installs hooks |
+| `refresh [--no-pull]` | stats + `UP_TO_DATE` or `PAGE_UPDATE_NEEDED` | Also (re)installs hooks |
+| `mark-synced [--mode …]` | `marked N repos as synced` | Run after the page was updated |
+| `status` | one line | For quick checks |
+| `build` | — | Snapshot + `dist/` without pulling (used by hooks) |
 
 ## Configuration
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | `GHQ_ROOT` | `ghq root`, else `~/ghq` | Where clones live |
-| `REPO_EXPLORER_HOME` | `~/workspace/repo-explorer` | Tools, snapshot and state |
+| `REPO_EXPLORER_HOME` | `~/workspace/repo-explorer` | Snapshot, `dist/` and state |
 
-## Tools reference
+## Lower-level scripts
 
-| Tool | Purpose |
+`repo_explorer.py` is a thin layer over these; they still work on their own.
+
+| Script | Purpose |
 | --- | --- |
 | `update_snapshot.py [--no-pull] [--quiet]` | Pull all clones (`--ff-only`) and write `snapshot.json` |
-| `sync_status.py [--mark]` | Exit 10 if the page is out of date; `--mark` records it as updated |
+| `sync_status.py [--mark]` | Exit 10 if the page is out of date |
 | `install-hooks.sh` | Install `post-merge` / `post-rewrite` hooks into every clone |
-| `on-pull.sh` | Hook body; regenerates the snapshot in the background |
+| `on-pull.sh` | Hook body; rebuilds in the background |

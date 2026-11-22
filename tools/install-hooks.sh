@@ -6,15 +6,15 @@
 #   <hook>.bak-repo-explorer before being replaced (never silently overwritten).
 # - Re-running is safe (idempotent).
 #
-# Copy the contents of tools/ to REPO_EXPLORER_HOME first.
+# Hooks call on-pull.sh next to this script (override with REPO_EXPLORER_ON_PULL).
 set -eu
 
 MARKER="# installed-by: muse-repo-explorer"
 GHQ_ROOT_DIR="${GHQ_ROOT:-$(ghq root 2>/dev/null || echo "$HOME/ghq")}"
-ON_PULL="${REPO_EXPLORER_HOME:-$HOME/workspace/repo-explorer}/on-pull.sh"
+ON_PULL="${REPO_EXPLORER_ON_PULL:-$(cd "$(dirname "$0")" && pwd)/on-pull.sh}"
 
 if [ ! -x "$ON_PULL" ]; then
-    echo "error: $ON_PULL not found or not executable (copy tools/ there first)" >&2
+    echo "error: $ON_PULL not found or not executable" >&2
     exit 1
 fi
 
@@ -34,6 +34,5 @@ for d in "$GHQ_ROOT_DIR"/*/*/*/; do
         chmod +x "$hook"
     done
     count=$((count + 1))
-    echo "hooks -> $d"
 done
 echo "installed hooks in $count repositories"

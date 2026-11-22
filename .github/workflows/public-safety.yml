@@ -20,4 +20,6 @@ jobs:
       - name: Script syntax
         run: |
           python3 -m py_compile tools/*.py scripts/*.py
-          for f in tools/*.sh scripts/*.sh; do sh -n "$f"; done
+          for f in tools/*.sh scripts/*.sh tests/*.sh; do sh -n "$f"; done
+      - name: End-to-end (offline)
+        run: sh tests/e2e.sh

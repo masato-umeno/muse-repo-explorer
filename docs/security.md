@@ -10,7 +10,7 @@ public repository*.
    repository. Keep it outside any git repository (the default `~/workspace/repo-explorer`
    is), never upload it to a file-sharing service.
    `update_snapshot.py` refuses to write if its output directory is inside a git work tree
-   that does not ignore `snapshot.json`, and writes the file with owner-only permissions (600).
+   that does not ignore `snapshot.json`, and writes it (and `dist/`) owner-only (600 / 700).
 2. **Never share the explorer page publicly.** A public link lets anyone with the link read
    your code. Keep the space private.
 3. **Never put credentials in chat or files.** Sign in only with the device flow
@@ -20,7 +20,9 @@ public repository*.
    (Settings → Applications → Authorized OAuth Apps).
 5. **Clone only what you are allowed to.** For shared/organization repositories, follow that
    project's rules; never expose other people's code without permission.
-6. **Hide sensitive files from the page.** Even private, the page is one share away from
+6. **Let the agent upload files, not read them.** The README prompt tells Muse to upload
+   `dist/` files by path and never print them, so your code does not pass through the chat.
+7. **Hide sensitive files from the page.** Even private, the page is one share away from
    anyone. List globs such as `.env*`, `*.pem`, `your-org/your-repo/secrets/*` in
    `~/workspace/repo-explorer/exclude.txt`; matching files appear in the tree without content.
    Symlinks and submodules are never followed.

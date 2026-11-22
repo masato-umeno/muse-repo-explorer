@@ -1,7 +1,7 @@
 #!/bin/sh
 # Called from the post-merge / post-rewrite hooks of each clone.
-# Regenerates the snapshot after a pull; if any HEAD changed, update_snapshot.py
-# creates .snapshot-dirty ("page not yet updated").
+# Rebuilds the snapshot and the page files (dist/) after a pull; if any HEAD
+# changed, .snapshot-dirty is created ("page not yet updated").
 # It never pulls (--no-pull), so it cannot recurse. Script-only: no tokens used.
 #
 # Usage: on-pull.sh <hook-name> [arguments git passed to the hook...]
@@ -24,6 +24,6 @@ unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_PREFIX GIT_OBJECT_DIRECTORY \
       GIT_ALTERNATE_OBJECT_DIRECTORIES GIT_COMMON_DIR
 
 # Run in the background so the pull is not slowed down; never fail the pull.
-nohup python3 "$SCRIPT_DIR/update_snapshot.py" --no-pull --quiet \
+nohup python3 "$SCRIPT_DIR/repo_explorer.py" build \
     >> snapshot-hook.log 2>&1 &
 exit 0

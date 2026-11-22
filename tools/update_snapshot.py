@@ -260,7 +260,7 @@ def main(argv=None):
             'committed_at': git(d, 'log', '-1', '--format=%cI'),
             'files': files,
         })
-        if not args.quiet:
+        if not args.quiet or status.startswith('pull failed'):
             print(f'{repo_id}: {status}, files={len(files)}')
 
     write_atomic(out, snapshot)
