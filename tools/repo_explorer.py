@@ -2,9 +2,10 @@
 """One command per step, short output. Designed so an AI agent spends as few tokens as possible.
 
     python3 repo_explorer.py next                  print the single next action; repeat until DONE
-    python3 repo_explorer.py setup [--lang en|ja|zh-CN|ko]
+    python3 repo_explorer.py setup [--lang en|ja|zh-CN|ko|auto]
                                                    install ghq, gh and Mermaid if missing;
-                                                   set the page language; check sign-in
+                                                   set the page's initial language;
+                                                   check sign-in
     python3 repo_explorer.py login                 start GitHub device sign-in, print the code
     python3 repo_explorer.py login --wait          wait for approval, then configure git
     python3 repo_explorer.py list [--all]          repositories you can clone (compact)
@@ -202,16 +203,15 @@ def cmd_setup(args):
             print(f'mermaid: installed {MERMAID_VERSION} (verified)')
         except Exception as e:  # optional: diagrams fall back to source
             print(f'mermaid: not installed ({e}); diagrams will be shown as source')
+    # --lang sets the page's initial language (the Muse user's language); `auto` means "follow the
+    # browser". Viewers can always change it in the page's settings.
     if '--lang' in args:
         i = args.index('--lang')
         lang = normalize_lang(args[i + 1] if i + 1 < len(args) else '')
-    elif not os.path.exists(LANG_FILE):
-        lang = normalize_lang(os.environ.get('LC_ALL') or os.environ.get('LANG') or '')
-    else:
-        lang = page_lang()
-    with open(LANG_FILE, 'w') as fh:
-        fh.write(lang)
-    print(f'page language: {lang or "browser setting"}')
+        with open(LANG_FILE, 'w') as fh:
+            fh.write(lang)
+    lang = page_lang()
+    print(f'page language: {lang + " (default)" if lang else "browser setting"}')
     user = signed_in_user()
     print(f'github: signed in as {user}' if user
           else 'github: not signed in -> next: repo_explorer.py login')
@@ -540,8 +540,10 @@ def cmd_next(args):
     C = 'python3 ' + os.path.join(TOOLS, 'repo_explorer.py').replace(os.path.expanduser('~'), '~', 1)
     again = f'Then run `{C} next` again.'
     if not (find_bin('ghq') and find_bin('gh')) or not os.path.exists(LANG_FILE):
-        print(f'NEXT (1/5 install): run `{C} setup --lang LANG`, where LANG is the language the user '
-              'is writing in (en, ja, zh-CN or ko; for any other language omit --lang). ' + again)
+        print(f'NEXT (1/5 install): run `{C} setup --lang LANG`. LANG is the language this user '
+              'normally uses with you (en, ja, zh-CN or ko; auto for any other language). Judge it from '
+              'your conversations with the user, not from the setup request, which is written in English. '
+              + again)
         return 0
     has_repos = bool(cloned_ids())
     if not has_repos and not signed_in_user():

@@ -4,7 +4,8 @@ These instructions are for Muse (the AI agent). People should read [README.md](R
 
 ## Rules (apply throughout)
 
-- **Language:** talk to the user in the language they are writing in. Keep messages short.
+- **Language:** talk to the user in the language they normally use with you, even though the
+  setup request is in English. Keep messages short.
 - **Tokens:** run only the commands named here or printed by `next`, and read only their output.
   Never open, print or paste `snapshot.json` or files under `dist/`; upload them by path.
   Do not write scripts and do not build the page yourself; it is already made.

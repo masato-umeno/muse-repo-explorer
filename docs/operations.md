@@ -35,7 +35,8 @@ only by a refresh.
 | Remove a repository | Delete its clone directory, then `rx refresh` (its file is listed for deletion) |
 | Use the sample repository | `rx clone masato-umeno/muse-repo-explorer`, then `rx refresh` |
 | Hide files | Add glob patterns to `exclude.txt`, then `rx refresh --no-pull` |
-| Change the page language | `rx setup --lang ko` (or `en`, `ja`, `zh-CN`), then `rx refresh` |
+| Change the language for yourself | Use the gear button on the page |
+| Change the initial page language | `rx setup --lang ko` (or `en`, `ja`, `zh-CN`, `auto`), then `rx refresh` |
 | Install Mermaid later | `rx setup`, then `rx refresh` |
 | Update the tool | `git -C ~/workspace/muse-repo-explorer pull --ff-only`, then `rx refresh` |
 | Renew the GitHub sign-in | `rx login`, then `rx login --wait` |
