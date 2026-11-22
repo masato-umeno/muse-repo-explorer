@@ -61,12 +61,18 @@ ul.tree { list-style: none; margin: 0; padding: 0; }
 .btn:active { background: var(--bg3); }
 .path { font-family: var(--mono); font-size: 13px; overflow-wrap: anywhere; }
 .notice { margin: 16px 12px; padding: 12px; border-radius: 8px; background: var(--bg2); color: var(--warn); }
-.code { display: flex; font: 12.5px/1.55 var(--mono); }
-.code pre { margin: 0; padding: 10px 0; }
-.gutter { flex: none; text-align: right; color: var(--fg2); padding: 10px 8px 10px 10px !important; user-select: none;
-  border-right: 1px solid var(--line); background: var(--bg2); }
-.src { flex: 1; min-width: 0; overflow-x: auto; }
-.src pre { padding: 10px 12px; tab-size: 4; }
+/* One block per line; the number is a ::before, so wrapped lines keep their number aligned
+   and selecting/copying text never includes line numbers. */
+.code { font: 12.5px/1.55 var(--mono); overflow-x: auto; }
+.code pre { margin: 0; padding: 10px 0; tab-size: 4; counter-reset: ln; min-width: 100%; width: max-content; }
+.code .l { display: block; position: relative; padding: 0 12px 0 calc(var(--gw) + 20px); white-space: pre; min-height: 1.55em; }
+.code .l::before { counter-increment: ln; content: counter(ln); position: absolute; left: 0; top: 0; bottom: 0;
+  width: calc(var(--gw) + 8px); padding-right: 8px; text-align: right; color: var(--fg2); background: var(--bg2);
+  border-right: 1px solid var(--line); user-select: none; }
+.code.wrap { overflow-x: hidden; }
+.code.wrap pre { width: auto; }
+.code.wrap .l { white-space: pre-wrap; overflow-wrap: anywhere; }
+.btn[aria-pressed="true"] { background: var(--bg3); border-color: var(--accent); color: var(--accent); }
 .t-c { color: var(--c-com); font-style: italic; } .t-s { color: var(--c-str); }
 .t-n { color: var(--c-num); } .t-k { color: var(--c-kw); font-weight: 600; }
 footer { color: var(--fg2); font-size: 12px; padding: 12px; }
@@ -115,6 +121,7 @@ var I18N = {
     'skipped.symlink': 'Symbolic link (not followed).',
     'skipped.submodule': 'Submodule (not included).',
     'skipped.other': 'This file cannot be displayed.',
+    wrap: 'Wrap',
     noHighlight: 'Large file: shown without colors.'
   },
   ja: {
@@ -129,6 +136,7 @@ var I18N = {
     'skipped.symlink': 'シンボリックリンク（参照先は表示しません）。',
     'skipped.submodule': 'サブモジュール（含まれません）。',
     'skipped.other': 'このファイルは表示できません。',
+    wrap: '折り返し',
     noHighlight: '大きいファイルのため色付けなしで表示しています。'
   },
   'zh-CN': {
@@ -143,6 +151,7 @@ var I18N = {
     'skipped.symlink': '符号链接（不跟随）。',
     'skipped.submodule': '子模块（未包含）。',
     'skipped.other': '无法显示此文件。',
+    wrap: '自动换行',
     noHighlight: '文件较大，未启用语法高亮。'
   },
   ko: {
@@ -157,6 +166,7 @@ var I18N = {
     'skipped.symlink': '심볼릭 링크(따라가지 않음).',
     'skipped.submodule': '서브모듈(포함되지 않음).',
     'skipped.other': '이 파일은 표시할 수 없습니다.',
+    wrap: '줄바꿈',
     noHighlight: '파일이 커서 색상 없이 표시합니다.'
   }
 };
@@ -224,18 +234,30 @@ function tokenRe(path) {
   reCache[key] = new RegExp('(' + com.join('|') + ')|(' + str + ')|(\\b\\d[\\d_]*(?:\\.\\d+)?(?:e[+-]?\\d+)?\\b|\\b0x[0-9a-f]+\\b)|(\\b[A-Za-z_][A-Za-z0-9_]*\\b)', 'gi');
   return reCache[key];
 }
-function highlight(src, path) {
-  if (PLAIN.test(path)) return esc(src);
-  var re = tokenRe(path), out = '', last = 0, m;
+/* Returns one HTML string per line. A token spanning lines (block comment, template string)
+   is closed at each line end and reopened on the next, so every line is self-contained. */
+function highlightLines(src, path, plain) {
+  var lines = [''];
+  function push(text, cls) {
+    var parts = text.split('\n');
+    for (var i = 0; i < parts.length; i++) {
+      if (i > 0) lines.push('');
+      if (parts[i]) lines[lines.length - 1] += cls ? '<span class="' + cls + '">' + esc(parts[i]) + '</span>' : esc(parts[i]);
+    }
+  }
+  if (plain || PLAIN.test(path)) { push(src, ''); return lines; }
+  var re = tokenRe(path), last = 0, m;
   re.lastIndex = 0;
   while ((m = re.exec(src)) !== null) {
     if (m[0] === '') { re.lastIndex++; continue; }
     var cls = m[1] ? 't-c' : m[2] ? 't-s' : m[3] ? 't-n' : (m[4] && KW[m[4].toLowerCase()] ? 't-k' : '');
     if (!cls) continue;
-    out += esc(src.slice(last, m.index)) + '<span class="' + cls + '">' + esc(m[0]) + '</span>';
+    push(src.slice(last, m.index), '');
+    push(m[0], cls);
     last = m.index + m[0].length;
   }
-  return out + esc(src.slice(last));
+  push(src.slice(last), '');
+  return lines;
 }
 
 /* ---------- data ---------- */
@@ -384,6 +406,15 @@ function renderFile(path) {
         copy.textContent = t('copied'); setTimeout(function () { copy.textContent = t('copy'); }, 1500);
       });
     });
+    var wrapBtn = el('button', 'btn', t('wrap'));
+    wrapBtn.setAttribute('aria-pressed', String(wrapOn()));
+    wrapBtn.addEventListener('click', function () {
+      var on = !wrapOn();
+      store('rx.wrap', on ? '1' : '0');
+      wrapBtn.setAttribute('aria-pressed', String(on));
+      var c = view.querySelector('.code'); if (c) c.classList.toggle('wrap', on);
+    });
+    row.appendChild(wrapBtn);
     row.appendChild(copy);
   }
   bar.appendChild(row); view.appendChild(bar);
@@ -394,15 +425,17 @@ function renderFile(path) {
     return;
   }
   var text = f.content.replace(/\n$/, '');
-  var n = text.split('\n').length, nums = [];
-  for (var i = 1; i <= n; i++) nums.push(i);
   var big = text.length > 80000;
   if (big) view.appendChild(el('div', 'meta', t('noHighlight'))).style.padding = '6px 12px';
-  var code = el('div', 'code'), g = el('pre', 'gutter', nums.join('\n')), wrap = el('div', 'src'), pre = el('pre');
-  if (big) pre.textContent = text; else pre.innerHTML = highlight(text, f.path);
-  wrap.appendChild(pre); code.appendChild(g); code.appendChild(wrap); view.appendChild(code);
+  var htmlLines = highlightLines(text, f.path, big);
+  var code = el('div', 'code' + (wrapOn() ? ' wrap' : '')), pre = el('pre');
+  code.style.setProperty('--gw', String(htmlLines.length).length + 'ch');
+  pre.innerHTML = '<span class="l">' + htmlLines.join('</span><span class="l">') + '</span>';
+  code.appendChild(pre); view.appendChild(code);
   window.scrollTo(0, 0);
 }
+// Wrapping is the default (phone-first); the choice is remembered.
+function wrapOn() { return store('rx.wrap') !== '0'; }
 function copyText(s) {
   if (navigator.clipboard && navigator.clipboard.writeText) {
     return navigator.clipboard.writeText(s).catch(function () { return fallbackCopy(s); });

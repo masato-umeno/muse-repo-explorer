@@ -56,7 +56,10 @@ every `<` escaped as `\u003c`, so file contents can never close the script eleme
   dictionary so a language can be added in one place.
 - Repository switcher, grouped by owner. Show `branch`, `head` and `committed_at` per repository.
 - Folder tree with expand/collapse. Tap a file to show it.
-- Code view: monospace, line numbers, horizontal scroll, light syntax highlighting (by file
+- Code view: monospace, line numbers, light syntax highlighting (by file extension), copy button.
+  **Long lines wrap by default** (phone-first); a "Wrap" toggle switches to horizontal scrolling
+  and the choice is remembered. Line numbers stay aligned with wrapped lines and are never
+  included when text is selected or copied.
   extension is enough), copy button.
 - Cross-repository file search: substring match on all paths; tapping a result switches to that
   repository and opens the file.
