@@ -81,8 +81,11 @@ out="$($RX mark-synced --mode folder)"; expect "$out" "marked as synced"
 out="$($RX refresh)"; expect "$out" "UP_TO_DATE"
 out="$($RX next)"; expect "$out" "DONE"; expect "$out" "2 repositories"; expect "$out" "tester"
 expect "$out" "a star on GitHub"
+echo "$out" | grep -qx "https://github.com/masato-umeno/muse-repo-viewer" || fail "star note URL is not on its own line"
+expect "$out" "Do not star the repository for the user"
 out="$($RX next)"; expect "$out" "DONE"
 echo "$out" | grep -q "a star on GitHub" && fail "star note shown twice"
+echo "$out" | grep -q "github.com/masato-umeno/muse-repo-viewer" && fail "star note URL shown twice"
 
 # a pull through the hook rebuilds in the background; only that repository's file changes
 echo more >> "$U/src/a.py"; git -C "$U" commit -qam 2
