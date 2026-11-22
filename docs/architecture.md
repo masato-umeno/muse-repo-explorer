@@ -11,10 +11,14 @@
 
 ## Data flow
 
-```
-GitHub ──(git pull over HTTPS, gh credentials)──▶ clones
-clones ──(post-merge / post-rewrite hooks)──▶ snapshot.json ──▶ dist/site/, dist/explorer.html
-dist/  ──(only the changed files, uploaded by Muse when refresh reports them)──▶ Muse space
+```mermaid
+flowchart TB
+  GH[GitHub] -- "git pull (HTTPS, gh credentials)" --> CL[Clones]
+  CL -- "post-merge / post-rewrite hooks" --> SN[snapshot.json]
+  SN --> DI["dist/site/ and dist/explorer.html"]
+  DI -- "changed files only, uploaded by Muse" --> SP[Muse space]
+  SP -. "Ask Muse: file, lines, commit" .-> MU[Muse]
+  MU -- "git show" --> CL
 ```
 
 1. `refresh` pulls every clone with `--ff-only`.

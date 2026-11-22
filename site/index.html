@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>muse-repo-explorer</title>
+<meta name="description" content="Read your GitHub repositories on your phone, in a Muse space. When part of the code is unclear, select the lines and ask Muse about them.">
+<meta name="color-scheme" content="light">
+<style>
+:root {
+  --bg: #FFFFFF;
+  --text: #1D2433;
+  --muted: #5A6377;
+  --line: #DADFE7;
+  --soft: #F4F6F9;
+  --blue: #2F6FDE;   /* the explorer's own accent */
+  --sans: system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans CJK JP",
+          "PingFang SC", "Microsoft YaHei", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Noto Sans Mono", monospace;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 var(--sans); }
+a { color: var(--blue); }
+a:focus-visible, button:focus-visible, select:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+
+.top { display: flex; justify-content: flex-end; align-items: center; gap: 18px; padding: 16px 0; font-size: 14px; }
+.top a { color: var(--muted); }
+.top select { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; }
+
+.intro-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 64px; align-items: start; padding: 32px 0 64px; }
+h1 { font-size: 2rem; line-height: 1.3; font-weight: 700; margin: 24px 0 16px; }
+.intro { font-size: 17px; max-width: 34em; margin: 0 0 32px; word-break: auto-phrase; }
+.send-label { margin: 0 0 8px; color: var(--muted); font-size: 15px; word-break: auto-phrase; }
+.line { border: 1px solid var(--line); background: var(--soft); border-radius: 8px; padding: 12px 14px; max-width: 36em; }
+.line code { display: block; font: 14px/1.6 var(--mono); overflow-wrap: anywhere; margin-bottom: 10px; }
+.line button { font: inherit; font-size: 14px; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 12px; cursor: pointer; }
+.line button:hover { border-color: var(--muted); }
+.demo-link { display: none; margin-top: 20px; }
+
+/* the demo, framed the way Muse shows a space: its own top bar above the page */
+.demo { margin: 0; }
+.demo .screen { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; height: 640px; display: flex; flex-direction: column; }
+.space-bar { display: flex; align-items: center; gap: 8px; height: 46px; padding: 0 8px; background: #1F2B44; color: #fff; flex: none; }
+.sb-btn { width: 30px; height: 30px; border-radius: 50%; background: rgba(255, 255, 255, .12); display: grid; place-items: center; font-size: 14px; line-height: 1; flex: none; }
+.sb-title { flex: 1; text-align: center; font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.demo iframe { flex: 1; min-height: 0; width: 100%; border: 0; display: block; }
+.demo figcaption, .shots figcaption { font-size: 14px; color: var(--muted); margin-top: 8px; word-break: auto-phrase; }
+
+.shots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; padding: 8px 0 72px; }
+.shots figure { margin: 0; }
+.shots img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; object-position: top;
+  border: 1px solid var(--line); border-radius: 12px; }
+.shots img.low { object-position: center 78%; }
+.shots figcaption { color: var(--text); font-size: 15px; }
+
+footer { border-top: 1px solid var(--line); padding: 24px 0 40px; font-size: 14px; color: var(--muted); }
+footer .wrap { display: flex; gap: 20px; }
+
+@media (max-width: 860px) {
+  .intro-grid { grid-template-columns: 1fr; gap: 0; padding-bottom: 48px; }
+  .demo { display: none; }
+  .demo-link { display: inline-block; }
+  .shots { grid-template-columns: 1fr; max-width: 340px; gap: 36px; }
+}
+@media (max-width: 520px) {
+  .wrap { padding: 0 18px; }
+  h1 { font-size: 1.7rem; margin-top: 8px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a href="https://github.com/masato-umeno/muse-repo-explorer">GitHub</a>
+    <select id="lang" aria-label="Language">
+      <option value="en">English</option><option value="ja">日本語</option>
+      <option value="zh-CN">简体中文</option><option value="ko">한국어</option>
+    </select>
+  </header>
+
+  <main>
+    <div class="intro-grid">
+      <div>
+        <h1>muse-repo-explorer</h1>
+        <p class="intro" data-t="intro">Read your GitHub repositories on your phone, in a Muse space. When part of the code is unclear, select the lines and ask Muse about them.</p>
+        <p class="send-label" data-t="sendLabel">To get started, send this line to Muse.</p>
+        <div class="line">
+          <code id="line">Set up muse-repo-explorer for me by following https://github.com/masato-umeno/muse-repo-explorer/blob/main/MUSE_SETUP.md (keep replying in the language we normally use)</code>
+          <button type="button" id="copyLine" data-t="copy">Copy</button>
+        </div>
+        <a class="demo-link" href="demo/index.html#masato-umeno%2Fmuse-repo-explorer:README.md" data-t="openDemo">Try it on this repository</a>
+      </div>
+      <figure class="demo">
+        <div class="screen">
+          <div class="space-bar" aria-hidden="true"><span class="sb-btn">‹</span><span class="sb-title" data-t="spaceTitle">Repository Explorer</span><span class="sb-btn">···</span></div>
+          <iframe id="demo" title="Demo" src="demo/index.html#masato-umeno%2Fmuse-repo-explorer:README.md" loading="lazy"></iframe>
+        </div>
+        <figcaption data-t="demoCaption">Demo: this repository, as it appears in a Muse space.</figcaption>
+      </figure>
+    </div>
+
+    <div class="shots">
+      <figure>
+        <img src="assets/en/browse.webp" data-shot="browse" width="780" height="1560" loading="lazy" alt="Code view" data-alt="altBrowse">
+        <figcaption data-t="f1Title">Reading code</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/en/search.webp" data-shot="search" width="780" height="1560" loading="lazy" alt="Search results inside files" data-alt="altSearch">
+        <figcaption data-t="f2Title">Searching names and contents</figcaption>
+      </figure>
+      <figure>
+        <img class="low" src="assets/en/ask.webp" data-shot="ask" width="780" height="1560" loading="lazy" alt="Writing a question for Muse about selected lines" data-alt="altAsk">
+        <figcaption data-t="f4Title">Asking Muse about selected lines</figcaption>
+      </figure>
+    </div>
+  </main>
+</div>
+
+<footer>
+  <div class="wrap">
+    <a href="https://github.com/masato-umeno/muse-repo-explorer">GitHub</a>
+    <span data-t="footLicense">MIT License</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+'use strict';
+var T = {
+  "en": {
+    "title": "muse-repo-explorer",
+    "intro": "Read your GitHub repositories on your phone, in a Muse space. When part of the code is unclear, select the lines and ask Muse about them.",
+    "sendLabel": "To get started, send this line to Muse.",
+    "copy": "Copy",
+    "copied": "Copied",
+    "openDemo": "Try it on this repository",
+    "demoCaption": "Demo: this repository, as it appears in a Muse space.",
+    "spaceTitle": "Repository Explorer",
+    "f1Title": "Reading code",
+    "f2Title": "Searching names and contents",
+    "f4Title": "Asking Muse about selected lines",
+    "altBrowse": "Code view",
+    "altSearch": "Search results inside files",
+    "altAsk": "Writing a question for Muse about selected lines",
+    "footLicense": "MIT License"
+  },
+  "ja": {
+    "title": "muse-repo-explorer",
+    "intro": "GitHub のリポジトリを、Muse のスペースでスマホから読めるようにするツールです。分からないところがあれば、行を選んでそのまま Muse に質問できます。",
+    "sendLabel": "使い始めるには、次の1行を Muse に送ってください。",
+    "copy": "コピー",
+    "copied": "コピーしました",
+    "openDemo": "このリポジトリで試す",
+    "demoCaption": "デモ：このリポジトリを Muse のスペースで表示した状態です。",
+    "spaceTitle": "リポジトリエクスプローラー",
+    "f1Title": "コードを読む",
+    "f2Title": "ファイル名と内容を検索する",
+    "f4Title": "選んだ行について Muse に聞く",
+    "altBrowse": "コード表示の画面",
+    "altSearch": "ファイル内検索の結果",
+    "altAsk": "行を指定して Muse への質問を作る画面",
+    "footLicense": "MIT ライセンス"
+  },
+  "zh-CN": {
+    "title": "muse-repo-explorer",
+    "intro": "在 Muse 空间里用手机阅读 GitHub 仓库的工具。遇到看不懂的代码，可以选中相应的行，直接向 Muse 提问。",
+    "sendLabel": "要开始使用，请把这一行发给 Muse。",
+    "copy": "复制",
+    "copied": "已复制",
+    "openDemo": "用本仓库试用",
+    "demoCaption": "演示：在 Muse 空间中显示本仓库的效果。",
+    "spaceTitle": "仓库浏览器",
+    "f1Title": "阅读代码",
+    "f2Title": "搜索文件名和内容",
+    "f4Title": "就选中的行向 Muse 提问",
+    "altBrowse": "代码视图",
+    "altSearch": "文件内容搜索结果",
+    "altAsk": "指定行并编写给 Muse 的问题",
+    "footLicense": "MIT 许可证"
+  },
+  "ko": {
+    "title": "muse-repo-explorer",
+    "intro": "GitHub 저장소를 Muse 스페이스에서 스마트폰으로 읽을 수 있게 해 주는 도구입니다. 이해하기 어려운 부분은 줄을 골라 바로 Muse에 물어볼 수 있습니다.",
+    "sendLabel": "시작하려면 다음 한 줄을 Muse에 보내십시오.",
+    "copy": "복사",
+    "copied": "복사됨",
+    "openDemo": "이 저장소로 써 보기",
+    "demoCaption": "데모: 이 저장소를 Muse 스페이스에서 표시한 모습입니다.",
+    "spaceTitle": "저장소 탐색기",
+    "f1Title": "코드 읽기",
+    "f2Title": "파일명과 내용 검색",
+    "f4Title": "고른 줄에 대해 Muse에 묻기",
+    "altBrowse": "코드 보기 화면",
+    "altSearch": "파일 내용 검색 결과",
+    "altAsk": "줄을 지정해 Muse에 보낼 질문을 작성하는 화면",
+    "footLicense": "MIT 라이선스"
+  }
+};
+function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+function detect() {
+  var q = (location.search.match(/[?&]lang=([\w-]+)/) || [])[1];
+  var c = q || store('site.lang');
+  if (c && T[c]) return c;
+  var navs = navigator.languages || [navigator.language || 'en'];
+  for (var i = 0; i < navs.length; i++) {
+    var l = String(navs[i]).toLowerCase();
+    if (l.indexOf('ja') === 0) return 'ja';
+    if (l.indexOf('zh') === 0) return 'zh-CN';
+    if (l.indexOf('ko') === 0) return 'ko';
+    if (l.indexOf('en') === 0) return 'en';
+  }
+  return 'en';
+}
+var lang;
+function str(k) { return (T[lang] && T[lang][k] !== undefined) ? T[lang][k] : T.en[k]; }
+function apply(l, fromUser) {
+  lang = l;
+  document.documentElement.lang = l;
+  document.querySelectorAll('[data-t]').forEach(function (e) { e.textContent = str(e.getAttribute('data-t')); });
+  document.querySelectorAll('[data-alt]').forEach(function (e) { e.alt = str(e.getAttribute('data-alt')); });
+  // Screenshots are taken in each language, with a sample question in that language.
+  document.querySelectorAll('[data-shot]').forEach(function (e) { e.src = 'assets/' + l + '/' + e.getAttribute('data-shot') + '.webp'; });
+  document.querySelector('meta[name=description]').content = str('intro');
+  document.getElementById('lang').value = l;
+  // The demo is on the same origin: show it in the same language.
+  try { localStorage.setItem('rx.lang', l); } catch (e) {}
+  if (fromUser) {
+    var f = document.getElementById('demo');
+    try { f.contentWindow.location.reload(); } catch (e) { f.src = f.src; }
+  }
+}
+apply(detect(), false);
+document.getElementById('lang').addEventListener('change', function () { store('site.lang', this.value); apply(this.value, true); });
+document.getElementById('copyLine').addEventListener('click', function () {
+  var b = this, text = document.getElementById('line').textContent;
+  function done() { b.textContent = str('copied'); setTimeout(function () { b.textContent = str('copy'); }, 1600); }
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, done);
+  else {
+    var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta); done();
+  }
+});
+})();
+</script>
+</body>
+</html>

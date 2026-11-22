@@ -98,7 +98,9 @@ remembered.
   Markdown preview as well. The lines in the range are shown in the sheet so that they can be
   checked before sending. Without a range, the question refers to the whole file (the fields
   show the first and last line numbers as a guide).
-- **Send to Muse** uses the system share sheet where available; **Copy** copies the same text.
+- **Copy to clipboard** copies the message; paste it into the Muse chat to ask. The page cannot post
+  into the chat by itself. Where the system share sheet is available, **Share…** offers the same
+  text to other apps.
 - The message identifies the repository, file, line range, branch and commit, and includes a
   command that reads exactly those lines from Muse's local clone, for example:
 

@@ -48,6 +48,15 @@ Also recommended:
 - Commit with your GitHub noreply address and enable "Block command line pushes that expose
   my email" in your GitHub e-mail settings.
 
+## Website
+
+`site/` is the overview page published to GitHub Pages by `.github/workflows/pages.yml`. The
+workflow builds a live demo from this repository itself and publishes it under `demo/`, so the
+demo always shows the current explorer. `site/` is plain HTML with no build step and can also be
+served by any static host (for example Cloudflare Pages, with `site` as the output directory and
+the demo built the same way). Screenshots in `site/assets/` must show only this repository or
+sample data.
+
 ## Tests
 
 ```sh

@@ -134,6 +134,7 @@ body.hdr-collapsed #hdrRepo { display: block; }
 .sheet label { gap: 8px; margin: 4px 0; }
 .ask-range { gap: 6px; margin: 4px 0; }
 .ask-range input { width: 5.5em; background: var(--bg2); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; color: inherit; font: inherit; }
+.ask-how { margin: 10px 0 0; font-weight: 600; }
 .ask-preview { max-height: 28vh; overflow: auto; margin: 6px 0; padding: 8px 10px; background: var(--bg2); border-radius: 8px;
   font: 12px/1.5 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
 .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 30; background: var(--fg); color: var(--bg);
@@ -194,8 +195,9 @@ body.hdr-collapsed #hdrRepo { display: block; }
     </div>
     <pre id="askPreview" class="ask-preview" hidden></pre>
     <div class="meta" id="askNote"></div>
+    <p class="ask-how" id="askHow"></p>
     <div class="row" style="margin-top:8px"><span class="grow"></span>
-      <button class="btn" id="askCopy"></button><button class="btn primary" id="askShare"></button></div>
+      <button class="btn" id="askShare"></button><button class="btn primary" id="askCopy"></button></div>
   </div>
 </div>
 <main>
@@ -228,13 +230,15 @@ var I18N = {
     wrap: 'Wrap',
     settings: 'Settings', language: 'Language', view: 'Display', wrapDefault: 'Wrap long lines',
     collapse: 'Hide', expand: 'Show',
-    ask: 'Ask Muse', askTitle: 'Ask Muse about this code', askQ: 'Your question (optional)',
-    askShare: 'Send to Muse', askCopied: 'Copied. Paste it into Muse.',
+    ask: 'Ask Muse', askTitle: 'Write a question for Muse', askQ: 'Your question (optional)',
+    askShare: 'Share…', askCopy: 'Copy to clipboard', askCopied: 'Copied to the clipboard. Paste it into your Muse chat.',
+    askHow: 'The question is copied to the clipboard. Paste it into your Muse chat and send it.',
     askNote: 'Muse reads the specified lines from its local clone. Without line numbers, the question is about the whole file.', askFileN: function (n) { return 'Whole file (' + n + ' lines)'; },
     askRange: 'Lines', more: function (n) { return '… ' + n + ' more lines'; },
     askRef: 'Code', askLocal: 'Read locally', clearSel: 'Clear',
     selected: function (a, b) { return a === b ? 'Line ' + a : 'Lines ' + a + '–' + b; },
     tapLines: 'Tap line numbers to select a range.',
+    fileCount: function (n) { return n + (n === 1 ? ' file' : ' files'); },
     hitCount: function (n) { return n + (n === 1 ? ' match' : ' matches'); },
     modeName: 'Names', modeText: 'Contents', scopeRepo: 'This repository', scopeAll: 'All repositories', done: 'Done',
     scopePicked: function (n) { return n + ' repositories'; },
@@ -260,13 +264,15 @@ var I18N = {
     wrap: '折り返し',
     settings: '設定', language: '言語', view: '表示', wrapDefault: '長い行を折り返す',
     collapse: '畳む', expand: '開く',
-    ask: 'Museに質問', askTitle: 'このコードについて Muse に質問', askQ: '質問（任意）',
-    askShare: 'Museに送る', askCopied: 'コピーしました。Muse に貼り付けてください。',
+    ask: 'Museに質問', askTitle: 'Muse への質問を作成', askQ: '質問（任意）',
+    askShare: '共有…', askCopy: 'クリップボードにコピー', askCopied: 'クリップボードにコピーしました。Muse のチャットに貼り付けてください。',
+    askHow: '質問文をクリップボードにコピーします。Muse のチャットに貼り付けて送信してください。',
     askNote: 'Muse は手元の clone から指定した行を読みます。行を指定しない場合は、ファイル全体についての質問になります。', askFileN: function (n) { return 'ファイル全体（' + n + ' 行）'; },
     askRange: '行', more: function (n) { return '… ほか ' + n + ' 行'; },
     askRef: 'コード', askLocal: 'ローカルで読む', clearSel: '解除',
     selected: function (a, b) { return a === b ? a + ' 行目' : a + '–' + b + ' 行目'; },
     tapLines: '行番号をタップすると範囲を選択できます。',
+    fileCount: function (n) { return n + ' ファイル'; },
     hitCount: function (n) { return n + ' 件'; },
     modeName: 'ファイル名', modeText: '内容', scopeRepo: 'このリポジトリ', scopeAll: '全リポジトリ', done: '完了',
     scopePicked: function (n) { return n + ' リポジトリ'; },
@@ -292,13 +298,15 @@ var I18N = {
     wrap: '自动换行',
     settings: '设置', language: '语言', view: '显示', wrapDefault: '长行自动换行',
     collapse: '收起', expand: '展开',
-    ask: '向 Muse 提问', askTitle: '就这段代码向 Muse 提问', askQ: '你的问题（可选）',
-    askShare: '发送给 Muse', askCopied: '已复制，请粘贴到 Muse。',
+    ask: '向 Muse 提问', askTitle: '为 Muse 编写问题', askQ: '你的问题（可选）',
+    askShare: '分享…', askCopy: '复制到剪贴板', askCopied: '已复制到剪贴板。请粘贴到 Muse 聊天中。',
+    askHow: '问题文本将复制到剪贴板。请粘贴到 Muse 聊天中发送。',
     askNote: 'Muse 会从本地克隆读取指定的行。未指定行时，问题针对整个文件。', askFileN: function (n) { return '整个文件（' + n + ' 行）'; },
     askRange: '行', more: function (n) { return '… 另有 ' + n + ' 行'; },
     askRef: '代码', askLocal: '本地读取', clearSel: '清除',
     selected: function (a, b) { return a === b ? '第 ' + a + ' 行' : '第 ' + a + '–' + b + ' 行'; },
     tapLines: '点按行号即可选择范围。',
+    fileCount: function (n) { return n + ' 个文件'; },
     hitCount: function (n) { return n + ' 处匹配'; },
     modeName: '文件名', modeText: '内容', scopeRepo: '当前仓库', scopeAll: '所有仓库', done: '完成',
     scopePicked: function (n) { return n + ' 个仓库'; },
@@ -324,13 +332,15 @@ var I18N = {
     wrap: '줄바꿈',
     settings: '설정', language: '언어', view: '표시', wrapDefault: '긴 줄 줄바꿈',
     collapse: '접기', expand: '펼치기',
-    ask: 'Muse에 질문', askTitle: '이 코드에 대해 Muse에 질문', askQ: '질문(선택)',
-    askShare: 'Muse로 보내기', askCopied: '복사했습니다. Muse에 붙여넣어 주십시오.',
+    ask: 'Muse에 질문', askTitle: 'Muse에게 보낼 질문 작성', askQ: '질문(선택)',
+    askShare: '공유…', askCopy: '클립보드에 복사', askCopied: '클립보드에 복사했습니다. Muse 채팅에 붙여넣으십시오.',
+    askHow: '질문이 클립보드에 복사됩니다. Muse 채팅에 붙여넣어 보내십시오.',
     askNote: 'Muse는 로컬 clone에서 지정한 줄을 읽습니다. 줄을 지정하지 않으면 파일 전체에 대한 질문이 됩니다.', askFileN: function (n) { return '파일 전체(' + n + '줄)'; },
     askRange: '줄', more: function (n) { return '… 외 ' + n + '줄'; },
     askRef: '코드', askLocal: '로컬에서 읽기', clearSel: '해제',
     selected: function (a, b) { return a === b ? a + '번째 줄' : a + '–' + b + '번째 줄'; },
     tapLines: '줄 번호를 탭하면 범위를 선택할 수 있습니다.',
+    fileCount: function (n) { return n + '개 파일'; },
     hitCount: function (n) { return n + '건'; },
     modeName: '파일명', modeText: '내용', scopeRepo: '이 저장소', scopeAll: '모든 저장소', done: '완료',
     scopePicked: function (n) { return n + '개 저장소'; },
@@ -803,7 +813,7 @@ function renderRepoSelect() {
 }
 function renderMeta() {
   var r = byId[current];
-  $('repoMeta').textContent = r ? [r.branch || '—', r.head || '—', fmtDate(r.committed_at), r.files.length + ' files']
+  $('repoMeta').textContent = r ? [r.branch || '—', r.head || '—', fmtDate(r.committed_at), t('fileCount')(r.files.length)]
     .filter(Boolean).join(' · ') : '';
 }
 function fileButton(name, f, depth, sub, repoId) {
@@ -1175,7 +1185,7 @@ function askText(repo, f, sel, question) {
 function toast(msg) {
   var d = el('div', 'toast', msg);
   document.body.appendChild(d);
-  setTimeout(function () { if (d.parentNode) d.parentNode.removeChild(d); }, 2200);
+  setTimeout(function () { if (d.parentNode) d.parentNode.removeChild(d); }, 3500);
 }
 var askCtx = null;
 function askLines() { return askCtx.content.replace(/\n$/, '').split('\n'); }
@@ -1211,7 +1221,8 @@ function openAsk(repo, f, content, sel) {
   $('askTo').value = sel ? sel.b : '';
   $('askNote').textContent = t('askNote');
   updateAsk();
-  $('askCopy').textContent = t('copy');
+  $('askCopy').textContent = t('askCopy');
+  $('askHow').textContent = t('askHow');
   $('askShare').textContent = t('askShare');
   $('askShare').hidden = !navigator.share;
   $('askSheet').hidden = false;
@@ -1293,6 +1304,12 @@ $('setWrap').addEventListener('change', function () {
 });
 
 document.body.classList.toggle('hdr-collapsed', store('rx.hdr') === '0');
+// Sticky offsets follow the real header height (it changes when data, language or panels change).
+if (window.ResizeObserver) {
+  new ResizeObserver(function () {
+    document.documentElement.style.setProperty('--hh', document.querySelector('header').offsetHeight + 'px');
+  }).observe(document.querySelector('header'));
+}
 applyStaticText();
 setHeader(headerCollapsed());
 $('status').textContent = t('loading');
