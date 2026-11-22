@@ -11,7 +11,7 @@ muse-repo-explorer는 GitHub 저장소의 로컬 clone을 Muse 환경에 유지�
 
 ## 설치
 
-다음 한 줄을 Muse에 보내십시오. 영어 그대로 보내도 되며, Muse는 평소 쓰던 언어로 계속 응답합니다.
+다음 한 줄을 복사해 Muse에 붙여 넣으십시오. 영어 그대로 붙여 넣어도 되며, Muse는 평소 쓰던 언어로 계속 응답합니다.
 
 ```text
 Set up muse-repo-explorer for me by following https://github.com/masato-umeno/muse-repo-explorer/blob/main/MUSE_SETUP.md (keep replying in the language we normally use)

@@ -11,7 +11,7 @@ muse-repo-explorer は、GitHub リポジトリのローカル clone を Muse �
 
 ## セットアップ
 
-次の1行を Muse に送信してください。英語のままで構いません。Muse はこれまでどおりの言語で応答を続けます。
+次の1行を Muse にコピペしてください。英語のままで構いません。Muse はこれまでどおりの言語で応答を続けます。
 
 ```text
 Set up muse-repo-explorer for me by following https://github.com/masato-umeno/muse-repo-explorer/blob/main/MUSE_SETUP.md (keep replying in the language we normally use)

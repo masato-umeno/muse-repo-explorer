@@ -18,7 +18,7 @@ Overview and live demo: <https://masato-umeno.github.io/muse-repo-explorer/>
 
 ## Setup
 
-Send this line to Muse. It is in English for everyone; Muse keeps replying in the language you
+Copy this line and paste it into Muse. It is in English for everyone; Muse keeps replying in the language you
 normally use with it.
 
 ```text

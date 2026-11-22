@@ -11,7 +11,7 @@ muse-repo-explorer 在 Muse 环境中保存 GitHub 仓库的本地克隆，并�
 
 ## 搭建
 
-将下面这一行发送给 Muse（保持英文即可，Muse 会继续使用你们平时的语言回复）：
+复制下面这一行并粘贴到 Muse（保持英文即可，Muse 会继续使用你们平时的语言回复）：
 
 ```text
 Set up muse-repo-explorer for me by following https://github.com/masato-umeno/muse-repo-explorer/blob/main/MUSE_SETUP.md (keep replying in the language we normally use)
