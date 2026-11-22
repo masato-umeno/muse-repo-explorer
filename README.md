@@ -8,7 +8,8 @@ serves them in two ways:
 - **To Muse:** source code is read from local files, which is faster than a connector and
   uses considerably fewer tokens.
 - **To you:** a private, mobile-first code browser (a Muse space) built from a snapshot of the
-  clones. Markdown files are shown as formatted documents and Mermaid diagrams are rendered.
+  clones. File names and file contents can be searched, Markdown files are shown as formatted
+  documents, and Mermaid diagrams are rendered.
   The page is built in your language (English, Japanese, Chinese or Korean) and stays fast as
   the number of repositories grows, because each repository's content is loaded only when needed.
 

@@ -38,7 +38,7 @@ main { display: flex; min-height: calc(100vh - 120px); }
 body.file-open #side { display: none; }
 body.file-open #view { display: block; }
 @media (min-width: 900px) {
-  #side { width: 340px; flex: none; border-right: 1px solid var(--line); height: calc(100vh - 118px); overflow: auto; position: sticky; top: 118px; }
+  #side { width: 340px; flex: none; border-right: 1px solid var(--line); height: calc(100vh - var(--hh, 118px)); overflow: auto; position: sticky; top: var(--hh, 118px); }
   #view, body.file-open #view { display: block; }
   body.file-open #side { display: block; }
   #back { display: none !important; }
@@ -53,9 +53,17 @@ ul.tree { list-style: none; margin: 0; padding: 0; }
 .icon { flex: none; width: 1.1em; text-align: center; }
 .dim { color: var(--fg2); }
 .hit small { display: block; color: var(--fg2); font-size: 12px; }
+.seg { margin-top: 6px; gap: 6px; }
+.seg .btn { padding: 3px 10px; font-size: 13px; }
+.match { display: flex; gap: 8px; width: 100%; text-align: left; background: none; border: 0; cursor: pointer;
+  padding: 3px 12px 3px 28px; font: 12px/1.5 var(--mono); color: var(--fg2); }
+.match:hover, .match:focus-visible { background: var(--bg2); outline: none; }
+.match .n { flex: none; min-width: 3ch; text-align: right; }
+.match .s { min-width: 0; overflow-wrap: anywhere; white-space: pre-wrap; color: var(--fg); }
+mark { background: rgba(255, 196, 0, .45); color: inherit; border-radius: 2px; }
+.code .l.hl { background: rgba(255, 196, 0, .22); }
 .empty { color: var(--fg2); padding: 16px 12px; }
-.filebar { position: sticky; top: 118px; z-index: 4; background: var(--bg); border-bottom: 1px solid var(--line); padding: 8px 12px; }
-@media (max-width: 899px) { .filebar { top: 0; position: relative; } }
+.filebar { position: sticky; top: var(--hh, 118px); z-index: 4; background: var(--bg); border-bottom: 1px solid var(--line); padding: 8px 12px; }
 .btn { background: var(--bg2); border: 1px solid var(--line); border-radius: 8px; padding: 5px 12px; cursor: pointer; white-space: nowrap; }
 .btn:active { background: var(--bg3); }
 .path { font-family: var(--mono); font-size: 13px; overflow-wrap: anywhere; }
@@ -113,6 +121,11 @@ footer { color: var(--fg2); font-size: 12px; padding: 12px; }
   <div class="row" style="margin-top:8px">
     <input id="q" type="search" class="grow" autocomplete="off" autocapitalize="off" spellcheck="false">
   </div>
+  <div class="row seg" id="searchOpts">
+    <button class="btn" data-mode="name"></button><button class="btn" data-mode="text"></button>
+    <span class="grow"></span>
+    <button class="btn" id="scope" hidden></button>
+  </div>
 </header>
 <main>
   <nav id="side"><div class="empty" id="status">…</div></nav>
@@ -142,6 +155,11 @@ var I18N = {
     'skipped.submodule': 'Submodule (not included).',
     'skipped.other': 'This file cannot be displayed.',
     wrap: 'Wrap',
+    hitCount: function (n) { return n + (n === 1 ? ' match' : ' matches'); },
+    modeName: 'Names', modeText: 'Contents', scopeRepo: 'This repository', scopeAll: 'All repositories',
+    searchText: 'Search inside files', minChars: 'Enter at least 2 characters.',
+    searching: function (i, n) { return 'Searching… ' + i + '/' + n; },
+    textResults: function (f, m, more) { return m + (more ? '+' : '') + ' matches in ' + f + ' files'; },
     preview: 'Preview', diagramUnavailable: 'Diagrams cannot be rendered on this page. Showing the source.',
     diagramError: 'This diagram could not be rendered.',
     noHighlight: 'Large file: shown without colors.'
@@ -159,6 +177,11 @@ var I18N = {
     'skipped.submodule': 'サブモジュール（含まれません）。',
     'skipped.other': 'このファイルは表示できません。',
     wrap: '折り返し',
+    hitCount: function (n) { return n + ' 件'; },
+    modeName: 'ファイル名', modeText: '内容', scopeRepo: 'このリポジトリ', scopeAll: '全リポジトリ',
+    searchText: 'ファイルの内容を検索', minChars: '2文字以上入力してください。',
+    searching: function (i, n) { return '検索中… ' + i + '/' + n; },
+    textResults: function (f, m, more) { return f + ' ファイル・' + m + (more ? '+' : '') + ' 件'; },
     preview: 'プレビュー', diagramUnavailable: 'このページでは図を描画できないため、ソースを表示しています。',
     diagramError: 'この図を描画できませんでした。',
     noHighlight: '大きいファイルのため色付けなしで表示しています。'
@@ -176,6 +199,11 @@ var I18N = {
     'skipped.submodule': '子模块（未包含）。',
     'skipped.other': '无法显示此文件。',
     wrap: '自动换行',
+    hitCount: function (n) { return n + ' 处匹配'; },
+    modeName: '文件名', modeText: '内容', scopeRepo: '当前仓库', scopeAll: '所有仓库',
+    searchText: '搜索文件内容', minChars: '请输入至少 2 个字符。',
+    searching: function (i, n) { return '搜索中… ' + i + '/' + n; },
+    textResults: function (f, m, more) { return f + ' 个文件中有 ' + m + (more ? '+' : '') + ' 处匹配'; },
     preview: '预览', diagramUnavailable: '此页面无法渲染图表，显示源代码。',
     diagramError: '无法渲染此图表。',
     noHighlight: '文件较大，未启用语法高亮。'
@@ -193,6 +221,11 @@ var I18N = {
     'skipped.submodule': '서브모듈(포함되지 않음).',
     'skipped.other': '이 파일은 표시할 수 없습니다.',
     wrap: '줄바꿈',
+    hitCount: function (n) { return n + '건'; },
+    modeName: '파일명', modeText: '내용', scopeRepo: '이 저장소', scopeAll: '모든 저장소',
+    searchText: '파일 내용 검색', minChars: '2자 이상 입력하십시오.',
+    searching: function (i, n) { return '검색 중… ' + i + '/' + n; },
+    textResults: function (f, m, more) { return f + '개 파일에서 ' + m + (more ? '+' : '') + '건'; },
     preview: '미리보기', diagramUnavailable: '이 페이지에서는 다이어그램을 렌더링할 수 없어 소스를 표시합니다.',
     diagramError: '이 다이어그램을 렌더링할 수 없습니다.',
     noHighlight: '파일이 커서 색상 없이 표시합니다.'
@@ -634,7 +667,7 @@ function applyStaticText() {
   document.documentElement.lang = lang;
   document.querySelectorAll('[data-i18n]').forEach(function (e) { e.textContent = t(e.getAttribute('data-i18n')); });
   document.title = t('title');
-  $('q').placeholder = t('search');
+  updateSearchOpts();
   if (DATA) $('foot').textContent = t('snapshot') + ': ' + fmtDate(DATA.generated_at);
 }
 function renderRepoSelect() {
@@ -720,6 +753,107 @@ function renderSearch(q) {
   });
   side.appendChild(ul);
 }
+/* Content search. The current repository is usually already loaded (prefetch), so its results
+   are immediate. "All repositories" loads repositories one by one and shows results as they
+   arrive. Work is split into slices so the page stays responsive. */
+var searchMode = store('rx.smode') === 'text' ? 'text' : 'name', searchAll = false, searchSeq = 0;
+var pendingJump = null;
+var MAX_FILES = 200, MAX_MATCHES = 2000, LINES_PER_FILE = 3;
+function snippet(line, idx, len) {
+  var start = Math.max(0, idx - 40), end = Math.min(line.length, idx + len + 80);
+  var span = el('span', 's');
+  span.appendChild(document.createTextNode((start ? '…' : '') + line.slice(start, idx)));
+  span.appendChild(el('mark', null, line.slice(idx, idx + len)));
+  span.appendChild(document.createTextNode(line.slice(idx + len, end) + (end < line.length ? '…' : '')));
+  return span;
+}
+function openAt(repoId, path, line) {
+  pendingJump = { repo: repoId, path: path, line: line };
+  go(repoId, path);
+}
+function renderContentSearch(q) {
+  var seq = ++searchSeq, side = $('side');
+  side.textContent = '';
+  if (q.length < 2) { side.appendChild(el('div', 'empty', t('minChars'))); return; }
+  var status = el('div', 'empty'), ul = el('ul', 'tree');
+  side.appendChild(status); side.appendChild(ul);
+  var needle = q.toLowerCase(), repos = searchAll ? DATA.repos.slice() : [byId[current]];
+  if (searchAll) { // current repository first: it is most likely already loaded
+    repos = [byId[current]].concat(repos.filter(function (r) { return r.id !== current; }));
+  }
+  var nFiles = 0, nMatches = 0, more = false;
+  function done() {
+    status.textContent = nFiles ? t('textResults')(nFiles, nMatches, more) : t('noResults');
+  }
+  function addFile(repo, f, hits, total) {
+    var li = el('li'), b = fileButton(f.path, f, 0, (searchAll ? repo.id + ' · ' : '') + t('hitCount')(total), repo.id);
+    b.classList.add('hit');
+    li.appendChild(b);
+    hits.forEach(function (h) {
+      var m = el('button', 'match');
+      m.appendChild(el('span', 'n', String(h.line)));
+      m.appendChild(snippet(h.text, h.idx, q.length));
+      m.addEventListener('click', function () { openAt(repo.id, f.path, h.line); });
+      li.appendChild(m);
+    });
+    b.addEventListener('click', function () { pendingJump = hits.length ? { repo: repo.id, path: f.path, line: hits[0].line } : null; });
+    ul.appendChild(li);
+  }
+  var ri = 0;
+  function nextRepo() {
+    if (seq !== searchSeq) return;
+    if (ri >= repos.length || more) { done(); return; }
+    var repo = repos[ri++];
+    status.textContent = t('searching')(ri, repos.length);
+    loadContent(repo).then(function (map) {
+      var files = repo.files, fi = 0;
+      (function slice() {
+        if (seq !== searchSeq) return;
+        var deadline = Date.now() + 12;
+        while (fi < files.length && Date.now() < deadline) {
+          var f = files[fi++], c = !f.skipped && map[f.path];
+          if (!c) continue;
+          var low = c.toLowerCase();
+          if (low.indexOf(needle) === -1) continue;
+          var lines = c.split('\n'), lowLines = low.split('\n'), hits = [], total = 0;
+          for (var k = 0; k < lowLines.length; k++) {
+            var idx = lowLines[k].indexOf(needle);
+            if (idx === -1) continue;
+            total++;
+            if (hits.length < LINES_PER_FILE) hits.push({ line: k + 1, text: lines[k], idx: idx });
+          }
+          nFiles++; nMatches += total;
+          addFile(repo, f, hits, total);
+          if (nFiles >= MAX_FILES || nMatches >= MAX_MATCHES) { more = true; done(); return; }
+        }
+        if (fi < files.length) setTimeout(slice, 0); else { nextRepo(); }
+      })();
+    }).catch(function (e) {
+      if (seq !== searchSeq) return;
+      status.textContent = e && e.message === 'unsupported' ? t('unsupported') : t('loadError');
+    });
+  }
+  nextRepo();
+}
+function updateSearchOpts() {
+  var btns = $('searchOpts').querySelectorAll('[data-mode]');
+  for (var i = 0; i < btns.length; i++) {
+    var m = btns[i].getAttribute('data-mode');
+    btns[i].textContent = t(m === 'name' ? 'modeName' : 'modeText');
+    btns[i].setAttribute('aria-pressed', String(m === searchMode));
+  }
+  var scope = $('scope');
+  scope.hidden = searchMode !== 'text';
+  scope.textContent = t(searchAll ? 'scopeAll' : 'scopeRepo');
+  scope.setAttribute('aria-pressed', String(searchAll));
+  $('q').placeholder = t(searchMode === 'text' ? 'searchText' : 'search');
+  document.documentElement.style.setProperty('--hh', document.querySelector('header').offsetHeight + 'px');
+}
+function runSearch() {
+  var q = $('q').value.trim();
+  if (!q) { searchSeq++; $('side').textContent = ''; renderTree(); return; }
+  if (searchMode === 'text') renderContentSearch(q); else renderSearch(q);
+}
 function setActive(b) {
   if (activeBtn) activeBtn.classList.remove('active');
   activeBtn = b; if (b) b.classList.add('active');
@@ -767,10 +901,12 @@ function showContent(row, meta, body, f, content) {
   var text = content.replace(/\n$/, '');
   meta.textContent = fmtSize(f.size) + ' · ' + text.split('\n').length + ' ' + t('lines');
   var kind = MD_RE.test(f.path) ? 'md' : MMD_RE.test(f.path) ? 'mmd' : null;
-  var preview = !!kind;
+  var jump = pendingJump && pendingJump.repo === current && pendingJump.path === f.path ? pendingJump.line : 0;
+  pendingJump = null;
+  var preview = !!kind && !jump; // a search result opens the source at the matching line
   if (kind) {
     var prevBtn = el('button', 'btn', t('preview'));
-    prevBtn.setAttribute('aria-pressed', 'true');
+    prevBtn.setAttribute('aria-pressed', String(preview));
     prevBtn.addEventListener('click', function () {
       preview = !preview;
       prevBtn.setAttribute('aria-pressed', String(preview));
@@ -805,6 +941,12 @@ function showContent(row, meta, body, f, content) {
     code.style.setProperty('--gw', String(htmlLines.length).length + 'ch');
     pre.innerHTML = '<span class="l">' + htmlLines.join('</span><span class="l">') + '</span>';
     code.appendChild(pre); body.appendChild(code);
+    if (jump && pre.children[jump - 1]) {
+      var target = pre.children[jump - 1];
+      target.classList.add('hl');
+      target.scrollIntoView({ block: 'center' });
+      jump = 0;
+    }
   }
   paint();
 }
@@ -868,8 +1010,18 @@ loadData().then(function (data) {
       go(current, null);
     }
     clearTimeout(timer);
-    timer = setTimeout(function () { if (q) renderSearch(q); else { $('side').textContent = ''; renderTree(); } }, 150);
+    timer = setTimeout(runSearch, searchMode === 'text' ? 350 : 150);
   });
+  $('searchOpts').addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('button') : null;
+    if (!b) return;
+    if (b.id === 'scope') searchAll = !searchAll;
+    else { searchMode = b.getAttribute('data-mode'); store('rx.smode', searchMode); }
+    updateSearchOpts();
+    if (document.body.classList.contains('file-open') && window.matchMedia('(max-width: 899px)').matches) go(current, null);
+    runSearch();
+  });
+  window.addEventListener('resize', updateSearchOpts);
   window.addEventListener('hashchange', route);
   $('view').addEventListener('click', function (e) {
     var a = e.target.closest ? e.target.closest('a[data-path], a[data-anchor]') : null;
