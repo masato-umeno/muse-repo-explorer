@@ -25,7 +25,7 @@ This document is for users. Guidance for contributors to this public repository 
   HTML, and only `http`, `https` and `mailto` links are made clickable.
 - Mermaid is downloaded once, at a pinned version, and kept only if its SHA-256 matches the value
   in the CLI. A modified file is rejected. Diagrams are rendered with `securityLevel: 'strict'`.
-- The setup prompt instructs the agent to upload page files by path and not to read them, so
+- The setup instructions tell the agent to upload page files by path and not to read them, so
   source code does not pass through the conversation.
 
 ## Recommendations
@@ -40,6 +40,9 @@ This document is for users. Guidance for contributors to this public repository 
    `your-org/your-repo/secrets/*` to `exclude.txt`, even though the page is private.
 5. **Include only repositories you are authorized to access,** and follow the policies of
    shared or organization repositories.
-6. **Revoke access when you stop using the tool.** The default gh token has the `repo` scope
+6. **Pin the setup instructions if you need a fixed version.** The one-line setup makes Muse follow
+   `MUSE_SETUP.md` and the output of `next` from this repository. Replace `main` in the URL with
+   a commit ID or release tag to use a version you have reviewed.
+7. **Revoke access when you stop using the tool.** The default gh token has the `repo` scope
    (read and write). Run `gh auth logout`, or revoke the authorization under GitHub
    Settings → Applications → Authorized OAuth Apps.

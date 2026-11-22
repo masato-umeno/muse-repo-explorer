@@ -6,6 +6,7 @@
 
 | Command | Description | Output |
 | --- | --- | --- |
+| `next` | Determines the current state, refreshes when repositories exist, and prints the single next action (`NEXT (n/5 …)`, `DONE` or `STOP`) | A few lines of instructions |
 | `setup [--lang en\|ja\|zh-CN\|ko]` | Installs ghq and gh into `~/.local/bin` and the verified Mermaid build if missing, records the page language, and reports the sign-in state | One line per item |
 | `login` | Starts the GitHub device flow in the background | URL and one-time code |
 | `login --wait` | Waits up to 15 minutes for approval, then runs `gh auth setup-git` | Account name |

@@ -14,8 +14,24 @@ fail() { echo "FAIL: $*" >&2; exit 1; }
 expect() { echo "$1" | grep -q -- "$2" || { echo "$1" >&2; fail "expected: $2"; }; }
 unzip_json() { python3 -c "import gzip,sys; sys.stdout.write(gzip.open(sys.argv[1],'rt').read())" "$1"; }
 
-# no repositories yet -> refresh must stop and point to the sample
+# ---- `next` walks the agent through setup, one action at a time ----
 mkdir -p "$REPO_EXPLORER_HOME"
+out="$($RX next)"; expect "$out" "NEXT (1/5 install)"; expect "$out" "setup --lang"
+# fake gh / ghq so the remaining states can be reached offline
+mkdir -p "$HOME/.local/bin"
+cat > "$HOME/.local/bin/gh" <<'EOS'
+#!/bin/sh
+[ "$1 $2" = "api user" ] && [ -n "${FAKE_GH_USER:-}" ] && { echo "$FAKE_GH_USER"; exit 0; }
+exit 1
+EOS
+printf '#!/bin/sh\necho "$GHQ_ROOT"\n' > "$HOME/.local/bin/ghq"
+chmod +x "$HOME/.local/bin/gh" "$HOME/.local/bin/ghq"
+printf 'en' > "$REPO_EXPLORER_HOME/.page-lang"
+out="$($RX next)"; expect "$out" "NEXT (2/5 sign in)"; expect "$out" "masato-umeno/muse-repo-explorer"
+export FAKE_GH_USER=tester
+out="$($RX next)"; expect "$out" "NEXT (3/5 repositories)"
+
+# no repositories yet -> refresh must stop and point to the sample
 set +e; out="$($RX refresh)"; rc=$?; set -e
 [ $rc -eq 3 ] || fail "refresh without repositories should exit 3"
 expect "$out" "NO_REPOSITORIES"; expect "$out" "masato-umeno/muse-repo-explorer"
@@ -36,7 +52,8 @@ git clone -q "$U" "$GHQ_ROOT/github.com/your-org/your-repo"
 git clone -q "$U" "$GHQ_ROOT/github.com/your-org/second"
 echo '.env' > "$REPO_EXPLORER_HOME/exclude.txt"
 
-out="$($RX refresh)"; expect "$out" "PAGE_UPDATE_NEEDED"; expect "$out" "first time"
+out="$($RX next)"; expect "$out" "NEXT (4/5 create the space)"; expect "$out" "dist/site/"
+out="$($RX refresh)"; expect "$out" "PAGE_UPDATE_NEEDED"; expect "$out" "create a private space"
 S="$REPO_EXPLORER_HOME/snapshot.json"; SITE="$REPO_EXPLORER_HOME/dist/site"
 grep -q outside-secret "$S" && fail "symlink target leaked"
 grep -q SECRET "$S" && fail "excluded file leaked"
@@ -60,6 +77,7 @@ fi
 $RX mark-synced >/dev/null 2>&1 && fail "mark-synced without --mode should fail"
 out="$($RX mark-synced --mode folder)"; expect "$out" "marked as synced"
 out="$($RX refresh)"; expect "$out" "UP_TO_DATE"
+out="$($RX next)"; expect "$out" "DONE"; expect "$out" "2 repositories"; expect "$out" "tester"
 
 # a pull through the hook rebuilds in the background; only that repository's file changes
 echo more >> "$U/src/a.py"; git -C "$U" commit -qam 2
@@ -71,6 +89,7 @@ out="$($RX refresh --no-pull)"
 expect "$out" "data/index.json.gz"
 expect "$out" "your-org--your-repo-"
 echo "$out" | grep -q "your-org--second-" && fail "unchanged repository listed for upload"
+out="$($RX next)"; expect "$out" "NEXT (5/5 update the space)"
 
 # removing a repository lists its file for deletion
 $RX mark-synced >/dev/null
