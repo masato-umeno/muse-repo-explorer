@@ -58,6 +58,7 @@ All files are in `REPO_EXPLORER_HOME`.
 | `exclude.txt` | Optional glob patterns for files to hide |
 | `.page-lang` | Initial page language (`en`, `ja`, `zh-CN`, `ko`, or empty for the browser setting) |
 | `.page-state.json` | Form of the space and checksums of the files it currently holds |
+| `.setup-version` | Setup version last completed; `next` asks for `setup` again when the tool requires a newer one |
 | `.snapshot-dirty` | Present when commits have changed since the last update of the space |
 | `.snapshot.lock`, `.build.lock` | Prevent concurrent rebuilds |
 | `snapshot-hook.log`, `.login.log` | Logs |

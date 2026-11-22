@@ -23,5 +23,7 @@ These instructions are for Muse (the AI agent). People should read [README.md](R
    If the output starts with `STOP`, report it to the user and stop.
 
 `next` decides every step from the current state (installation, sign-in, repository selection,
-creating or updating the space), so these instructions do not change between the first setup and
-later refreshes.
+creating or updating the space), so the same instructions serve the first setup, later refreshes
+and updates to a new version of the tool. When an existing space must change because the tool was
+updated, `next` lists exactly which files to upload or delete; update the existing space and do
+not create a new one.

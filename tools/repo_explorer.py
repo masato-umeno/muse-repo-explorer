@@ -53,6 +53,12 @@ STATE = os.path.join(HOME, '.page-state.json')
 LANG_FILE = os.path.join(HOME, '.page-lang')
 
 SAMPLE_REPO = 'masato-umeno/muse-repo-explorer'
+# Bump when an existing installation must run `setup` again after updating the tool
+# (for example, a new dependency or a new pinned Mermaid version).
+SETUP_VERSION = '2'
+SETUP_MARKER = os.path.join(HOME, '.setup-version')
+# State files of versions before the folder form (kept only to migrate existing spaces).
+LEGACY_STATE = ('.page-mode', '.page-synced-heads', '.page-template-hash')
 LANGS = ('en', 'ja', 'zh-CN', 'ko')
 
 # Mermaid is downloaded at setup time (it is too large for this public repository) and verified
@@ -211,7 +217,10 @@ def cmd_setup(args):
         with open(LANG_FILE, 'w') as fh:
             fh.write(lang)
     lang = page_lang()
-    print(f'page language: {lang + " (default)" if lang else "browser setting"}')
+    print(f'page language: {lang or "browser setting"}')
+    if not failed:
+        with open(SETUP_MARKER, 'w') as fh:
+            fh.write(SETUP_VERSION)
     user = signed_in_user()
     print(f'github: signed in as {user}' if user
           else 'github: not signed in -> next: repo_explorer.py login')
@@ -436,6 +445,22 @@ def file_hashes():
     return out
 
 
+def legacy_state():
+    """Map the state of an older installation, so that its existing space is updated in place.
+
+    Older versions uploaded index.html + snapshot.json ("two-file") or explorer.html. Every file
+    of the current build is reported as changed, and the old snapshot.json is reported for
+    deletion.
+    """
+    try:
+        old = open(os.path.join(HOME, '.page-mode')).read().strip()
+    except OSError:
+        return {}
+    if old == 'single-file':
+        return {'mode': 'single-file', 'files': {}}
+    return {'mode': 'folder', 'files': {'snapshot.json': 'legacy', 'index.html': 'legacy'}}
+
+
 def load_state():
     try:
         with open(STATE) as fh:
@@ -485,7 +510,7 @@ def refresh_state(pull=True):
     total = sum(os.path.getsize(os.path.join(SITE, p)) for p in now)
     print(f'repos: {len(snap["repos"])}, files: {sum(len(r["files"]) for r in snap["repos"])}, '
           f'page data: {total / 1024 / 1024:.1f} MB' + ('' if mermaid_ok() else ', diagrams: off'))
-    state = load_state()
+    state = load_state() or legacy_state()
     mode, synced = state.get('mode'), state.get('files', {})
     info = {'mode': mode, 'repos': len(snap['repos']),
             'changed': sorted(p for p in now if synced.get(p) != now[p]),
@@ -539,6 +564,14 @@ def cmd_next(args):
     """Print the single next action for the agent. Repeat until it prints DONE."""
     C = 'python3 ' + os.path.join(TOOLS, 'repo_explorer.py').replace(os.path.expanduser('~'), '~', 1)
     again = f'Then run `{C} next` again.'
+    try:
+        setup_current = open(SETUP_MARKER).read().strip() == SETUP_VERSION
+    except OSError:
+        setup_current = False
+    if os.path.exists(LANG_FILE) and find_bin('ghq') and find_bin('gh') and not setup_current:
+        print(f'NEXT (1/5 install): the tool was updated; run `{C} setup` (the page language is kept). '
+              + again)
+        return 0
     if not (find_bin('ghq') and find_bin('gh')) or not os.path.exists(LANG_FILE):
         print(f'NEXT (1/5 install): run `{C} setup --lang LANG`. LANG is the language this user '
               'normally uses with you (en, ja, zh-CN or ko; auto for any other language). Judge it from '
@@ -588,7 +621,7 @@ def cmd_next(args):
 
 
 def cmd_mark_synced(args):
-    state = load_state()
+    state = load_state() or {k: v for k, v in legacy_state().items() if k == 'mode'}
     if '--mode' in args:
         i = args.index('--mode')
         mode = args[i + 1] if i + 1 < len(args) else ''
@@ -602,8 +635,13 @@ def cmd_mark_synced(args):
     if not os.path.isdir(SITE):
         print('nothing built yet: run refresh first')
         return 1
+    if not state.get('mode'):
+        state['mode'] = legacy_state().get('mode')
     state['files'] = file_hashes()
     write_file(STATE, json.dumps(state, indent=1, sort_keys=True).encode())
+    for name in LEGACY_STATE:  # migrated; no longer needed
+        if os.path.exists(os.path.join(HOME, name)):
+            os.unlink(os.path.join(HOME, name))
     dirty = os.path.join(HOME, '.snapshot-dirty')
     if os.path.exists(dirty):
         os.unlink(dirty)
