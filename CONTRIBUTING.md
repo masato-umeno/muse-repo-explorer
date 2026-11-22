@@ -54,10 +54,17 @@ Also recommended:
 sh tests/e2e.sh
 ```
 
-The end-to-end test runs offline against temporary repositories. It covers the refresh and
-sync cycle, the git hooks, the exclusion of symbolic link targets and excluded files, escaping
-in the single-file page, and the refusal to write into an unignored working tree. CI runs it
-on every push together with a syntax check of all scripts.
+The end-to-end test runs offline against temporary repositories. It covers the requirement for
+at least one repository, the refresh and sync cycle with per-repository uploads and deletions,
+the git hooks, the built-in page language, the exclusion of symbolic link targets and excluded
+files, escaping in the single-file page, and the refusal to write into an unignored working tree.
+CI runs it on every push together with a syntax check of all scripts.
+
+To include Mermaid embedding, point the test to a local copy of the pinned build:
+
+```sh
+REPO_EXPLORER_MERMAID_FILE=/path/to/mermaid.min.js sh tests/e2e.sh
+```
 
 ## If sensitive data is pushed
 

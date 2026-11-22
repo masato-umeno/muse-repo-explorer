@@ -8,6 +8,7 @@ This document is for users. Guidance for contributors to this public repository 
 | Data | Where it is stored | Sensitivity |
 | --- | --- | --- |
 | Source code of included repositories | Clones, `snapshot.json`, `dist/`, the Muse space | As sensitive as the repositories themselves |
+| Mermaid build | `vendor/` in the state directory | Third-party code that runs in the page |
 | GitHub credentials | `~/.config/gh/` (managed by gh) | Grants access to every repository the account can reach |
 | Repository names and commit IDs | State files in `~/workspace/repo-explorer` | May reveal private project names |
 
@@ -20,7 +21,10 @@ This document is for users. Guidance for contributors to this public repository 
 - `update_snapshot.py` refuses to write into a git working tree unless `snapshot.json` is
   ignored there, which prevents the snapshot from being committed by mistake.
 - The page makes no external requests and sets `noindex` and `no-referrer`. File content is
-  escaped before display and is never interpreted as markup.
+  escaped before display and is never interpreted as markup. Markdown previews do not render raw
+  HTML, and only `http`, `https` and `mailto` links are made clickable.
+- Mermaid is downloaded once, at a pinned version, and kept only if its SHA-256 matches the value
+  in the CLI. A modified file is rejected. Diagrams are rendered with `securityLevel: 'strict'`.
 - The setup prompt instructs the agent to upload page files by path and not to read them, so
   source code does not pass through the conversation.
 

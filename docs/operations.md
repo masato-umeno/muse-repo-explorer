@@ -2,38 +2,41 @@
 
 In this document, `rx` stands for `python3 ~/workspace/muse-repo-explorer/tools/repo_explorer.py`.
 
-## Refreshing the page
+## Refreshing the space
 
 ```sh
 rx refresh
 ```
 
-The output ends with one of two results:
+The output ends with one of these results:
 
-- `UP_TO_DATE`: the page already shows the latest commits. No action is required.
-- `PAGE_UPDATE_NEEDED`: replace the file or files named in the output, then run
+- `UP_TO_DATE`: the space already shows the latest commits. No action is required.
+- `PAGE_UPDATE_NEEDED`: upload the files listed, delete the files listed for deletion, then run
   `rx mark-synced`.
+- `NO_REPOSITORIES`: no repository is cloned. Clone at least one (see below).
 
-| Page form | File replaced after new commits | Additional file after a tool update |
-| --- | --- | --- |
-| Two-file | `dist/snapshot.json` | `dist/index.html` |
-| Single-file | `dist/explorer.html` | None |
+In the folder form, the files listed are the index (`data/index.json.gz`) and the content files
+of the repositories that changed. The page file (`index.html`) and Mermaid are listed only when
+they have changed. In the single-file form, `explorer.html` is replaced as a whole.
 
 To refresh on a schedule, add these steps to the end of an existing recurring job.
 
 ## Automatic rebuilds
 
-After a `git pull` in any clone (merge or rebase), a git hook rebuilds `snapshot.json` and
-`dist/` in the background and writes its output to `snapshot-hook.log`. The page itself is
-changed only by a refresh.
+After a `git pull` in any clone (merge or rebase), a git hook rebuilds the snapshot and the page
+files in the background and writes its output to `snapshot-hook.log`. The space itself is changed
+only by a refresh.
 
 ## Maintenance
 
 | Task | Procedure |
 | --- | --- |
 | Add a repository | `rx clone owner/repo`, then `rx refresh` |
-| Remove a repository | Delete its clone directory, then `rx refresh` |
+| Remove a repository | Delete its clone directory, then `rx refresh` (its file is listed for deletion) |
+| Use the sample repository | `rx clone masato-umeno/muse-repo-explorer`, then `rx refresh` |
 | Hide files | Add glob patterns to `exclude.txt`, then `rx refresh --no-pull` |
+| Change the page language | `rx setup --lang ko` (or `en`, `ja`, `zh-CN`), then `rx refresh` |
+| Install Mermaid later | `rx setup`, then `rx refresh` |
 | Update the tool | `git -C ~/workspace/muse-repo-explorer pull --ff-only`, then `rx refresh` |
 | Renew the GitHub sign-in | `rx login`, then `rx login --wait` |
 
@@ -46,9 +49,6 @@ and `owner/repo/path`. Lines starting with `#` are ignored.
 your-org/your-repo/secrets/*
 ```
 
-When the tool is updated and the bundled page has changed, `refresh` reports
-`new page version` and names the page file to replace.
-
 ## Troubleshooting
 
 | Output | Cause | Action |
@@ -57,7 +57,9 @@ When the tool is updated and the bundled page has changed, `refresh` reports
 | `skipped (no upstream)` | The current branch has no tracking branch | None required; the branch is captured as it is |
 | `refusing to write: …` | The state directory is inside an unignored git working tree | Use the default location or set `REPO_EXPLORER_HOME` |
 | `could not get a device code` | gh could not reach GitHub | Check network access and run `rx login` again |
-| Page loads slowly | The snapshot is large | Exclude generated directories such as `dist/*` or `vendor/*` |
+| `mermaid: not installed (…)` | The download failed or the checksum did not match | Diagrams are shown as source; run `rx setup` again later |
+| `diagrams: off` in refresh output | Mermaid is not installed | Run `rx setup`, then `rx refresh` |
+| "This browser cannot read the data" on the page | The browser lacks `DecompressionStream` | Update the browser (Safari 16.4 or later, current Chrome or Firefox) |
 
 ## Uninstalling
 
@@ -65,6 +67,6 @@ When the tool is updated and the bundled page has changed, `refresh` reports
 2. Remove `~/workspace/repo-explorer` and `~/workspace/muse-repo-explorer`.
 3. In each clone, remove `.git/hooks/post-merge` and `.git/hooks/post-rewrite`, and restore
    any `*.bak-repo-explorer` backups.
-4. Delete the explorer page in Muse.
+4. Delete the explorer space in Muse.
 
 Clones are ordinary git repositories and can be kept or removed as needed.
