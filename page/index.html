@@ -60,6 +60,10 @@ ul.tree { list-style: none; margin: 0; padding: 0; }
 .match:hover, .match:focus-visible { background: var(--bg2); outline: none; }
 .match .n { flex: none; min-width: 3ch; text-align: right; }
 .match .s { min-width: 0; overflow-wrap: anywhere; white-space: pre-wrap; color: var(--fg); }
+.scope-panel { margin-top: 8px; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg2);
+  max-height: 45vh; overflow: auto; }
+.scope-panel h4 { margin: 8px 4px 2px; font-size: 12px; color: var(--fg2); font-weight: 600; }
+.scope-panel label { display: flex; gap: 8px; align-items: center; padding: 5px 4px; overflow-wrap: anywhere; }
 mark { background: rgba(255, 196, 0, .45); color: inherit; border-radius: 2px; }
 .code .l.hl { background: rgba(255, 196, 0, .22); }
 .empty { color: var(--fg2); padding: 16px 12px; }
@@ -124,7 +128,14 @@ footer { color: var(--fg2); font-size: 12px; padding: 12px; }
   <div class="row seg" id="searchOpts">
     <button class="btn" data-mode="name"></button><button class="btn" data-mode="text"></button>
     <span class="grow"></span>
-    <button class="btn" id="scope" hidden></button>
+    <button class="btn" id="scope" aria-expanded="false" aria-controls="scopePanel"></button>
+  </div>
+  <div id="scopePanel" class="scope-panel" hidden>
+    <div class="row seg" style="margin-top:0">
+      <button class="btn" data-scope="current"></button><button class="btn" data-scope="all"></button>
+      <span class="grow"></span><button class="btn" data-scope="done"></button>
+    </div>
+    <div id="scopeList"></div>
   </div>
 </header>
 <main>
@@ -156,7 +167,8 @@ var I18N = {
     'skipped.other': 'This file cannot be displayed.',
     wrap: 'Wrap',
     hitCount: function (n) { return n + (n === 1 ? ' match' : ' matches'); },
-    modeName: 'Names', modeText: 'Contents', scopeRepo: 'This repository', scopeAll: 'All repositories',
+    modeName: 'Names', modeText: 'Contents', scopeRepo: 'This repository', scopeAll: 'All repositories', done: 'Done',
+    scopePicked: function (n) { return n + ' repositories'; },
     searchText: 'Search inside files', minChars: 'Enter at least 2 characters.',
     searching: function (i, n) { return 'Searching… ' + i + '/' + n; },
     textResults: function (f, m, more) { return m + (more ? '+' : '') + ' matches in ' + f + ' files'; },
@@ -178,7 +190,8 @@ var I18N = {
     'skipped.other': 'このファイルは表示できません。',
     wrap: '折り返し',
     hitCount: function (n) { return n + ' 件'; },
-    modeName: 'ファイル名', modeText: '内容', scopeRepo: 'このリポジトリ', scopeAll: '全リポジトリ',
+    modeName: 'ファイル名', modeText: '内容', scopeRepo: 'このリポジトリ', scopeAll: '全リポジトリ', done: '完了',
+    scopePicked: function (n) { return n + ' リポジトリ'; },
     searchText: 'ファイルの内容を検索', minChars: '2文字以上入力してください。',
     searching: function (i, n) { return '検索中… ' + i + '/' + n; },
     textResults: function (f, m, more) { return f + ' ファイル・' + m + (more ? '+' : '') + ' 件'; },
@@ -200,7 +213,8 @@ var I18N = {
     'skipped.other': '无法显示此文件。',
     wrap: '自动换行',
     hitCount: function (n) { return n + ' 处匹配'; },
-    modeName: '文件名', modeText: '内容', scopeRepo: '当前仓库', scopeAll: '所有仓库',
+    modeName: '文件名', modeText: '内容', scopeRepo: '当前仓库', scopeAll: '所有仓库', done: '完成',
+    scopePicked: function (n) { return n + ' 个仓库'; },
     searchText: '搜索文件内容', minChars: '请输入至少 2 个字符。',
     searching: function (i, n) { return '搜索中… ' + i + '/' + n; },
     textResults: function (f, m, more) { return f + ' 个文件中有 ' + m + (more ? '+' : '') + ' 处匹配'; },
@@ -222,7 +236,8 @@ var I18N = {
     'skipped.other': '이 파일은 표시할 수 없습니다.',
     wrap: '줄바꿈',
     hitCount: function (n) { return n + '건'; },
-    modeName: '파일명', modeText: '내용', scopeRepo: '이 저장소', scopeAll: '모든 저장소',
+    modeName: '파일명', modeText: '내용', scopeRepo: '이 저장소', scopeAll: '모든 저장소', done: '완료',
+    scopePicked: function (n) { return n + '개 저장소'; },
     searchText: '파일 내용 검색', minChars: '2자 이상 입력하십시오.',
     searching: function (i, n) { return '검색 중… ' + i + '/' + n; },
     textResults: function (f, m, more) { return f + '개 파일에서 ' + m + (more ? '+' : '') + '건'; },
@@ -734,9 +749,9 @@ function renderTree() {
 }
 function renderSearch(q) {
   var side = $('side'); side.textContent = '';
-  var needle = q.toLowerCase(), hits = [], LIMIT = 200, more = false;
-  outer: for (var i = 0; i < DATA.repos.length; i++) {
-    var r = DATA.repos[i];
+  var needle = q.toLowerCase(), hits = [], LIMIT = 200, more = false, repos = scopeRepos();
+  outer: for (var i = 0; i < repos.length; i++) {
+    var r = repos[i];
     for (var j = 0; j < r.files.length; j++) {
       if (r.files[j].path.toLowerCase().indexOf(needle) !== -1) {
         if (hits.length >= LIMIT) { more = true; break outer; }
@@ -747,7 +762,7 @@ function renderSearch(q) {
   side.appendChild(el('div', 'empty', hits.length ? t('results')(hits.length, more) : t('noResults')));
   var ul = el('ul', 'tree');
   hits.forEach(function (h) {
-    var li = el('li'), b = fileButton(h[1].path, h[1], 0, h[0], h[0]);
+    var li = el('li'), b = fileButton(h[1].path, h[1], 0, repos.length > 1 ? h[0] : null, h[0]);
     b.classList.add('hit');
     li.appendChild(b); ul.appendChild(li);
   });
@@ -756,7 +771,47 @@ function renderSearch(q) {
 /* Content search. The current repository is usually already loaded (prefetch), so its results
    are immediate. "All repositories" loads repositories one by one and shows results as they
    arrive. Work is split into slices so the page stays responsive. */
-var searchMode = store('rx.smode') === 'text' ? 'text' : 'name', searchAll = false, searchSeq = 0;
+var searchMode = store('rx.smode') === 'text' ? 'text' : 'name', searchSeq = 0;
+/* Search scope, shared by both modes: the selected repository (default), all repositories,
+   or repositories picked from a list. Remembered in localStorage. */
+var scope = { kind: 'current', ids: [] };
+try { var savedScope = JSON.parse(store('rx.scope') || 'null'); if (savedScope && savedScope.kind) scope = savedScope; } catch (e) {}
+function saveScope() { store('rx.scope', JSON.stringify(scope)); }
+function scopeRepos() {
+  if (!DATA) return [];
+  if (scope.kind === 'all' || scope.kind === 'pick') {
+    var list = scope.kind === 'all' ? DATA.repos : DATA.repos.filter(function (r) { return scope.ids.indexOf(r.id) !== -1; });
+    if (list.length) { // the selected repository first: it is most likely already loaded
+      var first = list.filter(function (r) { return r.id === current; });
+      return first.concat(list.filter(function (r) { return r.id !== current; }));
+    }
+  }
+  return byId[current] ? [byId[current]] : [];
+}
+function scopeLabel() {
+  if (scope.kind === 'all') return t('scopeAll');
+  if (scope.kind === 'pick') return t('scopePicked')(scopeRepos().length);
+  return t('scopeRepo');
+}
+function renderScopeList() {
+  var box = $('scopeList'); box.textContent = '';
+  var groups = {};
+  DATA.repos.forEach(function (r) { var o = r.id.split('/')[0]; (groups[o] = groups[o] || []).push(r); });
+  Object.keys(groups).sort().forEach(function (owner) {
+    box.appendChild(el('h4', null, owner));
+    groups[owner].forEach(function (r) {
+      var label = el('label'), cb = el('input');
+      cb.type = 'checkbox'; cb.value = r.id;
+      cb.checked = scope.kind === 'all' || (scope.kind === 'pick' ? scope.ids.indexOf(r.id) !== -1 : r.id === current);
+      label.appendChild(cb); label.appendChild(el('span', null, r.id));
+      box.appendChild(label);
+    });
+  });
+}
+function setScope(kind, ids) {
+  scope = { kind: kind, ids: ids || [] };
+  saveScope(); updateSearchOpts(); runSearch();
+}
 var pendingJump = null;
 var MAX_FILES = 200, MAX_MATCHES = 2000, LINES_PER_FILE = 3;
 function snippet(line, idx, len) {
@@ -777,16 +832,13 @@ function renderContentSearch(q) {
   if (q.length < 2) { side.appendChild(el('div', 'empty', t('minChars'))); return; }
   var status = el('div', 'empty'), ul = el('ul', 'tree');
   side.appendChild(status); side.appendChild(ul);
-  var needle = q.toLowerCase(), repos = searchAll ? DATA.repos.slice() : [byId[current]];
-  if (searchAll) { // current repository first: it is most likely already loaded
-    repos = [byId[current]].concat(repos.filter(function (r) { return r.id !== current; }));
-  }
+  var needle = q.toLowerCase(), repos = scopeRepos(), multi = repos.length > 1;
   var nFiles = 0, nMatches = 0, more = false;
   function done() {
     status.textContent = nFiles ? t('textResults')(nFiles, nMatches, more) : t('noResults');
   }
   function addFile(repo, f, hits, total) {
-    var li = el('li'), b = fileButton(f.path, f, 0, (searchAll ? repo.id + ' · ' : '') + t('hitCount')(total), repo.id);
+    var li = el('li'), b = fileButton(f.path, f, 0, (multi ? repo.id + ' · ' : '') + t('hitCount')(total), repo.id);
     b.classList.add('hit');
     li.appendChild(b);
     hits.forEach(function (h) {
@@ -842,10 +894,15 @@ function updateSearchOpts() {
     btns[i].textContent = t(m === 'name' ? 'modeName' : 'modeText');
     btns[i].setAttribute('aria-pressed', String(m === searchMode));
   }
-  var scope = $('scope');
-  scope.hidden = searchMode !== 'text';
-  scope.textContent = t(searchAll ? 'scopeAll' : 'scopeRepo');
-  scope.setAttribute('aria-pressed', String(searchAll));
+  var sb = $('scope');
+  sb.textContent = scopeLabel() + ' ▾';
+  sb.setAttribute('aria-pressed', String(scope.kind !== 'current'));
+  var pb = $('scopePanel').querySelectorAll('[data-scope]');
+  for (var k = 0; k < pb.length; k++) {
+    var kind = pb[k].getAttribute('data-scope');
+    pb[k].textContent = t(kind === 'current' ? 'scopeRepo' : kind === 'all' ? 'scopeAll' : 'done');
+    if (kind !== 'done') pb[k].setAttribute('aria-pressed', String(scope.kind === kind));
+  }
   $('q').placeholder = t(searchMode === 'text' ? 'searchText' : 'search');
   document.documentElement.style.setProperty('--hh', document.querySelector('header').offsetHeight + 'px');
 }
@@ -982,6 +1039,7 @@ function route() {
     $('repo').value = repoId || '';
     renderMeta();
     if (!$('q').value) renderTree();
+    else if (scope.kind === 'current') runSearch();
     prefetch(byId[repoId]);
   }
   renderFile(path);
@@ -1015,11 +1073,34 @@ loadData().then(function (data) {
   $('searchOpts').addEventListener('click', function (e) {
     var b = e.target.closest ? e.target.closest('button') : null;
     if (!b) return;
-    if (b.id === 'scope') searchAll = !searchAll;
-    else { searchMode = b.getAttribute('data-mode'); store('rx.smode', searchMode); }
+    if (b.id === 'scope') {
+      var panel = $('scopePanel'), open = panel.hidden;
+      if (open) renderScopeList();
+      panel.hidden = !open;
+      b.setAttribute('aria-expanded', String(open));
+      updateSearchOpts();
+      return;
+    }
+    searchMode = b.getAttribute('data-mode'); store('rx.smode', searchMode);
     updateSearchOpts();
     if (document.body.classList.contains('file-open') && window.matchMedia('(max-width: 899px)').matches) go(current, null);
     runSearch();
+  });
+  $('scopePanel').addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('[data-scope]') : null;
+    if (!b) return;
+    var kind = b.getAttribute('data-scope');
+    if (kind === 'done') {
+      $('scopePanel').hidden = true; $('scope').setAttribute('aria-expanded', 'false'); updateSearchOpts(); return;
+    }
+    setScope(kind); renderScopeList();
+  });
+  $('scopePanel').addEventListener('change', function () {
+    var ids = [].map.call($('scopeList').querySelectorAll('input:checked'), function (c) { return c.value; });
+    if (!ids.length) setScope('current');
+    else if (ids.length === DATA.repos.length) setScope('all');
+    else if (ids.length === 1 && ids[0] === current) setScope('current');
+    else setScope('pick', ids);
   });
   window.addEventListener('resize', updateSearchOpts);
   window.addEventListener('hashchange', route);
