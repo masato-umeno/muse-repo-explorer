@@ -1,123 +1,93 @@
 # muse-repo-explorer
 
-Muse（パーソナルAIエージェント）の環境に GitHub リポジトリをローカル clone しておき、
+**English** | [日本語](README.ja.md) | [简体中文](README.zh-CN.md) | [한국어](README.ko.md)
 
-- Muse がソースコードを読むときはローカルから読む（コネクタ経由より速く、トークン消費も少ない）
-- ユーザーがスマホからソースコードを読みたいときは、スナップショットを埋め込んだ「ファイルエクスプローラー」ページ（Muse のスペース）で読む
+Keep local clones of your GitHub repositories inside Muse (your personal AI agent), so that:
 
-という運用の仕組み一式です。
+- **Muse reads code from local files** — faster and far fewer tokens than going through a connector.
+- **You read code from your phone** — in a private "file explorer" page (a Muse space) with a snapshot of the code embedded.
 
-この README の「再現プロンプト」を Muse に貼るだけで、同じ仕組みを別の Muse 環境にも構築できます。
+## Get started: paste this into Muse
 
-## 全体像
-
-```
-GitHub
-│ ghq get / git pull (HTTPS, gh の認証)
-▼
-Muse の環境 (Linux VM)
-├─ ~/ghq/github.com/<owner>/<repo> … ローカル clone 置き場
-├─ tools/update_snapshot.py … 全 clone を pull して snapshot.json を生成
-├─ post-merge フック … pull で進んだら snapshot を自動再生成（トークン消費ゼロ）
-└─ snapshot.json … 全リポジトリのテキストファイル集
-│ 差し替え（変わったときだけ）
-▼
-スペース「リポジトリエクスプローラー」 … スマホでツリーを辿ってコードを読むページ
-```
-
-## なぜこうなっているか（設計判断）
-
-- **ソース読みはローカル clone で。** コネクタ経由だと1ファイルごとにAPIを叩き、中身が丸ごと文脈に入る。ローカルなら grep で当たりを付けてから必要な範囲だけ読めるので、広く探索する作業ほどトークン消費が減る。Issue / PR の確認は従来のコネクタと併用する。
-- **clone は HTTPS + gh 認証で。** Muse の VM 環境では SSH（22番ポート）が通らないことがある。`gh auth login` のデバイスフローで認証し、`gh auth setup-git` で git に橋渡しするのが確実。
-- **ライブ接続ではなくスナップショットで。** Muse の VM は外からの接続を受け付けない（code-server 等を立ててもスマホから届かない）。そこで、ソースをスナップショットとしてページに埋め込む方式にした。代償として、最新化は「スナップショット再生成＋ページのデータ差し替え」という手順になる。
-- **pull にフックして再生成まで自動化。** `post-merge` フックで、pull でリポジトリが進むたびに snapshot を作り直す。ここはスクリプトだけなのでトークンを消費しない。
-- **ページ反映は「先頭コミットが変わったときだけ」。** ページの差し替えにはエージェントの編集作業が要る。週次チェック等の既存の定期ジョブに相乗りし、各リポジトリの HEAD が前回同期時から変わっている場合だけ差し替えることで、無変化の週は消費ゼロにしている。
-
-## プライバシーとセキュリティ（重要）
-
-この仕組みは「プライベートなソースコードを、自分のためだけに読みやすくする」ためのものです。以下を必ず守ってください。
-
-1. **スナップショットを公開しない。** `snapshot.json` には clone したリポジトリのソースコードが丸ごと入ります。これを Git 管理下に置かない（`.gitignore` 必須）、公開リポジトリに含めない、ファイル共有サービスに上げない。
-2. **エクスプローラーのページを公開共有しない。** スペースの公開リンク（public link）を発行すると、リンクを知る全員がソースを読めてしまいます。自分専用のまま使うこと。
-3. **このリポジトリ（仕組み側）には実データを持ち込まない。** 置いてよいのはスクリプト・手順・仕様だけです。実在のリポジトリ名、組織名、個人名、メールアドレス、実スナップショットは含めない。例示が必要な場合は `your-org/your-repo` のようなプレースホルダを使うこと。
-4. **認証情報をチャットやファイルに書かない。** GitHub のパスワードやトークンを、Muse とのチャットに貼らない。認証は `gh auth login` のデバイスフロー（ブラウザでコードを入力する方式）で行い、認証情報は gh の管理下（`~/.config/gh/`）にだけ置く。
-5. **gh のトークンの権限を理解する。** `gh auth login` の標準フローは `repo` スコープ（読み書き）を持ちます。不要になったら `gh auth logout` するか、GitHub の設定（Settings → Applications / Authorized OAuth Apps）から失効させること。
-6. **clone するのは自分が正当な権限を持つリポジトリだけ。** 共有プロジェクトのリポジトリを扱う場合、その取り扱いはプロジェクト側のルールに従うこと。特に、共有相手のソースを本人の許可なく外部に公開しない。
-
-## 再現プロンプト（Muse に貼るだけ）
-
-別の Muse 環境にこの仕組みを作るには、以下をそのまま貼ってください。途中で Muse が確認するのは、(1) GitHub 認証のデバイスコード入力、(2) clone 対象リポジトリの範囲、だけです。
+Copy the whole block below and send it to Muse. Muse will only stop to ask you two things:
+(1) the one-time code for GitHub sign-in, and (2) which repositories to clone.
 
 ````text
+Please set up "muse-repo-explorer" (https://github.com/masato-umeno/muse-repo-explorer) in my environment. Follow the privacy rules at the end strictly.
 
+1. Install tools (under my home directory, so they survive VM replacement)
+   - Download the latest ghq release binary (github.com/x-motemen/ghq) to ~/.local/bin/ghq.
+   - Download the latest gh (GitHub CLI) release binary (github.com/cli/cli) to ~/.local/bin/gh.
+   - Check both with --version.
 
-GitHub リポジトリ「muse-repo-explorer」（この README があるリポジトリ）の仕組みを、私の環境に再現してください。手順は以下です。プライバシーのルール（後述）を厳守してください。
+2. GitHub sign-in (device flow, HTTPS only)
+   - Run `gh auth login --hostname github.com --git-protocol https --web`.
+   - Show me the one-time code and https://github.com/login/device, then wait until I approve it in my browser.
+   - Then report the account name from `gh auth status` and run `gh auth setup-git`.
+   - Do not use SSH. Never ask me to paste a password or token.
 
-1. ツールのインストール（ホームディレクトリ配下に置くこと。VM が入れ替わっても残る場所にする）
-- ghq の最新リリースバイナリを GitHub の x-motemen/ghq リリースから取得し、~/.local/bin/ghq に配置する。
-- gh（GitHub CLI）の最新リリースバイナリを GitHub の cli/cli リリースから取得し、~/.local/bin/gh に配置する。
-- それぞれ --version で動作確認する。
+3. Clone my repositories
+   - List the repositories I can access (`gh repo list`, including my organizations), ask me which ones to clone, then run `ghq get <owner>/<repo>` for each.
+   - Skip archived repositories unless I ask for them.
 
-2. GitHub 認証（デバイスフロー）
-- `gh auth login --hostname github.com --git-protocol https --web` を実行する。
-- 表示されるワンタイムコードと https://github.com/login/device を私に見せて、私がブラウザで入力・承認するまで待つ。
-- 完了後、`gh auth status` でログイン中のアカウント名を報告し、`gh auth setup-git` を実行する。
-- SSH は使わない（HTTPS のみ）。パスワードやトークンをチャットで聞いたり貼らせたりしないこと。
+4. Install the snapshot tools
+   - Run `ghq get https://github.com/masato-umeno/muse-repo-explorer`.
+   - Copy everything in its tools/ directory to ~/workspace/repo-explorer/ (NOT inside any git repository) and make the scripts executable.
+   - Run `python3 ~/workspace/repo-explorer/update_snapshot.py` and confirm snapshot.json is created.
+   - Ask me whether any files should be hidden from the page (for example `.env*`, `*.pem`, `secrets/*`). If so, write those globs to ~/workspace/repo-explorer/exclude.txt and run update_snapshot.py again.
 
-3. 対象リポジトリの clone
-- `gh repo list` 等で私がアクセスできるリポジトリを確認し、clone 対象の範囲（個人リポジトリ／所属組織のリポジトリ）を私に確認してから、`ghq get <owner>/<repo>` で取得する。
-- アーカイブ済みリポジトリは、特に希望がなければ対象外にする。
+5. Install the pull hooks
+   - Run `~/workspace/repo-explorer/install-hooks.sh`.
+   - Pull one repository, then confirm snapshot.json was regenerated.
 
-4. スナップショット生成ツールの配置
-- このリポジトリ自体を `ghq get <このリポジトリの owner>/muse-repo-explorer` で取得する。
-- その tools/ の中身（update_snapshot.py、on-pull.sh、install-hooks.sh）を ~/workspace/repo-explorer/ にコピーし、スクリプトに実行権限を付ける。
-- `python3 ~/workspace/repo-explorer/update_snapshot.py` を実行し、snapshot.json が生成されることを確認する。
+6. Create the explorer page (a Muse space)
+   - Build it as specified in docs/explorer-page-spec.md of that repository. Keep snapshot.json as a single separate asset so the page can be refreshed by replacing it.
+   - Use my language for the page UI.
+   - Keep the page private. Never create a public link.
 
-5. pull フックの導入
-- `~/workspace/repo-explorer/install-hooks.sh` を実行し、ghq 配下の全 clone に post-merge フックを入れる。
-- フックを1回手動で実行し、snapshot.json が再生成され、~/workspace/repo-explorer/.snapshot-dirty フラグが立つことを確認する。
+7. Refreshing
+   - When I say "refresh the explorer": run update_snapshot.py, then sync_status.py. Only if sync_status.py exits with code 10, replace the page's snapshot asset and then run `sync_status.py --mark`.
+   - Optional: if I already have a recurring job (such as a weekly check), you may append this refresh step to it without reporting in chat.
 
-6. 閲覧ページ（スペース）の作成
-- このリポジトリの docs/explorer-page-spec.md の仕様に従い、Muse のスペース（Web アーティファクト）としてファイルエクスプローラーを作成する。データは snapshot.json を単一アセットとして分離し、差し替えだけで最新化できる構造にすること。
-- ページは公開共有しないこと（public link を発行しない）。
+8. Report
+   - The output of `ghq list`, the snapshot size, the page you created, and anything that failed with the reason.
 
-7. 最新化の運用
-- 手動：私が「最新化して」と言ったら、update_snapshot.py を実行し、各リポジトリの HEAD が前回同期時（~/workspace/repo-explorer/.page-synced-heads）と変わっている場合だけ、ページのデータを差し替えて.page-synced-heads を更新する。
-- 任意：既存の週次チェック等の定期ジョブがある場合は、その手順の最後に上記の最新化ステップを相乗りさせてもよい（チャット報告は不要）。
-
-8. 完了報告
-- ghq list の結果、snapshot のサイズ、ページの作成結果、失敗したものがあればその理由をまとめて報告する。
-
-
-- snapshot.json を Git 管理下に置かない。公開リポジトリや共有サービスに上げない。
-- 閲覧ページを公開共有しない。
-- 認証情報（パスワード、トークン）をチャット・ファイル・ログに残さない。
-- clone 対象は、私が正当な権限を持つリポジトリのみ。
+Privacy rules:
+- Never put snapshot.json under git, in a public repository, or on a file-sharing service.
+- Never share the explorer page publicly.
+- Never write credentials (passwords, tokens) to chat, files or logs.
+- Only clone repositories I am legitimately allowed to access.
 ````
 
-## 手動セットアップ（人／Claude Code 向け）
+## Before you start — three rules
 
-プロンプトを使わず自分で入れる場合は、上記の再現プロンプトの手順 1〜5 をそのまま実行すれば、ページ作成以外の部分が再現できます。ページ部分は `docs/explorer-page-spec.md` を参照してください。
+1. **The snapshot is your full source code.** Keep `snapshot.json` out of git and out of anything shared.
+2. **Keep the explorer page private.** A public link lets anyone with the link read your code.
+3. **Sign in with the device flow only.** Never paste a GitHub password or token into a chat.
 
-## ファイル構成
+Details: [docs/security.md](docs/security.md)
 
+## Documentation
+
+| Document | What it covers |
+| --- | --- |
+| [How it works](docs/design.md) | Architecture and design decisions |
+| [Security & privacy](docs/security.md) | Rules for users, and the safety checks for this public repository |
+| [Manual setup](docs/manual-setup.md) | Setting it up yourself (or with Claude Code) without the prompt |
+| [Operations](docs/operations.md) | Refreshing, hooks, excluding files, uninstalling |
+| [Explorer page spec](docs/explorer-page-spec.md) | Snapshot format and UI requirements for the page |
+
+## Contributing
+
+This repository is **public**. Before your first commit, run:
+
+```sh
+sh scripts/install-dev-hooks.sh
 ```
-.
-├─ README.md … このファイル（仕組みの説明と再現プロンプト）
-├─ tools/
-│ ├─ update_snapshot.py … 全 clone を pull して snapshot.json を再生成
-│ ├─ on-pull.sh … post-merge フックの本体（再生成＋フラグ立て）
-│ └─ install-hooks.sh … ghq 配下の全 clone にフックを入れる
-└─ docs/
-└─ explorer-page-spec.md … 閲覧ページのデータ形式と UI 仕様
-```
 
-## 運用メモ
+It blocks snapshots, logs, tokens, private e-mail addresses and the real names you list in
+your private denylist. CI runs the same check on every push. See [docs/security.md](docs/security.md#for-contributors).
 
-- 最新化のコスト：snapshot 再生成はスクリプト処理のみ（数十秒、トークン消費なし）。ページ差し替えは HEAD が変わったときだけ。
-- フックは clone ごとに `.git/hooks/` へ入るため、clone し直したら `install-hooks.sh` を再実行する。
-- gh の認証をやめる場合は `gh auth logout`。clone したリポジトリは通常の git リポジトリなので、そのまま消せばよい。
+## License
 
-## ライセンス
-
-MIT License（LICENSE を参照）。ただし上記「プライバシーとセキュリティ」の運用ルールは、利用者各自の環境で守るべき前提として読んでください。
+MIT — see [LICENSE](LICENSE).
