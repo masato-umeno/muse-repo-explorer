@@ -69,6 +69,11 @@ instructions only tell Muse to run `next` repeatedly. `next` inspects the curren
 logic is in tested code rather than in a long prompt, and the same instructions serve both the
 first setup and later refreshes.
 
+**Questions by reference.** When the user asks Muse about code from the explorer, the message
+names the repository, commit, file and line range and gives the command to read them from the
+local clone. Muse reads only those lines, and the code does not have to pass through the
+conversation.
+
 **Change detection in scripts.** Whether the space needs updating, and which files, is decided by
 the CLI, not by the agent. In a period without new commits, a refresh costs one command and one
 line of output.
@@ -84,4 +89,5 @@ line of output.
 | Interpreting results | Output limited to a few lines; per-repository lines appear only on failure |
 | Deciding whether to update | Determined by `refresh` |
 | Updating the space | Only the index and the files of changed repositories are uploaded |
+| Asking about code | The explorer sends a reference and a read command, not the code |
 | Rebuilding after a pull | Performed by git hooks without involving the agent |
