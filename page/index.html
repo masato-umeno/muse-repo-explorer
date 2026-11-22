@@ -222,7 +222,7 @@ var I18N = {
     title: 'Repository Viewer', search: 'Search files in all repositories', snapshot: 'Snapshot',
     copy: 'Copy', copied: 'Copied', back: 'Back', loading: 'Loading…',
     loadError: 'Could not load the data.', unsupported: 'This browser cannot read the data. Please update it.', noRepos: 'No repositories in the snapshot.',
-    noResults: 'No matching files.', results: function (n, more) { return n + (more ? '+' : '') + ' files'; },
+    noResults: 'No matching files.', results: function (n, more) { return n + (more ? '+' : '') + (n === 1 && !more ? ' file' : ' files'); },
     empty: 'No files', pick: 'Select a file from the tree.', lines: 'lines',
     'skipped.binary': 'Binary file — cannot be displayed.',
     'skipped.large': 'File too large to display.',
@@ -248,7 +248,9 @@ var I18N = {
     scopePicked: function (n) { return n + ' repositories'; },
     searchText: 'Search inside files', minChars: 'Enter at least 2 characters.',
     searching: function (i, n) { return 'Searching… ' + i + '/' + n; },
-    textResults: function (f, m, more) { return m + (more ? '+' : '') + ' matches in ' + f + ' files'; },
+    textResults: function (f, m, more) {
+      return m + (more ? '+' : '') + (m === 1 && !more ? ' match' : ' matches') + ' in ' + f + (f === 1 ? ' file' : ' files');
+    },
     preview: 'Preview', diagramUnavailable: 'Diagrams cannot be rendered on this page. Showing the source.',
     diagramError: 'This diagram could not be rendered.',
     noHighlight: 'Large file: shown without colors.'
