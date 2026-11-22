@@ -6,9 +6,9 @@ Usage:
 
 Environment:
     GHQ_ROOT           ghq root (default: output of `ghq root`, else ~/ghq)
-    REPO_EXPLORER_HOME output directory (default: ~/workspace/repo-explorer)
+    REPO_VIEWER_HOME output directory (default: ~/workspace/repo-viewer)
 
-Output: $REPO_EXPLORER_HOME/snapshot.json
+Output: $REPO_VIEWER_HOME/snapshot.json
 
 Rules:
 - Contents are read from the HEAD commit, not the working tree, so uncommitted
@@ -17,7 +17,7 @@ Rules:
 - Binary files and files over 300 KB carry no `content`; they get `skipped`
   ("binary" / "large" / "symlink" / "submodule" / "excluded") so the tree can
   still show them.
-- Globs listed in $REPO_EXPLORER_HOME/exclude.txt (e.g. `*.pem`, `.env*`,
+- Globs listed in $REPO_VIEWER_HOME/exclude.txt (e.g. `*.pem`, `.env*`,
   `your-org/your-repo/secrets/*`) are matched against the in-repo path, the
   file name and `owner/repo/path`; matching files carry no content.
 - If any HEAD changed, .snapshot-dirty is created.
@@ -38,7 +38,7 @@ MAX_FILE = 300_000
 SNIFF_BYTES = 8192
 
 # Tells on-pull.sh not to regenerate while this script itself is pulling.
-NO_HOOK_ENV = 'REPO_EXPLORER_NO_HOOK'
+NO_HOOK_ENV = 'REPO_VIEWER_NO_HOOK'
 
 
 def default_ghq_root():
@@ -53,7 +53,7 @@ def default_ghq_root():
 
 def home_dir():
     return os.environ.get(
-        'REPO_EXPLORER_HOME', os.path.expanduser('~/workspace/repo-explorer'))
+        'REPO_VIEWER_HOME', os.path.expanduser('~/workspace/repo-viewer'))
 
 
 def git(d, *args):
@@ -212,7 +212,7 @@ def unsafe_output_dir(out_dir):
         return None
     return (f'refusing to write: {out_dir} is inside the git work tree {top} '
             'and snapshot.json is not ignored there. Use a directory outside any '
-            'repository (default: ~/workspace/repo-explorer) or add it to .gitignore.')
+            'repository (default: ~/workspace/repo-viewer) or add it to .gitignore.')
 
 
 def main(argv=None):

@@ -25,7 +25,7 @@ Muse 会读取 [MUSE_SETUP.md](MUSE_SETUP.md)，之后由工具本身逐步引�
 
 - **更新页面：** 请 Muse "更新查看器页面"，或再次发送搭建用的那一行。只有在仓库有新提交时才会更新空间，并且只上传相应仓库的文件。
 - **添加仓库：** 请 Muse 克隆相应仓库，然后执行更新。
-- **隐藏文件：** 在 `~/workspace/repo-explorer/exclude.txt` 中写入 glob 模式（例如 `.env*`、`*.pem`）。详见[运维](docs/operations.md)。
+- **隐藏文件：** 在 `~/workspace/repo-viewer/exclude.txt` 中写入 glob 模式（例如 `.env*`、`*.pem`）。详见[运维](docs/operations.md)。
 
 ## 安全
 

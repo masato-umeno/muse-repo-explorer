@@ -12,8 +12,7 @@ Checks:
   4. E-mail addresses other than GitHub noreply and example.* placeholders.
   5. Files larger than 200 KB.
   6. Your private denylist (real org / repo / person names), read from
-     ~/.config/muse-repo-viewer/denylist.txt  (one word per line, '#' comments;
-     ~/.config/muse-repo-explorer/denylist.txt from before the rename is also read).
+     ~/.config/muse-repo-viewer/denylist.txt  (one word per line, '#' comments).
      That file lives OUTSIDE the repo on purpose -- never commit it.
 
 Exit code 1 if anything is found. Fix the finding; do not bypass with --no-verify.
@@ -32,7 +31,7 @@ FORBIDDEN_NAMES = [
     'snapshot*.json', '*.log', '.page-state.json', '.page-lang', '.snapshot-dirty',
     '.snapshot.lock', 'exclude.txt', 'denylist.txt', '.env', '.env.*',
     '*.pem', '*.key', '*.p12', '*.pfx', 'id_rsa*', 'id_ed25519*', 'hosts.yml',
-    '*.bak-repo-explorer',
+    '*.bak-repo-viewer',
 ]
 
 SECRET_PATTERNS = {
@@ -50,9 +49,7 @@ EMAIL_OK = re.compile(
     r'(@users\.noreply\.github\.com|@example\.(com|org|net)|@anthropic\.com)$', re.I)
 SNAPSHOT_SHAPE = re.compile(r'"generated_at".{0,200}"repos"\s*:\s*\[\s*\{\s*"id"', re.S)
 
-DENYLISTS = [os.path.expanduser('~/.config/muse-repo-viewer/denylist.txt'),
-             # location used before the repository was renamed; still read
-             os.path.expanduser('~/.config/muse-repo-explorer/denylist.txt')]
+DENYLIST = os.path.expanduser('~/.config/muse-repo-viewer/denylist.txt')
 
 
 def git(*args, binary=False):
@@ -76,14 +73,11 @@ def read(path, staged):
 
 
 def load_denylist():
-    words = []
-    for path in DENYLISTS:
-        try:
-            with open(path, encoding='utf-8') as fh:
-                words += [w.strip() for w in fh if w.strip() and not w.startswith('#')]
-        except OSError:
-            pass
-    return words
+    try:
+        with open(DENYLIST, encoding='utf-8') as fh:
+            return [w.strip() for w in fh if w.strip() and not w.startswith('#')]
+    except OSError:
+        return []
 
 
 def main(argv=None):

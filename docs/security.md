@@ -10,7 +10,7 @@ This document is for users. Guidance for contributors to this public repository 
 | Source code of included repositories | Clones, `snapshot.json`, `dist/`, the Muse space | As sensitive as the repositories themselves |
 | Mermaid build | `vendor/` in the state directory | Third-party code that runs in the page |
 | GitHub credentials | `~/.config/gh/` (managed by gh) | Grants access to every repository the account can reach |
-| Repository names and commit IDs | State files in `~/workspace/repo-explorer` | May reveal private project names |
+| Repository names and commit IDs | State files in `~/workspace/repo-viewer` | May reveal private project names |
 
 ## Built-in safeguards
 

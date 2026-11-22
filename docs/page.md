@@ -11,7 +11,7 @@ for those who want to modify or port it.
 | Form | Files | Uploaded on refresh |
 | --- | --- | --- |
 | Folder (preferred) | Everything under `dist/site/` | The index and the content files of changed repositories |
-| Single-file | `dist/explorer.html` | The whole file |
+| Single-file | `dist/viewer.html` | The whole file |
 
 Layout of the folder form:
 

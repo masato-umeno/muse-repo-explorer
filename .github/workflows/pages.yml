@@ -31,13 +31,13 @@ jobs:
           mkdir -p "$HOME_DEMO/ghq/github.com/masato-umeno"
           git clone -q --depth 1 "file://$GITHUB_WORKSPACE" "$HOME_DEMO/ghq/github.com/masato-umeno/muse-repo-viewer"
           # HOME points at a scratch directory so the demo shows "~/ghq/..." paths.
-          export HOME="$HOME_DEMO" GHQ_ROOT="$HOME_DEMO/ghq" REPO_EXPLORER_HOME="$RUNNER_TEMP/rx"
+          export HOME="$HOME_DEMO" GHQ_ROOT="$HOME_DEMO/ghq" REPO_VIEWER_HOME="$RUNNER_TEMP/rx"
           # setup installs the checksum-verified Mermaid build; ghq/gh are not needed for the demo.
-          python3 tools/repo_explorer.py setup --lang auto || true
-          python3 tools/repo_explorer.py build
+          python3 tools/repo_viewer.py setup --lang auto || true
+          python3 tools/repo_viewer.py build
           mkdir -p _site
           cp -R site/. _site/
-          cp -R "$REPO_EXPLORER_HOME/dist/site" _site/demo
+          cp -R "$REPO_VIEWER_HOME/dist/site" _site/demo
           touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:

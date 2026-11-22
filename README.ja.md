@@ -25,7 +25,7 @@ Muse は [MUSE_SETUP.md](MUSE_SETUP.md) を読み、その後はツール自体�
 
 - **ページの更新：** Muse に「ビューアを最新化して」と依頼するか、セットアップの1行を再送信します。スペースが更新されるのは新しいコミットがあった場合だけで、アップロードされるのは該当リポジトリのファイルのみです。
 - **リポジトリの追加：** Muse に clone を依頼したうえで、最新化します。
-- **ファイルの非表示：** `~/workspace/repo-explorer/exclude.txt` に glob パターン（例：`.env*`、`*.pem`）を記述します。詳しくは[運用](docs/operations.md)を参照してください。
+- **ファイルの非表示：** `~/workspace/repo-viewer/exclude.txt` に glob パターン（例：`.env*`、`*.pem`）を記述します。詳しくは[運用](docs/operations.md)を参照してください。
 
 ## セキュリティ
 

@@ -17,7 +17,7 @@ prints the one action required at each point.
 
 ```sh
 git clone https://github.com/masato-umeno/muse-repo-viewer ~/workspace/muse-repo-viewer
-alias rx='python3 ~/workspace/muse-repo-viewer/tools/repo_explorer.py'
+alias rx='python3 ~/workspace/muse-repo-viewer/tools/repo_viewer.py'
 ```
 
 1. Install the required tools and set the page language (`en`, `ja`, `zh-CN` or `ko`):
@@ -49,8 +49,8 @@ alias rx='python3 ~/workspace/muse-repo-viewer/tools/repo_explorer.py'
    rx refresh
    ```
 
-5. Create a private Muse space from `~/workspace/repo-explorer/dist/site/` (keeping the `data/`
-   folder) or, if a space can hold only one HTML file, from `dist/explorer.html`. See
+5. Create a private Muse space from `~/workspace/repo-viewer/dist/site/` (keeping the `data/`
+   folder) or, if a space can hold only one HTML file, from `dist/viewer.html`. See
    [Viewer page](page.md#delivery). Then record the form used:
 
    ```sh

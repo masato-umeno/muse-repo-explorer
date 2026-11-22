@@ -25,7 +25,7 @@ Muse는 [MUSE_SETUP.md](MUSE_SETUP.md)를 읽은 뒤, 도구 자체의 안내에
 
 - **페이지 최신화:** Muse에 "뷰어 최신화해 줘"라고 요청하거나 설치용 한 줄을 다시 보냅니다. 새 커밋이 있을 때만 스페이스가 갱신되며, 해당 저장소의 파일만 업로드됩니다.
 - **저장소 추가:** Muse에 clone을 요청한 뒤 최신화합니다.
-- **파일 숨기기:** `~/workspace/repo-explorer/exclude.txt`에 glob 패턴(예: `.env*`, `*.pem`)을 적습니다. 자세한 내용은 [운영](docs/operations.md)을 참고하십시오.
+- **파일 숨기기:** `~/workspace/repo-viewer/exclude.txt`에 glob 패턴(예: `.env*`, `*.pem`)을 적습니다. 자세한 내용은 [운영](docs/operations.md)을 참고하십시오.
 
 ## 보안
 

@@ -43,7 +43,7 @@ The line makes Muse follow instructions stored in this repository. To use a fixe
   repository has new commits, and only the files of those repositories are uploaded.
 - **Adding repositories:** ask Muse to clone them, then refresh.
 - **Hiding files:** list glob patterns (for example `.env*` or `*.pem`) in
-  `~/workspace/repo-explorer/exclude.txt`. See [Operations](docs/operations.md).
+  `~/workspace/repo-viewer/exclude.txt`. See [Operations](docs/operations.md).
 
 ## Security
 

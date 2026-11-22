@@ -37,12 +37,10 @@ agree.
 
 ## Steps
 
-1. Get the tool. The tool folder is `~/workspace/muse-repo-viewer`, or
-   `~/workspace/muse-repo-explorer` if only that one exists (installed before the repository was
-   renamed; keep using it). If the tool folder exists, run `git -C <tool folder> pull --ff-only`.
-   Otherwise run
+1. Get the tool. If `~/workspace/muse-repo-viewer` exists, run
+   `git -C ~/workspace/muse-repo-viewer pull --ff-only`. Otherwise run
    `git clone https://github.com/masato-umeno/muse-repo-viewer ~/workspace/muse-repo-viewer`.
-2. Run `python3 <tool folder>/tools/repo_explorer.py next`.
+2. Run `python3 ~/workspace/muse-repo-viewer/tools/repo_viewer.py next`.
 3. Do exactly what the line starting with `NEXT` says, then run `next` again.
    Repeat until the output starts with `DONE`, then follow the `DONE` instructions.
    If the output starts with `STOP`, report it to the user and stop.

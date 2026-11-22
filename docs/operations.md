@@ -1,6 +1,6 @@
 # Operations
 
-In this document, `rx` stands for `python3 ~/workspace/muse-repo-viewer/tools/repo_explorer.py`.
+In this document, `rx` stands for `python3 ~/workspace/muse-repo-viewer/tools/repo_viewer.py`.
 
 ## Refreshing the space
 
@@ -17,7 +17,7 @@ The output ends with one of these results:
 
 In the folder form, the files listed are the index (`data/index.json.gz`) and the content files
 of the repositories that changed. The page file (`index.html`) and Mermaid are listed only when
-they have changed. In the single-file form, `explorer.html` is replaced as a whole.
+they have changed. In the single-file form, `viewer.html` is replaced as a whole.
 
 To refresh on a schedule, add these steps to the end of an existing recurring job.
 
@@ -67,7 +67,7 @@ your-org/your-repo/secrets/*
 | --- | --- | --- |
 | `pull failed: …` | The clone has local commits or has diverged from its upstream | Resolve it in that clone; other repositories are still processed |
 | `skipped (no upstream)` | The current branch has no tracking branch | None required; the branch is captured as it is |
-| `refusing to write: …` | The state directory is inside an unignored git working tree | Use the default location or set `REPO_EXPLORER_HOME` |
+| `refusing to write: …` | The state directory is inside an unignored git working tree | Use the default location or set `REPO_VIEWER_HOME` |
 | Muse pauses and asks whether to continue | Its safety settings ask for confirmation before a step such as creating the space | Reply that it may go ahead; the setup continues from the same step |
 | `could not get a device code` | gh could not reach GitHub | Check network access and run `rx login` again |
 | `mermaid: not installed (…)` | The download failed or the checksum did not match | Diagrams are shown as source; run `rx setup` again later |
@@ -77,10 +77,9 @@ your-org/your-repo/secrets/*
 ## Uninstalling
 
 1. Run `gh auth logout`.
-2. Remove `~/workspace/repo-explorer` and `~/workspace/muse-repo-viewer` (or
-   `~/workspace/muse-repo-explorer` for installs from before the rename).
+2. Remove `~/workspace/repo-viewer` and `~/workspace/muse-repo-viewer`.
 3. In each clone, remove `.git/hooks/post-merge` and `.git/hooks/post-rewrite`, and restore
-   any `*.bak-repo-explorer` backups.
+   any `*.bak-repo-viewer` backups.
 4. Delete the viewer space in Muse.
 
 Clones are ordinary git repositories and can be kept or removed as needed.

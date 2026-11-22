@@ -5,8 +5,8 @@
 | Component | Location | Role |
 | --- | --- | --- |
 | Clones | `~/ghq/github.com/<owner>/<repo>` | Local copies of the selected repositories, managed by ghq |
-| Tool | `~/workspace/muse-repo-viewer` (`~/workspace/muse-repo-explorer` for installs from before the rename) | This repository: the CLI, hook scripts, the viewer page and the agent instructions (`MUSE_SETUP.md`) |
-| State | `~/workspace/repo-explorer` | Snapshot, built page files, Mermaid, sync state; outside any repository |
+| Tool | `~/workspace/muse-repo-viewer` | This repository: the CLI, hook scripts, the viewer page and the agent instructions (`MUSE_SETUP.md`) |
+| State | `~/workspace/repo-viewer` | Snapshot, built page files, Mermaid, sync state; outside any repository |
 | Viewer space | Muse space | A private page that displays the built files |
 
 ## Data flow
@@ -15,7 +15,7 @@
 flowchart TB
   GH[GitHub] -- "git pull (HTTPS, gh credentials)" --> CL[Clones]
   CL -- "post-merge / post-rewrite hooks" --> SN[snapshot.json]
-  SN --> DI["dist/site/ and dist/explorer.html"]
+  SN --> DI["dist/site/ and dist/viewer.html"]
   DI -- "changed files only, uploaded by Muse" --> SP[Muse space]
   SP -. "Ask Muse: file, lines, commit" .-> MU[Muse]
   MU -- "git show" --> CL

@@ -19,9 +19,7 @@ your organizations, private repository names and colleagues' names) in:
 ~/.config/muse-repo-viewer/denylist.txt
 ```
 
-This file is stored outside the repository so that the list itself is never published. A list kept at
-`~/.config/muse-repo-explorer/denylist.txt` (the location before the repository was renamed) is
-also read.
+This file is stored outside the repository so that the list itself is never published.
 
 ## Safety checks
 
@@ -74,7 +72,7 @@ CI runs it on every push together with a syntax check of all scripts.
 To include Mermaid embedding, point the test to a local copy of the pinned build:
 
 ```sh
-REPO_EXPLORER_MERMAID_FILE=/path/to/mermaid.min.js sh tests/e2e.sh
+REPO_VIEWER_MERMAID_FILE=/path/to/mermaid.min.js sh tests/e2e.sh
 ```
 
 ## If sensitive data is pushed
