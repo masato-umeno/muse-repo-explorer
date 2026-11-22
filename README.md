@@ -1,8 +1,8 @@
-# muse-repo-explorer
+# muse-repo-viewer
 
 **English** | [日本語](README.ja.md) | [简体中文](README.zh-CN.md) | [한국어](README.ko.md)
 
-muse-repo-explorer keeps local clones of your GitHub repositories in the Muse environment and
+muse-repo-viewer keeps local clones of your GitHub repositories in the Muse environment and
 serves them in two ways:
 
 - **To Muse:** source code is read from local files, which is faster than a connector and
@@ -14,15 +14,15 @@ serves them in two ways:
   The page is shown in your language (English, Japanese, Chinese or Korean) and stays fast as
   the number of repositories grows, because each repository's content is loaded only when needed.
 
-Overview and live demo: <https://masato-umeno.github.io/muse-repo-explorer/>
+Overview and live demo: <https://masato-umeno.github.io/muse-repo-viewer/>
 
 ## Setup
 
-Send this line to Muse. It is in English for everyone; Muse keeps replying in the language you
+Copy this line and paste it into Muse. It is in English for everyone; Muse keeps replying in the language you
 normally use with it.
 
 ```text
-Set up muse-repo-explorer for me by following https://github.com/masato-umeno/muse-repo-explorer/blob/main/MUSE_SETUP.md (keep replying in the language we normally use)
+Set up muse-repo-viewer for me by following https://github.com/masato-umeno/muse-repo-viewer/blob/main/MUSE_SETUP.md (keep replying in the language we normally use)
 ```
 
 Muse reads [MUSE_SETUP.md](MUSE_SETUP.md) and is then guided step by step by the tool itself.
@@ -39,15 +39,15 @@ The line makes Muse follow instructions stored in this repository. To use a fixe
 
 ## Usage
 
-- **Updating the page:** ask Muse to "refresh the explorer", or send the setup line again. The space is changed only when a
+- **Updating the page:** ask Muse to "refresh the viewer", or send the setup line again. The space is changed only when a
   repository has new commits, and only the files of those repositories are uploaded.
 - **Adding repositories:** ask Muse to clone them, then refresh.
 - **Hiding files:** list glob patterns (for example `.env*` or `*.pem`) in
-  `~/workspace/repo-explorer/exclude.txt`. See [Operations](docs/operations.md).
+  `~/workspace/repo-viewer/exclude.txt`. See [Operations](docs/operations.md).
 
 ## Security
 
-The snapshot contains the full source code of every included repository. Keep the explorer
+The snapshot contains the full source code of every included repository. Keep the viewer
 page private, never commit or share `snapshot.json`, and sign in only through the device flow.
 See [Security](docs/security.md) for the complete guidance.
 
@@ -60,7 +60,7 @@ See [Security](docs/security.md) for the complete guidance.
 | [Manual setup](docs/manual-setup.md) | Running the setup yourself or with Claude Code |
 | [Operations](docs/operations.md) | Refreshing, maintenance, troubleshooting, uninstalling |
 | [Reference](docs/reference.md) | Commands, configuration, state files, snapshot format |
-| [Explorer page](docs/page.md) | Delivery forms and behavior of the bundled page |
+| [Viewer page](docs/page.md) | Delivery forms and behavior of the bundled page |
 
 ## Contributing
 

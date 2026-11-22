@@ -2,7 +2,7 @@
 
 ## Commands
 
-`tools/repo_explorer.py` provides one command per step. All commands are idempotent.
+`tools/repo_viewer.py` provides one command per step. All commands are idempotent.
 
 | Command | Description | Output |
 | --- | --- | --- |
@@ -42,18 +42,18 @@ Lower-level scripts in `tools/` can also be used on their own:
 | Environment variable | Default | Description |
 | --- | --- | --- |
 | `GHQ_ROOT` | Output of `ghq root`, otherwise `~/ghq` | Location of the clones |
-| `REPO_EXPLORER_HOME` | `~/workspace/repo-explorer` | Location of the snapshot, page files and state |
-| `REPO_EXPLORER_MERMAID_FILE` | Not set | A local `mermaid.min.js` to install instead of downloading it; it must still match the pinned checksum |
+| `REPO_VIEWER_HOME` | `~/workspace/repo-viewer` | Location of the snapshot, page files and state |
+| `REPO_VIEWER_MERMAID_FILE` | Not set | A local `mermaid.min.js` to install instead of downloading it; it must still match the pinned checksum |
 
 ## State files
 
-All files are in `REPO_EXPLORER_HOME`.
+All files are in `REPO_VIEWER_HOME`.
 
 | File | Description |
 | --- | --- |
 | `snapshot.json` | Text content of all included repositories (mode 600) |
-| `dist/site/` | Folder form of the page (see [Explorer page](page.md#delivery)) |
-| `dist/explorer.html` | Single-file form of the page |
+| `dist/site/` | Folder form of the page (see [Viewer page](page.md#delivery)) |
+| `dist/viewer.html` | Single-file form of the page |
 | `vendor/mermaid-<version>.min.js` | Verified Mermaid build |
 | `exclude.txt` | Optional glob patterns for files to hide |
 | `.page-lang` | Initial page language (`en`, `ja`, `zh-CN`, `ko`, or empty for the browser setting) |

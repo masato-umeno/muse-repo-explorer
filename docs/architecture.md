@@ -5,9 +5,9 @@
 | Component | Location | Role |
 | --- | --- | --- |
 | Clones | `~/ghq/github.com/<owner>/<repo>` | Local copies of the selected repositories, managed by ghq |
-| Tool | `~/workspace/muse-repo-explorer` | This repository: the CLI, hook scripts, the explorer page and the agent instructions (`MUSE_SETUP.md`) |
-| State | `~/workspace/repo-explorer` | Snapshot, built page files, Mermaid, sync state; outside any repository |
-| Explorer space | Muse space | A private page that displays the built files |
+| Tool | `~/workspace/muse-repo-viewer` | This repository: the CLI, hook scripts, the viewer page and the agent instructions (`MUSE_SETUP.md`) |
+| State | `~/workspace/repo-viewer` | Snapshot, built page files, Mermaid, sync state; outside any repository |
+| Viewer space | Muse space | A private page that displays the built files |
 
 ## Data flow
 
@@ -15,7 +15,7 @@
 flowchart TB
   GH[GitHub] -- "git pull (HTTPS, gh credentials)" --> CL[Clones]
   CL -- "post-merge / post-rewrite hooks" --> SN[snapshot.json]
-  SN --> DI["dist/site/ and dist/explorer.html"]
+  SN --> DI["dist/site/ and dist/viewer.html"]
   DI -- "changed files only, uploaded by Muse" --> SP[Muse space]
   SP -. "Ask Muse: file, lines, commit" .-> MU[Muse]
   MU -- "git show" --> CL
@@ -23,7 +23,7 @@ flowchart TB
 
 1. `refresh` pulls every clone with `--ff-only`.
 2. The snapshot is built from each repository's `HEAD` commit and written to `snapshot.json`.
-3. The page files are built from the snapshot (see [Explorer page](page.md#delivery)): a small
+3. The page files are built from the snapshot (see [Viewer page](page.md#delivery)): a small
    index, one compressed content file per repository, Mermaid, and the page itself.
 4. The built files are compared with those recorded when the space was last updated. The result
    is either `UP_TO_DATE` or `PAGE_UPDATE_NEEDED` with the exact files to upload or delete.
@@ -74,7 +74,7 @@ instructions only tell Muse to run `next` repeatedly. `next` inspects the curren
 logic is in tested code rather than in a long prompt, and the same instructions serve both the
 first setup and later refreshes.
 
-**Questions by reference.** When the user asks Muse about code from the explorer, the message
+**Questions by reference.** When the user asks Muse about code from the viewer, the message
 names the repository, commit, file and line range and gives the command to read them from the
 local clone. Muse reads only those lines, and the code does not have to pass through the
 conversation.
@@ -94,5 +94,5 @@ line of output.
 | Interpreting results | Output limited to a few lines; per-repository lines appear only on failure |
 | Deciding whether to update | Determined by `refresh` |
 | Updating the space | Only the index and the files of changed repositories are uploaded |
-| Asking about code | The explorer sends a reference and a read command, not the code |
+| Asking about code | The viewer sends a reference and a read command, not the code |
 | Rebuilding after a pull | Performed by git hooks without involving the agent |

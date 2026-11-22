@@ -1,6 +1,6 @@
-# Explorer page
+# Viewer page
 
-The explorer page is bundled as [`page/index.html`](../page/index.html). It is a single HTML file
+The viewer page is bundled as [`page/index.html`](../page/index.html). It is a single HTML file
 with no external dependencies. This document describes how it is delivered and how it behaves,
 for those who want to modify or port it.
 
@@ -11,7 +11,7 @@ for those who want to modify or port it.
 | Form | Files | Uploaded on refresh |
 | --- | --- | --- |
 | Folder (preferred) | Everything under `dist/site/` | The index and the content files of changed repositories |
-| Single-file | `dist/explorer.html` | The whole file |
+| Single-file | `dist/viewer.html` | The whole file |
 
 Layout of the folder form:
 
@@ -133,7 +133,7 @@ shows them as formatted documents. The choice is remembered, so they keep openin
 were last viewed. Supported: headings with anchors, emphasis, inline code,
 fenced code with highlighting, lists including task lists, tables with alignment, block quotes,
 horizontal rules, links and front matter. Links to other files in the repository open them in
-the explorer, and `#anchor` links scroll within the document. Raw HTML is not rendered: tags are
+the viewer, and `#anchor` links scroll within the document. Raw HTML is not rendered: tags are
 removed and their text is kept, and `<script>` and `<style>` elements are removed entirely.
 Images are shown as their alternative text, because the page loads no external resources.
 

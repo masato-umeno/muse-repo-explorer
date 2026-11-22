@@ -3,15 +3,15 @@
 # Each time a pull moves a repository forward, on-pull.sh regenerates the snapshot.
 #
 # - Existing hooks that were not written by this script are backed up to
-#   <hook>.bak-repo-explorer before being replaced (never silently overwritten).
+#   <hook>.bak-repo-viewer before being replaced (never silently overwritten).
 # - Re-running is safe (idempotent).
 #
-# Hooks call on-pull.sh next to this script (override with REPO_EXPLORER_ON_PULL).
+# Hooks call on-pull.sh next to this script (override with REPO_VIEWER_ON_PULL).
 set -eu
 
-MARKER="# installed-by: muse-repo-explorer"
+MARKER="# installed-by: muse-repo-viewer"
 GHQ_ROOT_DIR="${GHQ_ROOT:-$(ghq root 2>/dev/null || echo "$HOME/ghq")}"
-ON_PULL="${REPO_EXPLORER_ON_PULL:-$(cd "$(dirname "$0")" && pwd)/on-pull.sh}"
+ON_PULL="${REPO_VIEWER_ON_PULL:-$(cd "$(dirname "$0")" && pwd)/on-pull.sh}"
 
 if [ ! -x "$ON_PULL" ]; then
     echo "error: $ON_PULL not found or not executable" >&2
@@ -27,7 +27,7 @@ for d in "$GHQ_ROOT_DIR"/*/*/*/; do
     for name in post-merge post-rewrite; do
         hook="$hooks_dir/$name"
         if [ -f "$hook" ] && ! grep -q "$MARKER" "$hook"; then
-            cp "$hook" "$hook.bak-repo-explorer"
+            cp "$hook" "$hook.bak-repo-viewer"
             echo "backed up existing hook: $hook"
         fi
         printf '#!/bin/sh\n%s\nexec "%s" %s "$@"\n' "$MARKER" "$ON_PULL" "$name" > "$hook"

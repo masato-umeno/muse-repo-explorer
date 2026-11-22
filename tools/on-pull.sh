@@ -7,7 +7,7 @@
 # Usage: on-pull.sh <hook-name> [arguments git passed to the hook...]
 
 # When update_snapshot.py itself is pulling, do nothing: it regenerates once at the end.
-[ -n "${REPO_EXPLORER_NO_HOOK:-}" ] && exit 0
+[ -n "${REPO_VIEWER_NO_HOOK:-}" ] && exit 0
 
 # post-rewrite runs for both rebase and amend; only react to rebase (= pull --rebase).
 case "${1:-}" in
@@ -15,7 +15,7 @@ case "${1:-}" in
 esac
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-HOME_DIR="${REPO_EXPLORER_HOME:-$HOME/workspace/repo-explorer}"
+HOME_DIR="${REPO_VIEWER_HOME:-$HOME/workspace/repo-viewer}"
 cd "$HOME_DIR" 2>/dev/null || exit 0
 
 # Inside a hook, GIT_DIR etc. point at the repository being pulled.
@@ -24,6 +24,6 @@ unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_PREFIX GIT_OBJECT_DIRECTORY \
       GIT_ALTERNATE_OBJECT_DIRECTORIES GIT_COMMON_DIR
 
 # Run in the background so the pull is not slowed down; never fail the pull.
-nohup python3 "$SCRIPT_DIR/repo_explorer.py" build \
+nohup python3 "$SCRIPT_DIR/repo_viewer.py" build \
     >> snapshot-hook.log 2>&1 &
 exit 0

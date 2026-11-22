@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
 <meta name="color-scheme" content="light dark">
-<title>Repository Explorer</title>
+<title>Repository Viewer</title>
 <style>
 :root {
   --bg: #ffffff; --bg2: #f5f6f8; --bg3: #eceef2; --fg: #1d2129; --fg2: #5b6270;
@@ -144,7 +144,7 @@ body.hdr-collapsed #hdrRepo { display: block; }
 <body>
 <header>
   <div class="row">
-    <h1 data-i18n="title">Repository Explorer</h1>
+    <h1 data-i18n="title">Repository Viewer</h1>
     <span id="hdrRepo" class="grow"></span>
     <button class="btn" id="gear" aria-haspopup="dialog">⚙</button>
     <button class="btn" id="hdrToggle" aria-expanded="true" aria-controls="hdrBody"></button>
@@ -219,7 +219,7 @@ body.hdr-collapsed #hdrRepo { display: block; }
 /* ---------- i18n ---------- */
 var I18N = {
   en: {
-    title: 'Repository Explorer', search: 'Search files in all repositories', snapshot: 'Snapshot',
+    title: 'Repository Viewer', search: 'Search files in all repositories', snapshot: 'Snapshot',
     copy: 'Copy', copied: 'Copied', back: 'Back', loading: 'Loading…',
     loadError: 'Could not load the data.', unsupported: 'This browser cannot read the data. Please update it.', noRepos: 'No repositories in the snapshot.',
     noResults: 'No matching files.', results: function (n, more) { return n + (more ? '+' : '') + ' files'; },
@@ -254,7 +254,7 @@ var I18N = {
     noHighlight: 'Large file: shown without colors.'
   },
   ja: {
-    title: 'リポジトリエクスプローラー', search: '全リポジトリのファイルを検索', snapshot: 'スナップショット',
+    title: 'リポジトリビューア', search: '全リポジトリのファイルを検索', snapshot: 'スナップショット',
     copy: 'コピー', copied: 'コピーしました', back: '戻る', loading: '読み込み中…',
     loadError: 'データを読み込めませんでした。', unsupported: 'このブラウザではデータを読み込めません。ブラウザを更新してください。', noRepos: 'スナップショットにリポジトリがありません。',
     noResults: '一致するファイルはありません。', results: function (n, more) { return n + (more ? '+' : '') + ' 件'; },
@@ -289,7 +289,7 @@ var I18N = {
     noHighlight: '大きいファイルのため色付けなしで表示しています。'
   },
   'zh-CN': {
-    title: '仓库浏览器', search: '在所有仓库中搜索文件', snapshot: '快照',
+    title: '仓库查看器', search: '在所有仓库中搜索文件', snapshot: '快照',
     copy: '复制', copied: '已复制', back: '返回', loading: '加载中…',
     loadError: '无法加载数据。', unsupported: '此浏览器无法读取数据，请更新浏览器。', noRepos: '快照中没有仓库。',
     noResults: '没有匹配的文件。', results: function (n, more) { return n + (more ? '+' : '') + ' 个文件'; },
@@ -324,7 +324,7 @@ var I18N = {
     noHighlight: '文件较大，未启用语法高亮。'
   },
   ko: {
-    title: '저장소 탐색기', search: '모든 저장소에서 파일 검색', snapshot: '스냅샷',
+    title: '저장소 뷰어', search: '모든 저장소에서 파일 검색', snapshot: '스냅샷',
     copy: '복사', copied: '복사됨', back: '뒤로', loading: '불러오는 중…',
     loadError: '데이터를 불러올 수 없습니다.', unsupported: '이 브라우저에서는 데이터를 읽을 수 없습니다. 브라우저를 업데이트해 주십시오.', noRepos: '스냅샷에 저장소가 없습니다.',
     noResults: '일치하는 파일이 없습니다.', results: function (n, more) { return n + (more ? '+' : '') + '개 파일'; },

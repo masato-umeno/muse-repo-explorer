@@ -15,7 +15,7 @@ snapshot*.json
 .build.lock
 exclude.txt
 denylist.txt
-*.bak-repo-explorer
+*.bak-repo-viewer
 
 # Credentials
 .env

@@ -1,23 +1,23 @@
 #!/usr/bin/env python3
 """One command per step, short output. Designed so an AI agent spends as few tokens as possible.
 
-    python3 repo_explorer.py next                  print the single next action; repeat until DONE
-    python3 repo_explorer.py setup [--lang en|ja|zh-CN|ko|auto]
+    python3 repo_viewer.py next                  print the single next action; repeat until DONE
+    python3 repo_viewer.py setup [--lang en|ja|zh-CN|ko|auto]
                                                    install ghq, gh and Mermaid if missing;
                                                    set the page's initial language;
                                                    check sign-in
-    python3 repo_explorer.py login                 start GitHub device sign-in, print the code
-    python3 repo_explorer.py login --wait          wait for approval, then configure git
-    python3 repo_explorer.py list [--all]          repositories you can clone (compact)
-    python3 repo_explorer.py clone OWNER/REPO ...  clone with ghq and install hooks
-    python3 repo_explorer.py refresh [--no-pull]   pull, snapshot, build the page, list what to upload
-    python3 repo_explorer.py mark-synced [--mode folder|single-file]
+    python3 repo_viewer.py login                 start GitHub device sign-in, print the code
+    python3 repo_viewer.py login --wait          wait for approval, then configure git
+    python3 repo_viewer.py list [--all]          repositories you can clone (compact)
+    python3 repo_viewer.py clone OWNER/REPO ...  clone with ghq and install hooks
+    python3 repo_viewer.py refresh [--no-pull]   pull, snapshot, build the page, list what to upload
+    python3 repo_viewer.py mark-synced [--mode folder|single-file]
                                                    record that the space now shows this build
-    python3 repo_explorer.py status                one-line state
-    python3 repo_explorer.py build                 snapshot + page without pulling (used by hooks)
+    python3 repo_viewer.py status                one-line state
+    python3 repo_viewer.py build                 snapshot + page without pulling (used by hooks)
 
 Every command is idempotent: re-running a finished step is safe and cheap.
-State lives in $REPO_EXPLORER_HOME (default ~/workspace/repo-explorer), outside any repository.
+State lives in $REPO_VIEWER_HOME (default ~/workspace/repo-viewer), outside any repository.
 """
 import base64
 import fcntl
@@ -48,11 +48,11 @@ HOME = update_snapshot.home_dir()
 os.environ['PATH'] = BIN + os.pathsep + os.environ.get('PATH', '')
 DIST = os.path.join(HOME, 'dist')
 SITE = os.path.join(DIST, 'site')
-SINGLE = os.path.join(DIST, 'explorer.html')
+SINGLE = os.path.join(DIST, 'viewer.html')
 STATE = os.path.join(HOME, '.page-state.json')
 LANG_FILE = os.path.join(HOME, '.page-lang')
 
-SAMPLE_REPO = 'masato-umeno/muse-repo-explorer'
+SAMPLE_REPO = 'masato-umeno/muse-repo-viewer'
 # Bump when an existing installation must run `setup` again after updating the tool
 # (for example, a new dependency or a new pinned Mermaid version).
 SETUP_VERSION = '2'
@@ -133,7 +133,7 @@ def install_binary(name):
 
 def install_mermaid():
     """Download the pinned Mermaid build and keep it only if its SHA-256 matches."""
-    local = os.environ.get('REPO_EXPLORER_MERMAID_FILE')  # offline / test source
+    local = os.environ.get('REPO_VIEWER_MERMAID_FILE')  # offline / test source
     if local:
         data = open(local, 'rb').read()
     else:
@@ -155,7 +155,7 @@ def mermaid_ok():
 def gh(*args, **kw):
     exe = find_bin('gh')
     if not exe:
-        raise SystemExit('gh not installed: run `repo_explorer.py setup` first')
+        raise SystemExit('gh not installed: run `repo_viewer.py setup` first')
     return run([exe, *args], **kw)
 
 
@@ -224,7 +224,7 @@ def cmd_setup(args):
             fh.write(SETUP_VERSION)
     user = signed_in_user()
     print(f'github: signed in as {user}' if user
-          else 'github: not signed in -> next: repo_explorer.py login')
+          else 'github: not signed in -> next: repo_viewer.py login')
     return 1 if failed else 0
 
 
@@ -244,7 +244,7 @@ def cmd_login(args):
                 print(f'signed in as {user}; git configured for HTTPS')
                 return 0
             time.sleep(3)
-        print('timed out waiting for approval; run `repo_explorer.py login` again')
+        print('timed out waiting for approval; run `repo_viewer.py login` again')
         return 1
     os.makedirs(HOME, exist_ok=True)
     out = open(log, 'w')
@@ -265,7 +265,7 @@ def cmd_login(args):
         print('could not get a device code: ' + (' / '.join(tail) or 'no output from gh'))
         return 1
     print(f'Open https://github.com/login/device and enter: {code}')
-    print('Then run: repo_explorer.py login --wait')
+    print('Then run: repo_viewer.py login --wait')
     return 0
 
 
@@ -287,7 +287,7 @@ def cloned_ids():
 def cmd_list(args):
     me = signed_in_user()
     if not me:
-        print('not signed in: run `repo_explorer.py login`')
+        print('not signed in: run `repo_viewer.py login`')
         return 1
     show_all = '--all' in args
     have = cloned_ids()
@@ -310,7 +310,7 @@ def cmd_list(args):
     print(f'-- {total} repositories' + ('' if show_all else ' (archived hidden; --all to show)'))
     if total == 0:
         print(f'no repositories available; the sample repository can be used: '
-              f'repo_explorer.py clone {SAMPLE_REPO}')
+              f'repo_viewer.py clone {SAMPLE_REPO}')
     return 0
 
 
@@ -324,11 +324,11 @@ def install_hooks():
 
 def cmd_clone(args):
     if not args:
-        print('usage: repo_explorer.py clone OWNER/REPO ...')
+        print('usage: repo_viewer.py clone OWNER/REPO ...')
         return 2
     exe = find_bin('ghq')
     if not exe:
-        raise SystemExit('ghq not installed: run `repo_explorer.py setup` first')
+        raise SystemExit('ghq not installed: run `repo_viewer.py setup` first')
     have, ok, bad = cloned_ids(), 0, 0
     for rid in args:
         if rid in have:
@@ -352,7 +352,7 @@ def cmd_clone(args):
 #   data/index.json.gz        repository list and file tree, no file content
 #   data/<repo-key>.json.gz   file content of one repository, loaded when it is opened
 #   data/mermaid.js.gz        Mermaid, loaded only when a diagram is shown
-# dist/explorer.html          "single-file" form: the same data embedded (base64 gzip)
+# dist/viewer.html          "single-file" form: the same data embedded (base64 gzip)
 
 def repo_key(repo_id):
     slug = re.sub(r'[^a-z0-9._-]+', '-', repo_id.lower().replace('/', '--')).strip('-')
@@ -449,7 +449,7 @@ def file_hashes():
 def legacy_state():
     """Map the state of an older installation, so that its existing space is updated in place.
 
-    Older versions uploaded index.html + snapshot.json ("two-file") or explorer.html. Every file
+    Older versions uploaded index.html + snapshot.json ("two-file") or viewer.html. Every file
     of the current build is reported as changed, and the old snapshot.json is reported for
     deletion.
     """
@@ -486,7 +486,7 @@ def cmd_build(args):
 
 def no_repositories():
     print('NO_REPOSITORIES: clone at least one repository first.')
-    print(f'If none can be chosen, the sample can be used: repo_explorer.py clone {SAMPLE_REPO}')
+    print(f'If none can be chosen, the sample can be used: repo_viewer.py clone {SAMPLE_REPO}')
     return 3
 
 
@@ -554,16 +554,16 @@ def cmd_refresh(args):
     print('PAGE_UPDATE_NEEDED')
     if status == 'FIRST_TIME':
         print_first_time()
-        print('then run: repo_explorer.py mark-synced --mode folder   (or --mode single-file)')
+        print('then run: repo_viewer.py mark-synced --mode folder   (or --mode single-file)')
         return 0
     print_upload(info)
-    print('then run: repo_explorer.py mark-synced')
+    print('then run: repo_viewer.py mark-synced')
     return 0
 
 
 def cmd_next(args):
     """Print the single next action for the agent. Repeat until it prints DONE."""
-    C = 'python3 ' + os.path.join(TOOLS, 'repo_explorer.py').replace(os.path.expanduser('~'), '~', 1)
+    C = 'python3 ' + os.path.join(TOOLS, 'repo_viewer.py').replace(os.path.expanduser('~'), '~', 1)
     again = f'Then run `{C} next` again.'
     lang_note = " Speak to the user in their usual language, not in English unless that is theirs."
     try:
@@ -599,7 +599,7 @@ def cmd_next(args):
         return info['rc']
     if status == 'FIRST_TIME':
         print('NEXT (4/5 create the space): upload the files below unchanged, by path, without '
-              'opening them, to a new private Muse space named "Repository Explorer" in the '
+              'opening them, to a new private Muse space named "Repository Viewer" in the '
               "user's language. Never create a public link.")
         print_first_time()
         print(f'Then run `{C} mark-synced --mode folder` (or `--mode single-file`). ' + again)
@@ -615,12 +615,12 @@ def cmd_next(args):
           + (f', GitHub account {user}' if user else '') + ').')
     print('Tell the user in at most 3 lines, in their usual language: the account, the number of '
           'repositories, and the space. Remember for later: when the user asks to refresh the '
-          f'explorer, run `git -C {os.path.dirname(TOOLS)} pull --ff-only`, then repeat '
-          f'`{C} next` until it prints DONE. When the user sends a question from the explorer, it '
+          f'viewer, run `git -C {os.path.dirname(TOOLS)} pull --ff-only`, then repeat '
+          f'`{C} next` until it prints DONE. When the user sends a question from the viewer, it '
           'contains a `git -C ... show ...` command: run it to read exactly those lines from the local '
           'clone instead of asking for the code.')
     if not os.path.exists(STAR_NOTE):
-        print('This time only, end with one short line in the same language: if the explorer is '
+        print('This time only, end with one short line in the same language: if the viewer is '
               f'useful, a star on GitHub is welcome (https://github.com/{SAMPLE_REPO}). Do not star '
               'the repository for the user.')
         write_file(STAR_NOTE, b'1')

@@ -11,8 +11,8 @@ cat > "$hooks/pre-commit" <<'EOF'
 exec python3 "$(git rev-parse --show-toplevel)/scripts/check_public_safety.py" --staged
 EOF
 chmod +x "$hooks/pre-commit"
-mkdir -p "$HOME/.config/muse-repo-explorer"
-touch "$HOME/.config/muse-repo-explorer/denylist.txt"
+mkdir -p "$HOME/.config/muse-repo-viewer"
+touch "$HOME/.config/muse-repo-viewer/denylist.txt"
 echo "pre-commit hook installed."
 echo "Add real org / repo / person names that must never be published to:"
-echo "  $HOME/.config/muse-repo-explorer/denylist.txt"
+echo "  $HOME/.config/muse-repo-viewer/denylist.txt"
