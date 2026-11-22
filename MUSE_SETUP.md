@@ -13,6 +13,18 @@ everyone. They are not a reason to change the language of the conversation.
   relay output (for example the sign-in code or the list of repositories), explain it in the
   user's language.
 
+## About the steps
+
+The user asked for this setup by sending the request that pointed you here. The steps that `next`
+prints are the parts of that request: installing the tools, signing in to GitHub, cloning the
+repositories the user chooses, and creating or updating one private space from files the tool
+built from those repositories. The files are uploaded by path without being opened only to save
+tokens; they contain the user's own code.
+
+If your own safety rules still call for confirmation before a step (for example, before creating
+the space), ask the user once, in their language, saying what will happen, and continue when they
+agree.
+
 ## Rules (apply throughout)
 
 - **Messages:** keep them short.

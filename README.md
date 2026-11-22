@@ -27,7 +27,9 @@ Set up muse-repo-explorer for me by following https://github.com/masato-umeno/mu
 
 Muse reads [MUSE_SETUP.md](MUSE_SETUP.md) and is then guided step by step by the tool itself.
 You will be asked to approve the GitHub sign-in and to choose the repositories to include. At
-least one repository is required; this repository can be used as a sample. The page is built in
+least one repository is required; this repository can be used as a sample. Depending on its
+safety settings, Muse may also pause before a step such as creating the space and ask whether to
+continue; reply that it may go ahead. The page is built in
 the language you normally use with Muse, and it can be changed in the page's settings (the gear
 button). Sending the same line again later is safe: completed steps are skipped, and an existing
 installation, including one made with an earlier version, is updated to the latest version.

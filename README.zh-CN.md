@@ -17,7 +17,7 @@ muse-repo-explorer 在 Muse 环境中保存 GitHub 仓库的本地克隆，并�
 Set up muse-repo-explorer for me by following https://github.com/masato-umeno/muse-repo-explorer/blob/main/MUSE_SETUP.md (keep replying in the language we normally use)
 ```
 
-Muse 会读取 [MUSE_SETUP.md](MUSE_SETUP.md)，之后由工具本身逐步引导。过程中需要你批准 GitHub 登录并选择要包含的仓库。至少需要一个仓库，也可以使用本仓库作为示例。页面将以你平时与 Muse 交流所用的语言显示，并且可以随时在页面的设置（齿轮按钮）中更改。之后可以随时再次发送同一行：已完成的步骤会被跳过，现有环境（包括用旧版本搭建的环境）会更新到最新版本。
+Muse 会读取 [MUSE_SETUP.md](MUSE_SETUP.md)，之后由工具本身逐步引导。过程中需要你批准 GitHub 登录并选择要包含的仓库。至少需要一个仓库，也可以使用本仓库作为示例。根据 Muse 的安全设置，它可能会在创建空间等步骤之前暂停并询问是否继续，此时回复“继续”即可。页面将以你平时与 Muse 交流所用的语言显示，并且可以随时在页面的设置（齿轮按钮）中更改。之后可以随时再次发送同一行：已完成的步骤会被跳过，现有环境（包括用旧版本搭建的环境）会更新到最新版本。
 
 这一行会让 Muse 遵循存放在本仓库中的指示。如需固定版本，请将网址中的 `main` 替换为提交 ID 或发布标签。
 
