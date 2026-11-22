@@ -2,6 +2,8 @@
 
 [English](README.md) | [日本語](README.ja.md) | **简体中文** | [한국어](README.ko.md)
 
+https://github.com/user-attachments/assets/88320094-3a39-4f5a-8100-42c470ea2940
+
 muse-repo-viewer 在 Muse 环境中保存 GitHub 仓库的本地克隆，并提供以下两种用途：
 
 - **面向 Muse：** 从本地文件读取源代码，比通过连接器更快，且显著减少 token 消耗。

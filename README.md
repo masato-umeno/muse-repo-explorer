@@ -2,6 +2,8 @@
 
 **English** | [日本語](README.ja.md) | [简体中文](README.zh-CN.md) | [한국어](README.ko.md)
 
+https://github.com/user-attachments/assets/88320094-3a39-4f5a-8100-42c470ea2940
+
 muse-repo-viewer keeps local clones of your GitHub repositories in the Muse environment and
 serves them in two ways:
 

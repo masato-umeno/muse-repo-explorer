@@ -2,6 +2,8 @@
 
 [English](README.md) | [日本語](README.ja.md) | [简体中文](README.zh-CN.md) | **한국어**
 
+https://github.com/user-attachments/assets/88320094-3a39-4f5a-8100-42c470ea2940
+
 muse-repo-viewer는 GitHub 저장소의 로컬 clone을 Muse 환경에 유지하고, 다음 두 가지 용도로 제공합니다.
 
 - **Muse용:** 소스 코드를 로컬 파일에서 읽습니다. 커넥터를 거치는 것보다 빠르며 토큰 사용량도 크게 줄어듭니다.
