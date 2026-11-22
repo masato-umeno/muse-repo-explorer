@@ -16,10 +16,12 @@ Then list, one per line, the real names that must never appear in this repositor
 your organizations, private repository names and colleagues' names) in:
 
 ```
-~/.config/muse-repo-explorer/denylist.txt
+~/.config/muse-repo-viewer/denylist.txt
 ```
 
-This file is stored outside the repository so that the list itself is never published.
+This file is stored outside the repository so that the list itself is never published. A list kept at
+`~/.config/muse-repo-explorer/denylist.txt` (the location before the repository was renamed) is
+also read.
 
 ## Safety checks
 
@@ -52,7 +54,7 @@ Also recommended:
 
 `site/` is the overview page published to GitHub Pages by `.github/workflows/pages.yml`. The
 workflow builds a live demo from this repository itself and publishes it under `demo/`, so the
-demo always shows the current explorer. `site/` is plain HTML with no build step and can also be
+demo always shows the current viewer. `site/` is plain HTML with no build step and can also be
 served by any static host (for example Cloudflare Pages, with `site` as the output directory and
 the demo built the same way). Screenshots in `site/assets/` must show only this repository or
 sample data.

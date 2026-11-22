@@ -52,7 +52,7 @@ All files are in `REPO_EXPLORER_HOME`.
 | File | Description |
 | --- | --- |
 | `snapshot.json` | Text content of all included repositories (mode 600) |
-| `dist/site/` | Folder form of the page (see [Explorer page](page.md#delivery)) |
+| `dist/site/` | Folder form of the page (see [Viewer page](page.md#delivery)) |
 | `dist/explorer.html` | Single-file form of the page |
 | `vendor/mermaid-<version>.min.js` | Verified Mermaid build |
 | `exclude.txt` | Optional glob patterns for files to hide |

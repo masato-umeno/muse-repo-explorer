@@ -1,20 +1,20 @@
-# muse-repo-explorer
+# muse-repo-viewer
 
 [English](README.md) | **日本語** | [简体中文](README.zh-CN.md) | [한국어](README.ko.md)
 
-muse-repo-explorer は、GitHub リポジトリのローカル clone を Muse の環境に保持し、次の2つの用途に提供します。
+muse-repo-viewer は、GitHub リポジトリのローカル clone を Muse の環境に保持し、次の2つの用途に提供します。
 
 - **Muse 向け：** ソースコードをローカルのファイルから読み込みます。コネクタ経由より高速で、トークン消費も大幅に抑えられます。
 - **利用者向け：** clone のスナップショットから、スマートフォンでの閲覧に適した非公開のコードブラウザ（Muse のスペース）を作成します。ファイル名とファイルの内容を検索でき、選択した範囲を質問とともに Muse に渡せます。また、Markdown は整形して表示し、Mermaid の図も描画します。ページは利用者の言語（英語・日本語・中国語・韓国語）で表示され、設定から切り替えられます。各リポジトリの内容は必要になった時点で読み込むため、リポジトリが増えても表示は遅くなりません。
 
-紹介ページとライブデモ：<https://masato-umeno.github.io/muse-repo-explorer/>
+紹介ページとライブデモ：<https://masato-umeno.github.io/muse-repo-viewer/>
 
 ## セットアップ
 
 次の1行を Muse にコピペしてください。英語のままで構いません。Muse はこれまでどおりの言語で応答を続けます。
 
 ```text
-Set up muse-repo-explorer for me by following https://github.com/masato-umeno/muse-repo-explorer/blob/main/MUSE_SETUP.md (keep replying in the language we normally use)
+Set up muse-repo-viewer for me by following https://github.com/masato-umeno/muse-repo-viewer/blob/main/MUSE_SETUP.md (keep replying in the language we normally use)
 ```
 
 Muse は [MUSE_SETUP.md](MUSE_SETUP.md) を読み、その後はツール自体の案内に従って1手順ずつ進めます。途中で求められる操作は、GitHub へのサインインの承認と、対象リポジトリの選択です。リポジトリは少なくとも1つ必要で、このリポジトリをサンプルとして使うこともできます。Muse の安全設定によっては、スペースの作成などの前に、続けてよいか確認されることがあります。その場合は「進めて」と返してください。ページは、普段 Muse と話している言語で表示されます。表示言語は、ページの設定（歯車ボタン）からいつでも変更できます。あとで同じ1行を再送信しても問題ありません。完了済みの手順は省略され、既存の環境（以前の版で構築したものを含む）は最新版に更新されます。
@@ -23,13 +23,13 @@ Muse は [MUSE_SETUP.md](MUSE_SETUP.md) を読み、その後はツール自体�
 
 ## 使い方
 
-- **ページの更新：** Muse に「エクスプローラーを最新化して」と依頼するか、セットアップの1行を再送信します。スペースが更新されるのは新しいコミットがあった場合だけで、アップロードされるのは該当リポジトリのファイルのみです。
+- **ページの更新：** Muse に「ビューアを最新化して」と依頼するか、セットアップの1行を再送信します。スペースが更新されるのは新しいコミットがあった場合だけで、アップロードされるのは該当リポジトリのファイルのみです。
 - **リポジトリの追加：** Muse に clone を依頼したうえで、最新化します。
 - **ファイルの非表示：** `~/workspace/repo-explorer/exclude.txt` に glob パターン（例：`.env*`、`*.pem`）を記述します。詳しくは[運用](docs/operations.md)を参照してください。
 
 ## セキュリティ
 
-スナップショットには、対象リポジトリのソースコードがすべて含まれます。エクスプローラーページは非公開のまま運用し、`snapshot.json` をコミットしたり共有したりしないでください。サインインはデバイスフローでのみ行ってください。詳細は[セキュリティ](docs/security.md)を参照してください。
+スナップショットには、対象リポジトリのソースコードがすべて含まれます。ビューアページは非公開のまま運用し、`snapshot.json` をコミットしたり共有したりしないでください。サインインはデバイスフローでのみ行ってください。詳細は[セキュリティ](docs/security.md)を参照してください。
 
 ## ドキュメント
 
@@ -42,7 +42,7 @@ Muse は [MUSE_SETUP.md](MUSE_SETUP.md) を読み、その後はツール自体�
 | [手動セットアップ](docs/manual-setup.md) | プロンプトを使わずに直接、または Claude Code で構築する手順 |
 | [運用](docs/operations.md) | 最新化、保守、トラブルシューティング、アンインストール |
 | [リファレンス](docs/reference.md) | コマンド、設定、状態ファイル、スナップショット形式 |
-| [エクスプローラーページ](docs/page.md) | 同梱ページの提供形式と動作 |
+| [ビューアページ](docs/page.md) | 同梱ページの提供形式と動作 |
 
 ## コントリビュート
 

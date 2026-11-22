@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pull every repository under ghq and regenerate snapshot.json for the explorer page.
+"""Pull every repository under ghq and regenerate snapshot.json for the viewer page.
 
 Usage:
     python3 update_snapshot.py [--no-pull] [--quiet]

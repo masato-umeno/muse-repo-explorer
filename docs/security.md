@@ -30,7 +30,7 @@ This document is for users. Guidance for contributors to this public repository 
 
 ## Recommendations
 
-1. **Keep the explorer page private.** A public link gives anyone who has it access to the
+1. **Keep the viewer page private.** A public link gives anyone who has it access to the
    code. Do not create one.
 2. **Do not copy `snapshot.json` elsewhere.** Keep it out of git repositories and file-sharing
    services.

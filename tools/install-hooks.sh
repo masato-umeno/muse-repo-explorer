@@ -9,7 +9,8 @@
 # Hooks call on-pull.sh next to this script (override with REPO_EXPLORER_ON_PULL).
 set -eu
 
-MARKER="# installed-by: muse-repo-explorer"
+MARKER="# installed-by: muse-repo-viewer"
+OLD_MARKER="# installed-by: muse-repo-explorer"  # hooks installed before the rename
 GHQ_ROOT_DIR="${GHQ_ROOT:-$(ghq root 2>/dev/null || echo "$HOME/ghq")}"
 ON_PULL="${REPO_EXPLORER_ON_PULL:-$(cd "$(dirname "$0")" && pwd)/on-pull.sh}"
 
@@ -26,7 +27,7 @@ for d in "$GHQ_ROOT_DIR"/*/*/*/; do
     mkdir -p "$hooks_dir"
     for name in post-merge post-rewrite; do
         hook="$hooks_dir/$name"
-        if [ -f "$hook" ] && ! grep -q "$MARKER" "$hook"; then
+        if [ -f "$hook" ] && ! grep -q -e "$MARKER" -e "$OLD_MARKER" "$hook"; then
             cp "$hook" "$hook.bak-repo-explorer"
             echo "backed up existing hook: $hook"
         fi

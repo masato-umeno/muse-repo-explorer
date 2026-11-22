@@ -29,14 +29,14 @@ chmod +x "$HOME/.local/bin/gh" "$HOME/.local/bin/ghq"
 out="$($RX next)"; expect "$out" "NEXT (1/5 install)"   # tools present, language not decided yet
 $RX setup --lang auto >/dev/null 2>&1 || true
 [ -f "$REPO_EXPLORER_HOME/.page-lang" ] && [ ! -s "$REPO_EXPLORER_HOME/.page-lang" ] || fail "--lang auto should record an empty language"
-out="$($RX next)"; expect "$out" "NEXT (2/5 sign in)"; expect "$out" "masato-umeno/muse-repo-explorer"
+out="$($RX next)"; expect "$out" "NEXT (2/5 sign in)"; expect "$out" "masato-umeno/muse-repo-viewer"
 export FAKE_GH_USER=tester
 out="$($RX next)"; expect "$out" "NEXT (3/5 repositories)"
 
 # no repositories yet -> refresh must stop and point to the sample
 set +e; out="$($RX refresh)"; rc=$?; set -e
 [ $rc -eq 3 ] || fail "refresh without repositories should exit 3"
-expect "$out" "NO_REPOSITORIES"; expect "$out" "masato-umeno/muse-repo-explorer"
+expect "$out" "NO_REPOSITORIES"; expect "$out" "masato-umeno/muse-repo-viewer"
 
 # page language is stored for the build
 printf 'ja' > "$REPO_EXPLORER_HOME/.page-lang"

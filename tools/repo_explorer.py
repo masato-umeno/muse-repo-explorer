@@ -52,7 +52,7 @@ SINGLE = os.path.join(DIST, 'explorer.html')
 STATE = os.path.join(HOME, '.page-state.json')
 LANG_FILE = os.path.join(HOME, '.page-lang')
 
-SAMPLE_REPO = 'masato-umeno/muse-repo-explorer'
+SAMPLE_REPO = 'masato-umeno/muse-repo-viewer'
 # Bump when an existing installation must run `setup` again after updating the tool
 # (for example, a new dependency or a new pinned Mermaid version).
 SETUP_VERSION = '2'
@@ -599,7 +599,7 @@ def cmd_next(args):
         return info['rc']
     if status == 'FIRST_TIME':
         print('NEXT (4/5 create the space): upload the files below unchanged, by path, without '
-              'opening them, to a new private Muse space named "Repository Explorer" in the '
+              'opening them, to a new private Muse space named "Repository Viewer" in the '
               "user's language. Never create a public link.")
         print_first_time()
         print(f'Then run `{C} mark-synced --mode folder` (or `--mode single-file`). ' + again)
@@ -615,12 +615,12 @@ def cmd_next(args):
           + (f', GitHub account {user}' if user else '') + ').')
     print('Tell the user in at most 3 lines, in their usual language: the account, the number of '
           'repositories, and the space. Remember for later: when the user asks to refresh the '
-          f'explorer, run `git -C {os.path.dirname(TOOLS)} pull --ff-only`, then repeat '
-          f'`{C} next` until it prints DONE. When the user sends a question from the explorer, it '
+          f'viewer, run `git -C {os.path.dirname(TOOLS)} pull --ff-only`, then repeat '
+          f'`{C} next` until it prints DONE. When the user sends a question from the viewer, it '
           'contains a `git -C ... show ...` command: run it to read exactly those lines from the local '
           'clone instead of asking for the code.')
     if not os.path.exists(STAR_NOTE):
-        print('This time only, end with one short line in the same language: if the explorer is '
+        print('This time only, end with one short line in the same language: if the viewer is '
               f'useful, a star on GitHub is welcome (https://github.com/{SAMPLE_REPO}). Do not star '
               'the repository for the user.')
         write_file(STAR_NOTE, b'1')

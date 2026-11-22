@@ -1,7 +1,7 @@
 name: pages
 
 # Publishes site/ to GitHub Pages, with a live demo built from this repository itself.
-# The demo is rebuilt on every push to main, so it always shows the current explorer.
+# The demo is rebuilt on every push to main, so it always shows the current viewer.
 on:
   push:
     branches: [main]
@@ -29,7 +29,7 @@ jobs:
           set -eu
           export HOME_DEMO="$RUNNER_TEMP/demo-home"
           mkdir -p "$HOME_DEMO/ghq/github.com/masato-umeno"
-          git clone -q --depth 1 "file://$GITHUB_WORKSPACE" "$HOME_DEMO/ghq/github.com/masato-umeno/muse-repo-explorer"
+          git clone -q --depth 1 "file://$GITHUB_WORKSPACE" "$HOME_DEMO/ghq/github.com/masato-umeno/muse-repo-viewer"
           # HOME points at a scratch directory so the demo shows "~/ghq/..." paths.
           export HOME="$HOME_DEMO" GHQ_ROOT="$HOME_DEMO/ghq" REPO_EXPLORER_HOME="$RUNNER_TEMP/rx"
           # setup installs the checksum-verified Mermaid build; ghq/gh are not needed for the demo.

@@ -16,8 +16,8 @@ prints the one action required at each point.
 ## Steps
 
 ```sh
-git clone https://github.com/masato-umeno/muse-repo-explorer ~/workspace/muse-repo-explorer
-alias rx='python3 ~/workspace/muse-repo-explorer/tools/repo_explorer.py'
+git clone https://github.com/masato-umeno/muse-repo-viewer ~/workspace/muse-repo-viewer
+alias rx='python3 ~/workspace/muse-repo-viewer/tools/repo_explorer.py'
 ```
 
 1. Install the required tools and set the page language (`en`, `ja`, `zh-CN` or `ko`):
@@ -40,7 +40,7 @@ alias rx='python3 ~/workspace/muse-repo-explorer/tools/repo_explorer.py'
    ```sh
    rx list
    rx clone your-org/your-repo your-name/another-repo
-   rx clone masato-umeno/muse-repo-explorer        # sample
+   rx clone masato-umeno/muse-repo-viewer        # sample
    ```
 
 4. Build the snapshot and the page files:
@@ -51,7 +51,7 @@ alias rx='python3 ~/workspace/muse-repo-explorer/tools/repo_explorer.py'
 
 5. Create a private Muse space from `~/workspace/repo-explorer/dist/site/` (keeping the `data/`
    folder) or, if a space can hold only one HTML file, from `dist/explorer.html`. See
-   [Explorer page](page.md#delivery). Then record the form used:
+   [Viewer page](page.md#delivery). Then record the form used:
 
    ```sh
    rx mark-synced --mode folder    # or --mode single-file

@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>muse-repo-explorer</title>
+<title>muse-repo-viewer</title>
 <meta name="description" content="Read your GitHub repositories on your phone, in a Muse space. When part of the code is unclear, select the lines and ask Muse about them.">
 <meta name="color-scheme" content="light dark">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://masato-umeno.github.io/muse-repo-explorer/">
-<meta property="og:title" content="muse-repo-explorer">
+<meta property="og:url" content="https://masato-umeno.github.io/muse-repo-viewer/">
+<meta property="og:title" content="muse-repo-viewer">
 <meta property="og:description" content="Read your GitHub repositories on your phone, in a Muse space. When part of the code is unclear, select the lines and ask Muse about them.">
-<meta property="og:image" content="https://masato-umeno.github.io/muse-repo-explorer/assets/og.jpg">
+<meta property="og:image" content="https://masato-umeno.github.io/muse-repo-viewer/assets/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="The explorer on a phone: a code file, and a question about selected lines being written for Muse.">
+<meta property="og:image:alt" content="The viewer on a phone: a code file, and a question about selected lines being written for Muse.">
 <meta name="twitter:card" content="summary_large_image">
 <style>
 :root {
@@ -22,14 +22,14 @@
   --muted: #5A6377;
   --line: #DADFE7;
   --soft: #F4F6F9;
-  --blue: #2F6FDE;   /* the explorer's own accent */
+  --blue: #2F6FDE;   /* the viewer's own accent */
   --bar: #1F2B44;
   --warn: #C98A00;
   --sans: system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans CJK JP",
           "PingFang SC", "Microsoft YaHei", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Noto Sans Mono", monospace;
 }
-/* Dark mode follows the device setting, with the same colours as the explorer's dark theme. */
+/* Dark mode follows the device setting, with the same colours as the viewer's dark theme. */
 @media (prefers-color-scheme: dark) {
   :root { --bg: #15171C; --text: #E6E8EC; --muted: #9AA2B1; --line: #2D323C; --soft: #1C1F26; --blue: #6EA2FF; --bar: #252E42; --warn: #F0B45A; }
 }
@@ -91,7 +91,7 @@ footer .wrap { display: flex; gap: 20px; }
 <body>
 <div class="wrap">
   <header class="top">
-    <a href="https://github.com/masato-umeno/muse-repo-explorer">GitHub</a>
+    <a href="https://github.com/masato-umeno/muse-repo-viewer">GitHub</a>
     <select id="lang" aria-label="Language">
       <option value="en">English</option><option value="ja">日本語</option>
       <option value="zh-CN">简体中文</option><option value="ko">한국어</option>
@@ -101,19 +101,19 @@ footer .wrap { display: flex; gap: 20px; }
   <main>
     <div class="intro-grid">
       <div>
-        <h1>muse-repo-explorer</h1>
+        <h1>muse-repo-viewer</h1>
         <p class="intro" data-t="intro">Read your GitHub repositories on your phone, in a Muse space. When part of the code is unclear, select the lines and ask Muse about them.</p>
         <p class="send-label" data-t="sendLabel">To get started, copy this line and paste it into Muse.</p>
         <div class="line">
-          <code id="line">Set up muse-repo-explorer for me by following https://github.com/masato-umeno/muse-repo-explorer/blob/main/MUSE_SETUP.md (keep replying in the language we normally use)</code>
+          <code id="line">Set up muse-repo-viewer for me by following https://github.com/masato-umeno/muse-repo-viewer/blob/main/MUSE_SETUP.md (keep replying in the language we normally use)</code>
           <button type="button" id="copyLine" data-t="copy">Copy</button>
         </div>
         <p class="note" role="note"><strong data-t="noteLabel">Note</strong> <span data-t="approvalNote">During setup, Muse asks you to approve the GitHub sign-in and to choose repositories. It may also ask before creating the space.</span></p>
       </div>
       <figure class="demo">
         <div class="screen">
-          <div class="space-bar" aria-hidden="true"><span class="sb-btn">‹</span><span class="sb-title" data-t="spaceTitle">Repository Explorer</span><span class="sb-btn">···</span></div>
-          <iframe id="demo" title="Demo" src="demo/index.html#masato-umeno%2Fmuse-repo-explorer:README.md" loading="lazy"></iframe>
+          <div class="space-bar" aria-hidden="true"><span class="sb-btn">‹</span><span class="sb-title" data-t="spaceTitle">Repository Viewer</span><span class="sb-btn">···</span></div>
+          <iframe id="demo" title="Demo" src="demo/index.html#masato-umeno%2Fmuse-repo-viewer:README.md" loading="lazy"></iframe>
         </div>
         <figcaption data-t="demoCaption">Demo: this repository, as it appears in a Muse space.</figcaption>
       </figure>
@@ -138,7 +138,7 @@ footer .wrap { display: flex; gap: 20px; }
 
 <footer>
   <div class="wrap">
-    <a href="https://github.com/masato-umeno/muse-repo-explorer">GitHub</a>
+    <a href="https://github.com/masato-umeno/muse-repo-viewer">GitHub</a>
     <span data-t="footLicense">MIT License</span>
   </div>
 </footer>
@@ -150,13 +150,13 @@ var T = {
   "en": {
     "noteLabel": "Note",
     "approvalNote": "During setup, Muse asks you to approve the GitHub sign-in and to choose repositories. It may also ask before creating the space.",
-    "title": "muse-repo-explorer",
+    "title": "muse-repo-viewer",
     "intro": "Read your GitHub repositories on your phone, in a Muse space. When part of the code is unclear, select the lines and ask Muse about them.",
     "sendLabel": "To get started, copy this line and paste it into Muse.",
     "copy": "Copy",
     "copied": "Copied",
     "demoCaption": "Demo: this repository, as it appears in a Muse space.",
-    "spaceTitle": "Repository Explorer",
+    "spaceTitle": "Repository Viewer",
     "f1Title": "Reading code",
     "f2Title": "Searching names and contents",
     "f4Title": "Asking Muse about selected lines",
@@ -168,13 +168,13 @@ var T = {
   "ja": {
     "noteLabel": "注意",
     "approvalNote": "セットアップ中に、GitHub へのサインインの承認とリポジトリの選択を求められます。スペースを作成する前に確認されることもあります。",
-    "title": "muse-repo-explorer",
+    "title": "muse-repo-viewer",
     "intro": "GitHub のリポジトリを、Muse のスペースでスマホから読めるようにするツールです。分からないところがあれば、行を選んでそのまま Muse に質問できます。",
     "sendLabel": "使い始めるには、|次の1行を Muse にコピペしてください。",
     "copy": "コピー",
     "copied": "コピーしました",
     "demoCaption": "デモ：このリポジトリを Muse のスペースで表示した状態です。",
-    "spaceTitle": "リポジトリエクスプローラー",
+    "spaceTitle": "リポジトリビューア",
     "f1Title": "コードを読む",
     "f2Title": "ファイル名と内容を検索する",
     "f4Title": "選んだ行について Muse に聞く",
@@ -186,13 +186,13 @@ var T = {
   "zh-CN": {
     "noteLabel": "注意",
     "approvalNote": "搭建过程中，Muse 会请你批准 GitHub 登录并选择仓库，创建空间前也可能请你确认。",
-    "title": "muse-repo-explorer",
+    "title": "muse-repo-viewer",
     "intro": "在 Muse 空间里用手机阅读 GitHub 仓库的工具。遇到看不懂的代码，可以选中相应的行，直接向 Muse 提问。",
     "sendLabel": "要开始使用，请复制这一行并粘贴到 Muse。",
     "copy": "复制",
     "copied": "已复制",
     "demoCaption": "演示：在 Muse 空间中显示本仓库的效果。",
-    "spaceTitle": "仓库浏览器",
+    "spaceTitle": "仓库查看器",
     "f1Title": "阅读代码",
     "f2Title": "搜索文件名和内容",
     "f4Title": "就选中的行向 Muse 提问",
@@ -204,13 +204,13 @@ var T = {
   "ko": {
     "noteLabel": "주의",
     "approvalNote": "설치 중에 Muse가 GitHub 로그인 승인과 저장소 선택을 요청합니다. 스페이스를 만들기 전에 확인을 요청할 수도 있습니다.",
-    "title": "muse-repo-explorer",
+    "title": "muse-repo-viewer",
     "intro": "GitHub 저장소를 Muse 스페이스에서 스마트폰으로 읽을 수 있게 해 주는 도구입니다. 이해하기 어려운 부분은 줄을 골라 바로 Muse에 물어볼 수 있습니다.",
     "sendLabel": "시작하려면 다음 한 줄을 복사해 Muse에 붙여 넣으십시오.",
     "copy": "복사",
     "copied": "복사됨",
     "demoCaption": "데모: 이 저장소를 Muse 스페이스에서 표시한 모습입니다.",
-    "spaceTitle": "저장소 탐색기",
+    "spaceTitle": "저장소 뷰어",
     "f1Title": "코드 읽기",
     "f2Title": "파일명과 내용 검색",
     "f4Title": "고른 줄에 대해 Muse에 묻기",
