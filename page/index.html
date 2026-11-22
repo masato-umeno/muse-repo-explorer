@@ -126,7 +126,6 @@ body.hdr-collapsed #hdrRepo { display: block; }
 .filebar .actions { margin-top: 6px; justify-content: flex-end; flex-wrap: wrap; gap: 6px; }
 .filebar .actions:empty { display: none; }
 .filebar .actions .btn { padding: 4px 10px; font-size: 13px; }
-.btn:disabled { opacity: .45; cursor: default; }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
 .sheet { position: fixed; inset: 0; z-index: 20; background: rgba(0, 0, 0, .35); display: flex; align-items: flex-end; justify-content: center; }
 .sheet[hidden] { display: none; }
@@ -135,7 +134,6 @@ body.hdr-collapsed #hdrRepo { display: block; }
 .sheet label { gap: 8px; margin: 4px 0; }
 .ask-range { gap: 6px; margin: 4px 0; }
 .ask-range input { width: 5.5em; background: var(--bg2); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; color: inherit; font: inherit; }
-.ask-preview.hint { font-family: inherit; font-size: 13px; color: var(--fg2); background: none; padding: 4px 0; }
 .ask-preview { max-height: 28vh; overflow: auto; margin: 6px 0; padding: 8px 10px; background: var(--bg2); border-radius: 8px;
   font: 12px/1.5 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
 .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 30; background: var(--fg); color: var(--bg);
@@ -232,7 +230,7 @@ var I18N = {
     collapse: 'Hide', expand: 'Show',
     ask: 'Ask Muse', askTitle: 'Ask Muse about this code', askQ: 'Your question (optional)',
     askShare: 'Send to Muse', askCopied: 'Copied. Paste it into Muse.',
-    askNote: 'Muse reads the specified lines from its local clone.', askNeed: 'Enter the lines to ask about (or tap line numbers in the code view).',
+    askNote: 'Muse reads the specified lines from its local clone. Without line numbers, the question is about the whole file.', askFileN: function (n) { return 'Whole file (' + n + ' lines)'; },
     askRange: 'Lines', more: function (n) { return '… ' + n + ' more lines'; },
     askRef: 'Code', askLocal: 'Read locally', clearSel: 'Clear',
     selected: function (a, b) { return a === b ? 'Line ' + a : 'Lines ' + a + '–' + b; },
@@ -264,7 +262,7 @@ var I18N = {
     collapse: '畳む', expand: '開く',
     ask: 'Museに質問', askTitle: 'このコードについて Muse に質問', askQ: '質問（任意）',
     askShare: 'Museに送る', askCopied: 'コピーしました。Muse に貼り付けてください。',
-    askNote: 'Muse は手元の clone から指定した行を読みます。', askNeed: '質問する行を指定してください（コード表示で行番号をタップして選ぶこともできます）。',
+    askNote: 'Muse は手元の clone から指定した行を読みます。行を指定しない場合は、ファイル全体についての質問になります。', askFileN: function (n) { return 'ファイル全体（' + n + ' 行）'; },
     askRange: '行', more: function (n) { return '… ほか ' + n + ' 行'; },
     askRef: 'コード', askLocal: 'ローカルで読む', clearSel: '解除',
     selected: function (a, b) { return a === b ? a + ' 行目' : a + '–' + b + ' 行目'; },
@@ -296,7 +294,7 @@ var I18N = {
     collapse: '收起', expand: '展开',
     ask: '向 Muse 提问', askTitle: '就这段代码向 Muse 提问', askQ: '你的问题（可选）',
     askShare: '发送给 Muse', askCopied: '已复制，请粘贴到 Muse。',
-    askNote: 'Muse 会从本地克隆读取指定的行。', askNeed: '请输入要提问的行（也可以在代码视图中点按行号选择）。',
+    askNote: 'Muse 会从本地克隆读取指定的行。未指定行时，问题针对整个文件。', askFileN: function (n) { return '整个文件（' + n + ' 行）'; },
     askRange: '行', more: function (n) { return '… 另有 ' + n + ' 行'; },
     askRef: '代码', askLocal: '本地读取', clearSel: '清除',
     selected: function (a, b) { return a === b ? '第 ' + a + ' 行' : '第 ' + a + '–' + b + ' 行'; },
@@ -328,7 +326,7 @@ var I18N = {
     collapse: '접기', expand: '펼치기',
     ask: 'Muse에 질문', askTitle: '이 코드에 대해 Muse에 질문', askQ: '질문(선택)',
     askShare: 'Muse로 보내기', askCopied: '복사했습니다. Muse에 붙여넣어 주십시오.',
-    askNote: 'Muse는 로컬 clone에서 지정한 줄을 읽습니다.', askNeed: '질문할 줄을 지정하십시오(코드 보기에서 줄 번호를 탭해 선택할 수도 있습니다).',
+    askNote: 'Muse는 로컬 clone에서 지정한 줄을 읽습니다. 줄을 지정하지 않으면 파일 전체에 대한 질문이 됩니다.', askFileN: function (n) { return '파일 전체(' + n + '줄)'; },
     askRange: '줄', more: function (n) { return '… 외 ' + n + '줄'; },
     askRef: '코드', askLocal: '로컬에서 읽기', clearSel: '해제',
     selected: function (a, b) { return a === b ? a + '번째 줄' : a + '–' + b + '번째 줄'; },
@@ -1192,10 +1190,9 @@ function askRange() {
 function updateAsk() {
   var lines = askLines(), sel = askRange(), pv = $('askPreview');
   askCtx.sel = sel;
-  $('askTarget').textContent = askCtx.repo.id + ' · ' + askCtx.f.path + (sel ? ' · ' + t('selected')(sel.a, sel.b) : '');
-  $('askShare').disabled = $('askCopy').disabled = !sel;
-  if (!sel) { pv.textContent = t('askNeed'); pv.hidden = false; pv.classList.add('hint'); return; }
-  pv.classList.remove('hint');
+  $('askTarget').textContent = askCtx.repo.id + ' · ' + askCtx.f.path + ' · ' +
+    (sel ? t('selected')(sel.a, sel.b) : t('askFileN')(lines.length));
+  if (!sel) { pv.hidden = true; return; } // no lines given: the question is about the whole file
   var MAX = 30, end = Math.min(sel.b, sel.a + MAX - 1), w = String(end).length, out = [];
   for (var i = sel.a; i <= end; i++) out.push(('        ' + i).slice(-w) + '  ' + lines[i - 1]);
   if (end < sel.b) out.push(t('more')(sel.b - end));
@@ -1221,7 +1218,7 @@ function openAsk(repo, f, content, sel) {
   setTimeout(function () { $('askQ').focus(); }, 50);
 }
 function closeAsk() { $('askSheet').hidden = true; askCtx = null; }
-function currentAskText() { // only reachable with a range: the buttons are disabled otherwise
+function currentAskText() {
   return askText(askCtx.repo, askCtx.f, askRange(), $('askQ').value.trim());
 }
 function wrapOn() { return store('rx.wrap') !== '0'; }
