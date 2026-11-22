@@ -127,8 +127,9 @@ remembered.
 - Files without content are listed in the tree and show the reason when opened (binary, too
   large, excluded, symbolic link or submodule).
 
-**Markdown preview.** Files ending in `.md` or `.markdown` open as formatted documents; the
-Preview button switches to the source. Supported: headings with anchors, emphasis, inline code,
+**Markdown preview.** Files ending in `.md` or `.markdown` open as source; the Preview button
+shows them as formatted documents. The choice is remembered, so they keep opening the way they
+were last viewed. Supported: headings with anchors, emphasis, inline code,
 fenced code with highlighting, lists including task lists, tables with alignment, block quotes,
 horizontal rules, links and front matter. Links to other files in the repository open them in
 the explorer, and `#anchor` links scroll within the document. Raw HTML is not rendered: tags are

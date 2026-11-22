@@ -1083,12 +1083,15 @@ function showContent(row, meta, body, f, content) {
   var kind = MD_RE.test(f.path) ? 'md' : MMD_RE.test(f.path) ? 'mmd' : null;
   var jump = pendingJump && pendingJump.repo === current && pendingJump.path === f.path ? pendingJump.line : 0;
   pendingJump = null;
-  var preview = !!kind && !jump; // a search result opens the source at the matching line
+  // Markdown opens as source unless the viewer last chose the preview (remembered);
+  // a search result always opens the source at the matching line.
+  var preview = !!kind && !jump && store('rx.mdpreview') === '1';
   if (kind) {
     var prevBtn = el('button', 'btn', t('preview'));
     prevBtn.setAttribute('aria-pressed', String(preview));
     prevBtn.addEventListener('click', function () {
       preview = !preview;
+      store('rx.mdpreview', preview ? '1' : '0');
       prevBtn.setAttribute('aria-pressed', String(preview));
       paint();
     });
