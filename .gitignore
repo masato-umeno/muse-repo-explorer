@@ -1,0 +1,5 @@
+snapshot.json
+*.log
+.snapshot-dirty
+.page-synced-heads
+__pycache__/
