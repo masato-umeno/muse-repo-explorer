@@ -121,7 +121,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; }
           <p id="line">Set up muse-repo-explorer for me by following https://github.com/masato-umeno/muse-repo-explorer/blob/main/MUSE_SETUP.md (keep replying in the language we normally use)</p>
           <button type="button" id="copyLine" data-t="copy">Copy</button>
         </div>
-        <a class="demo-link" href="demo/index.html#masato-umeno%2Fmuse-repo-explorer:README.md" data-t="openDemo">Open the live demo</a>
+        <a class="demo-link" href="demo/index.html#masato-umeno%2Fmuse-repo-explorer:README.md" data-t="openDemo">Try it on this repository</a>
       </div>
       <div class="phone-col">
         <div class="phone"><iframe id="demo" title="Live demo" src="demo/index.html#masato-umeno%2Fmuse-repo-explorer:README.md" loading="lazy"></iframe></div>
@@ -133,15 +133,15 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; }
       <h2 data-t="featuresTitle">Features</h2>
       <div class="shots">
         <figure>
-          <img src="assets/browse.webp" width="780" height="1560" loading="lazy" alt="" data-alt="altBrowse">
+          <img src="assets/en/browse.webp" data-shot="browse" width="780" height="1560" loading="lazy" alt="" data-alt="altBrowse">
           <figcaption data-t="f1Title">Made for reading on a phone</figcaption>
         </figure>
         <figure>
-          <img src="assets/search.webp" width="780" height="1560" loading="lazy" alt="" data-alt="altSearch">
+          <img src="assets/en/search.webp" data-shot="search" width="780" height="1560" loading="lazy" alt="" data-alt="altSearch">
           <figcaption data-t="f2Title">Search file names and contents</figcaption>
         </figure>
         <figure>
-          <img class="low" src="assets/ask.webp" width="780" height="1560" loading="lazy" alt="" data-alt="altAsk">
+          <img class="low" src="assets/en/ask.webp" data-shot="ask" width="780" height="1560" loading="lazy" alt="" data-alt="altAsk">
           <figcaption data-t="f4Title">Ask Muse about specific lines</figcaption>
         </figure>
       </div>
@@ -171,7 +171,7 @@ var T = {
       "sendLabel": "次の1行を Muse に送るとセットアップされます。",
       "copy": "コピー",
       "copied": "コピーしました",
-      "openDemo": "ライブデモを開く",
+      "openDemo": "このリポジトリで試す",
       "demoCaption": "ライブデモ",
       "featuresTitle": "機能",
       "altBrowse": "コード表示の画面",
@@ -190,7 +190,7 @@ var T = {
       "sendLabel": "把这一行发给 Muse 即可完成搭建。",
       "copy": "复制",
       "copied": "已复制",
-      "openDemo": "打开在线演示",
+      "openDemo": "用本仓库试用",
       "demoCaption": "在线演示",
       "featuresTitle": "功能",
       "altBrowse": "代码视图",
@@ -209,7 +209,7 @@ var T = {
       "sendLabel": "다음 한 줄을 Muse에 보내면 설치됩니다.",
       "copy": "복사",
       "copied": "복사됨",
-      "openDemo": "라이브 데모 열기",
+      "openDemo": "이 저장소로 써 보기",
       "demoCaption": "라이브 데모",
       "featuresTitle": "기능",
       "altBrowse": "코드 보기 화면",
@@ -250,6 +250,8 @@ function apply(l, fromUser) {
   document.title = str('title');
   document.querySelectorAll('[data-t]').forEach(function (e) { e.textContent = str(e.getAttribute('data-t')); });
   document.querySelectorAll('[data-alt]').forEach(function (e) { e.alt = str(e.getAttribute('data-alt')); });
+  // Screenshots are taken in each language, with a sample question in that language.
+  document.querySelectorAll('[data-shot]').forEach(function (e) { e.src = 'assets/' + l + '/' + e.getAttribute('data-shot') + '.webp'; });
   document.getElementById('lang').value = l;
   // The demo is on the same origin: show it in the same language.
   try { localStorage.setItem('rx.lang', l); } catch (e) {}

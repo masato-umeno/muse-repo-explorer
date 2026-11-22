@@ -238,6 +238,7 @@ var I18N = {
     askRef: 'Code', askLocal: 'Read locally', clearSel: 'Clear',
     selected: function (a, b) { return a === b ? 'Line ' + a : 'Lines ' + a + '–' + b; },
     tapLines: 'Tap line numbers to select a range.',
+    fileCount: function (n) { return n + (n === 1 ? ' file' : ' files'); },
     hitCount: function (n) { return n + (n === 1 ? ' match' : ' matches'); },
     modeName: 'Names', modeText: 'Contents', scopeRepo: 'This repository', scopeAll: 'All repositories', done: 'Done',
     scopePicked: function (n) { return n + ' repositories'; },
@@ -271,6 +272,7 @@ var I18N = {
     askRef: 'コード', askLocal: 'ローカルで読む', clearSel: '解除',
     selected: function (a, b) { return a === b ? a + ' 行目' : a + '–' + b + ' 行目'; },
     tapLines: '行番号をタップすると範囲を選択できます。',
+    fileCount: function (n) { return n + ' ファイル'; },
     hitCount: function (n) { return n + ' 件'; },
     modeName: 'ファイル名', modeText: '内容', scopeRepo: 'このリポジトリ', scopeAll: '全リポジトリ', done: '完了',
     scopePicked: function (n) { return n + ' リポジトリ'; },
@@ -304,6 +306,7 @@ var I18N = {
     askRef: '代码', askLocal: '本地读取', clearSel: '清除',
     selected: function (a, b) { return a === b ? '第 ' + a + ' 行' : '第 ' + a + '–' + b + ' 行'; },
     tapLines: '点按行号即可选择范围。',
+    fileCount: function (n) { return n + ' 个文件'; },
     hitCount: function (n) { return n + ' 处匹配'; },
     modeName: '文件名', modeText: '内容', scopeRepo: '当前仓库', scopeAll: '所有仓库', done: '完成',
     scopePicked: function (n) { return n + ' 个仓库'; },
@@ -337,6 +340,7 @@ var I18N = {
     askRef: '코드', askLocal: '로컬에서 읽기', clearSel: '해제',
     selected: function (a, b) { return a === b ? a + '번째 줄' : a + '–' + b + '번째 줄'; },
     tapLines: '줄 번호를 탭하면 범위를 선택할 수 있습니다.',
+    fileCount: function (n) { return n + '개 파일'; },
     hitCount: function (n) { return n + '건'; },
     modeName: '파일명', modeText: '내용', scopeRepo: '이 저장소', scopeAll: '모든 저장소', done: '완료',
     scopePicked: function (n) { return n + '개 저장소'; },
@@ -809,7 +813,7 @@ function renderRepoSelect() {
 }
 function renderMeta() {
   var r = byId[current];
-  $('repoMeta').textContent = r ? [r.branch || '—', r.head || '—', fmtDate(r.committed_at), r.files.length + ' files']
+  $('repoMeta').textContent = r ? [r.branch || '—', r.head || '—', fmtDate(r.committed_at), t('fileCount')(r.files.length)]
     .filter(Boolean).join(' · ') : '';
 }
 function fileButton(name, f, depth, sub, repoId) {
