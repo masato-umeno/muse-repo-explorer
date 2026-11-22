@@ -80,6 +80,9 @@ $RX mark-synced >/dev/null 2>&1 && fail "mark-synced without --mode should fail"
 out="$($RX mark-synced --mode folder)"; expect "$out" "marked as synced"
 out="$($RX refresh)"; expect "$out" "UP_TO_DATE"
 out="$($RX next)"; expect "$out" "DONE"; expect "$out" "2 repositories"; expect "$out" "tester"
+expect "$out" "a star on GitHub"
+out="$($RX next)"; expect "$out" "DONE"
+echo "$out" | grep -q "a star on GitHub" && fail "star note shown twice"
 
 # a pull through the hook rebuilds in the background; only that repository's file changes
 echo more >> "$U/src/a.py"; git -C "$U" commit -qam 2

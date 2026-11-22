@@ -59,6 +59,7 @@ All files are in `REPO_EXPLORER_HOME`.
 | `.page-lang` | Initial page language (`en`, `ja`, `zh-CN`, `ko`, or empty for the browser setting) |
 | `.page-state.json` | Form of the space and checksums of the files it currently holds |
 | `.setup-version` | Setup version last completed; `next` asks for `setup` again when the tool requires a newer one |
+| `.star-note-shown` | Marks that the one-time note about starring the repository was shown |
 | `.snapshot-dirty` | Present when commits have changed since the last update of the space |
 | `.snapshot.lock`, `.build.lock` | Prevent concurrent rebuilds |
 | `snapshot-hook.log`, `.login.log` | Logs |

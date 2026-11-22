@@ -33,6 +33,7 @@ agree.
   Do not write scripts and do not build the page yourself; it is already made.
 - **Privacy:** keep the space private and never create a public link. Never ask the user for a
   password or token. Clone only repositories the user chooses.
+- **GitHub:** never star, watch or fork a repository for the user.
 
 ## Steps
 
