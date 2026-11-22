@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="light dark">
+<title>Repository Explorer</title>
+<style>
+:root {
+  --bg: #ffffff; --bg2: #f5f6f8; --bg3: #eceef2; --fg: #1d2129; --fg2: #5b6270;
+  --line: #dfe2e8; --accent: #2f6fde; --warn: #9a5b00;
+  --c-com: #6a737d; --c-str: #0a7a3e; --c-num: #b4530f; --c-kw: #8a3fd1;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Noto Sans Mono", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #15171c; --bg2: #1c1f26; --bg3: #252932; --fg: #e6e8ec; --fg2: #9aa2b1;
+    --line: #2d323c; --accent: #6ea2ff; --warn: #f0b45a;
+    --c-com: #7d8695; --c-str: #7fd19b; --c-num: #f2a66b; --c-kw: #c9a2ff;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--fg);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Noto Sans CJK JP", "PingFang SC", "Apple SD Gothic Neo", sans-serif; }
+button, select, input { font: inherit; color: inherit; }
+header { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line);
+  padding: max(8px, env(safe-area-inset-top)) 12px 8px; }
+.row { display: flex; gap: 8px; align-items: center; }
+.grow { flex: 1; min-width: 0; }
+h1 { font-size: 16px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+select, input[type=search] { background: var(--bg2); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; width: 100%; }
+#lang { width: auto; padding: 4px 6px; font-size: 13px; }
+.meta { color: var(--fg2); font-size: 12px; margin-top: 4px; overflow-wrap: anywhere; }
+main { display: flex; min-height: calc(100vh - 120px); }
+#side { width: 100%; }
+#view { display: none; width: 100%; min-width: 0; }
+body.file-open #side { display: none; }
+body.file-open #view { display: block; }
+@media (min-width: 900px) {
+  #side { width: 340px; flex: none; border-right: 1px solid var(--line); height: calc(100vh - 118px); overflow: auto; position: sticky; top: 118px; }
+  #view, body.file-open #view { display: block; }
+  body.file-open #side { display: block; }
+  #back { display: none !important; }
+}
+ul.tree { list-style: none; margin: 0; padding: 0; }
+.node { display: flex; align-items: center; gap: 6px; width: 100%; text-align: left; background: none; border: 0;
+  padding: 7px 12px; cursor: pointer; overflow-wrap: anywhere; }
+.node:hover, .node:focus-visible { background: var(--bg2); outline: none; }
+.node.active { background: var(--bg3); }
+.caret { width: 1em; flex: none; color: var(--fg2); transition: transform .12s; }
+.open > .node .caret { transform: rotate(90deg); }
+.icon { flex: none; width: 1.1em; text-align: center; }
+.dim { color: var(--fg2); }
+.hit small { display: block; color: var(--fg2); font-size: 12px; }
+.empty { color: var(--fg2); padding: 16px 12px; }
+.filebar { position: sticky; top: 118px; z-index: 4; background: var(--bg); border-bottom: 1px solid var(--line); padding: 8px 12px; }
+@media (max-width: 899px) { .filebar { top: 0; position: relative; } }
+.btn { background: var(--bg2); border: 1px solid var(--line); border-radius: 8px; padding: 5px 12px; cursor: pointer; white-space: nowrap; }
+.btn:active { background: var(--bg3); }
+.path { font-family: var(--mono); font-size: 13px; overflow-wrap: anywhere; }
+.notice { margin: 16px 12px; padding: 12px; border-radius: 8px; background: var(--bg2); color: var(--warn); }
+/* One block per line; the number is a ::before, so wrapped lines keep their number aligned
+   and selecting/copying text never includes line numbers. */
+.code { font: 12.5px/1.55 var(--mono); overflow-x: auto; }
+.code pre { margin: 0; padding: 10px 0; tab-size: 4; counter-reset: ln; min-width: 100%; width: max-content; }
+.code .l { display: block; position: relative; padding: 0 12px 0 calc(var(--gw) + 20px); white-space: pre; min-height: 1.55em; }
+.code .l::before { counter-increment: ln; content: counter(ln); position: absolute; left: 0; top: 0; bottom: 0;
+  width: calc(var(--gw) + 8px); padding-right: 8px; text-align: right; color: var(--fg2); background: var(--bg2);
+  border-right: 1px solid var(--line); user-select: none; }
+.code.wrap { overflow-x: hidden; }
+.code.wrap pre { width: auto; }
+.code.wrap .l { white-space: pre-wrap; overflow-wrap: anywhere; }
+.btn[aria-pressed="true"] { background: var(--bg3); border-color: var(--accent); color: var(--accent); }
+.t-c { color: var(--c-com); font-style: italic; } .t-s { color: var(--c-str); }
+.t-n { color: var(--c-num); } .t-k { color: var(--c-kw); font-weight: 600; }
+footer { color: var(--fg2); font-size: 12px; padding: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="row">
+    <h1 class="grow" data-i18n="title">Repository Explorer</h1>
+    <select id="lang" aria-label="Language">
+      <option value="en">EN</option><option value="ja">日本語</option>
+      <option value="zh-CN">中文</option><option value="ko">한국어</option>
+    </select>
+  </div>
+  <div class="row" style="margin-top:8px">
+    <select id="repo" class="grow" aria-label="Repository"></select>
+  </div>
+  <div class="meta" id="repoMeta"></div>
+  <div class="row" style="margin-top:8px">
+    <input id="q" type="search" class="grow" autocomplete="off" autocapitalize="off" spellcheck="false">
+  </div>
+</header>
+<main>
+  <nav id="side"><div class="empty" id="status">…</div></nav>
+  <section id="view"></section>
+</main>
+<footer id="foot"></footer>
+
+<!-- build_page.py fills this for the single-file version; empty = load snapshot.json -->
+<script id="snapshot-data" type="application/json"></script>
+<script>
+(function () {
+'use strict';
+
+/* ---------- i18n ---------- */
+var I18N = {
+  en: {
+    title: 'Repository Explorer', search: 'Search files in all repositories', snapshot: 'Snapshot',
+    copy: 'Copy', copied: 'Copied', back: 'Back', loading: 'Loading…',
+    loadError: 'Could not load snapshot.json.', noRepos: 'No repositories in the snapshot.',
+    noResults: 'No matching files.', results: function (n, more) { return n + (more ? '+' : '') + ' files'; },
+    empty: 'No files', pick: 'Select a file from the tree.', lines: 'lines',
+    'skipped.binary': 'Binary file — cannot be displayed.',
+    'skipped.large': 'File too large to display.',
+    'skipped.excluded': 'Hidden by your exclude list.',
+    'skipped.symlink': 'Symbolic link (not followed).',
+    'skipped.submodule': 'Submodule (not included).',
+    'skipped.other': 'This file cannot be displayed.',
+    wrap: 'Wrap',
+    noHighlight: 'Large file: shown without colors.'
+  },
+  ja: {
+    title: 'リポジトリエクスプローラー', search: '全リポジトリのファイルを検索', snapshot: 'スナップショット',
+    copy: 'コピー', copied: 'コピーしました', back: '戻る', loading: '読み込み中…',
+    loadError: 'snapshot.json を読み込めませんでした。', noRepos: 'スナップショットにリポジトリがありません。',
+    noResults: '一致するファイルはありません。', results: function (n, more) { return n + (more ? '+' : '') + ' 件'; },
+    empty: 'ファイルがありません', pick: 'ツリーからファイルを選んでください。', lines: '行',
+    'skipped.binary': 'バイナリファイルのため表示できません。',
+    'skipped.large': 'サイズが大きすぎるため表示できません。',
+    'skipped.excluded': '除外設定により非表示です。',
+    'skipped.symlink': 'シンボリックリンク（参照先は表示しません）。',
+    'skipped.submodule': 'サブモジュール（含まれません）。',
+    'skipped.other': 'このファイルは表示できません。',
+    wrap: '折り返し',
+    noHighlight: '大きいファイルのため色付けなしで表示しています。'
+  },
+  'zh-CN': {
+    title: '仓库浏览器', search: '在所有仓库中搜索文件', snapshot: '快照',
+    copy: '复制', copied: '已复制', back: '返回', loading: '加载中…',
+    loadError: '无法加载 snapshot.json。', noRepos: '快照中没有仓库。',
+    noResults: '没有匹配的文件。', results: function (n, more) { return n + (more ? '+' : '') + ' 个文件'; },
+    empty: '没有文件', pick: '请从目录树中选择文件。', lines: '行',
+    'skipped.binary': '二进制文件，无法显示。',
+    'skipped.large': '文件过大，无法显示。',
+    'skipped.excluded': '已按排除列表隐藏。',
+    'skipped.symlink': '符号链接（不跟随）。',
+    'skipped.submodule': '子模块（未包含）。',
+    'skipped.other': '无法显示此文件。',
+    wrap: '自动换行',
+    noHighlight: '文件较大，未启用语法高亮。'
+  },
+  ko: {
+    title: '저장소 탐색기', search: '모든 저장소에서 파일 검색', snapshot: '스냅샷',
+    copy: '복사', copied: '복사됨', back: '뒤로', loading: '불러오는 중…',
+    loadError: 'snapshot.json 을 불러올 수 없습니다.', noRepos: '스냅샷에 저장소가 없습니다.',
+    noResults: '일치하는 파일이 없습니다.', results: function (n, more) { return n + (more ? '+' : '') + '개 파일'; },
+    empty: '파일이 없습니다', pick: '트리에서 파일을 선택하세요.', lines: '줄',
+    'skipped.binary': '바이너리 파일이라 표시할 수 없습니다.',
+    'skipped.large': '파일이 너무 커서 표시할 수 없습니다.',
+    'skipped.excluded': '제외 목록에 의해 숨겨졌습니다.',
+    'skipped.symlink': '심볼릭 링크(따라가지 않음).',
+    'skipped.submodule': '서브모듈(포함되지 않음).',
+    'skipped.other': '이 파일은 표시할 수 없습니다.',
+    wrap: '줄바꿈',
+    noHighlight: '파일이 커서 색상 없이 표시합니다.'
+  }
+};
+var LANGS = ['en', 'ja', 'zh-CN', 'ko'];
+
+function store(k, v) {
+  try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; }
+}
+function pickLang() {
+  var saved = store('rx.lang');
+  if (saved && I18N[saved]) return saved;
+  var navs = (navigator.languages || [navigator.language || 'en']);
+  for (var i = 0; i < navs.length; i++) {
+    var l = String(navs[i]).toLowerCase();
+    if (l.indexOf('ja') === 0) return 'ja';
+    if (l.indexOf('zh') === 0) return 'zh-CN';
+    if (l.indexOf('ko') === 0) return 'ko';
+    if (l.indexOf('en') === 0) return 'en';
+  }
+  return 'en';
+}
+var lang = pickLang();
+function t(k) { var d = I18N[lang] || I18N.en; return d[k] !== undefined ? d[k] : I18N.en[k]; }
+
+/* ---------- helpers ---------- */
+var $ = function (id) { return document.getElementById(id); };
+function el(tag, cls, text) {
+  var e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function fmtSize(n) {
+  if (n < 1024) return n + ' B';
+  if (n < 1048576) return (n / 1024).toFixed(1) + ' KB';
+  return (n / 1048576).toFixed(1) + ' MB';
+}
+function fmtDate(s) {
+  if (!s) return '';
+  var d = new Date(s);
+  if (isNaN(d)) return s;
+  try { return d.toLocaleString(lang, { dateStyle: 'medium', timeStyle: 'short' }); } catch (e) { return d.toLocaleString(); }
+}
+
+/* ---------- syntax highlight (lightweight, escape-first) ---------- */
+var KW = {};
+('abstract and as async await break case catch class const continue def default defer del delete do elif else enum ' +
+ 'except export extends false final finally fn for from func function go if impl import in instanceof interface is ' +
+ 'lambda let loop match mod module namespace new nil none not null of or package pass private protected pub public ' +
+ 'raise readonly return self static struct super switch then this throw throws true try type typeof unless use var ' +
+ 'void when where while with yield').split(' ').forEach(function (w) { KW[w] = 1; });
+var HASH = /\.(py|sh|bash|zsh|fish|rb|ya?ml|toml|r|pl|pm|conf|cfg|ini|env|mk|cmake|ex|exs|nim|cr|tf|hcl)$|(^|\/)(dockerfile|makefile|gemfile|rakefile|procfile|\.gitignore|\.dockerignore|\.gitattributes)$/i;
+var DASH = /\.(sql|lua|hs|elm|ada)$/i;
+var MARK = /\.(html?|xml|svg|vue|svelte)$/i;
+var PLAIN = /\.(md|markdown|txt|rst|csv|tsv|log|lock)$/i;
+var reCache = {};
+function tokenRe(path) {
+  var p = path.toLowerCase();
+  var key = HASH.test(p) ? 'h' : DASH.test(p) ? 'd' : MARK.test(p) ? 'm' : 'c';
+  if (reCache[key]) return reCache[key];
+  var com = { h: ['#[^\\n]*'], d: ['--[^\\n]*', '/\\*[\\s\\S]*?\\*/'], m: ['<!--[\\s\\S]*?-->', '/\\*[\\s\\S]*?\\*/', '//[^\\n]*'],
+              c: ['//[^\\n]*', '/\\*[\\s\\S]*?\\*/'] }[key];
+  var str = '"(?:\\\\.|[^"\\\\\\n])*"|\'(?:\\\\.|[^\'\\\\\\n])*\'|`(?:\\\\.|[^`\\\\])*`';
+  reCache[key] = new RegExp('(' + com.join('|') + ')|(' + str + ')|(\\b\\d[\\d_]*(?:\\.\\d+)?(?:e[+-]?\\d+)?\\b|\\b0x[0-9a-f]+\\b)|(\\b[A-Za-z_][A-Za-z0-9_]*\\b)', 'gi');
+  return reCache[key];
+}
+/* Returns one HTML string per line. A token spanning lines (block comment, template string)
+   is closed at each line end and reopened on the next, so every line is self-contained. */
+function highlightLines(src, path, plain) {
+  var lines = [''];
+  function push(text, cls) {
+    var parts = text.split('\n');
+    for (var i = 0; i < parts.length; i++) {
+      if (i > 0) lines.push('');
+      if (parts[i]) lines[lines.length - 1] += cls ? '<span class="' + cls + '">' + esc(parts[i]) + '</span>' : esc(parts[i]);
+    }
+  }
+  if (plain || PLAIN.test(path)) { push(src, ''); return lines; }
+  var re = tokenRe(path), last = 0, m;
+  re.lastIndex = 0;
+  while ((m = re.exec(src)) !== null) {
+    if (m[0] === '') { re.lastIndex++; continue; }
+    var cls = m[1] ? 't-c' : m[2] ? 't-s' : m[3] ? 't-n' : (m[4] && KW[m[4].toLowerCase()] ? 't-k' : '');
+    if (!cls) continue;
+    push(src.slice(last, m.index), '');
+    push(m[0], cls);
+    last = m.index + m[0].length;
+  }
+  push(src.slice(last), '');
+  return lines;
+}
+
+/* ---------- data ---------- */
+var DATA = null, byId = {}, trees = {}, current = null, activeBtn = null;
+
+function loadData() {
+  var tag = $('snapshot-data');
+  if (tag && tag.textContent.trim()) {
+    try { return Promise.resolve(JSON.parse(tag.textContent)); } catch (e) { return Promise.reject(e); }
+  }
+  return fetch('snapshot.json', { cache: 'no-store' }).then(function (r) {
+    if (!r.ok) throw new Error(r.status);
+    return r.json();
+  });
+}
+function buildTree(repo) {
+  if (trees[repo.id]) return trees[repo.id];
+  var root = { dirs: {}, files: [] };
+  repo.files.forEach(function (f) {
+    var parts = f.path.split('/'), node = root;
+    for (var i = 0; i < parts.length - 1; i++) {
+      node = node.dirs[parts[i]] || (node.dirs[parts[i]] = { dirs: {}, files: [] });
+    }
+    node.files.push({ name: parts[parts.length - 1], file: f });
+  });
+  trees[repo.id] = root;
+  return root;
+}
+
+/* ---------- rendering ---------- */
+function applyStaticText() {
+  document.documentElement.lang = lang;
+  $('lang').value = lang;
+  document.querySelectorAll('[data-i18n]').forEach(function (e) { e.textContent = t(e.getAttribute('data-i18n')); });
+  document.title = t('title');
+  $('q').placeholder = t('search');
+  if (DATA) $('foot').textContent = t('snapshot') + ': ' + fmtDate(DATA.generated_at);
+}
+function renderRepoSelect() {
+  var sel = $('repo');
+  sel.textContent = '';
+  var groups = {};
+  DATA.repos.forEach(function (r) {
+    var owner = r.id.split('/')[0];
+    (groups[owner] = groups[owner] || []).push(r);
+  });
+  Object.keys(groups).sort().forEach(function (owner) {
+    var g = el('optgroup'); g.label = owner;
+    groups[owner].forEach(function (r) {
+      var o = el('option', null, r.id); o.value = r.id; g.appendChild(o);
+    });
+    sel.appendChild(g);
+  });
+}
+function renderMeta() {
+  var r = byId[current];
+  $('repoMeta').textContent = r ? [r.branch || '—', r.head || '—', fmtDate(r.committed_at), r.files.length + ' files']
+    .filter(Boolean).join(' · ') : '';
+}
+function fileButton(name, f, depth, sub, repoId) {
+  var b = el('button', 'node');
+  b.style.paddingLeft = (12 + depth * 16) + 'px';
+  b.appendChild(el('span', 'caret', ''));
+  b.appendChild(el('span', 'icon', f.skipped ? '·' : '📄'));
+  var label = el('span', f.skipped ? 'dim' : null, name);
+  if (sub) label.appendChild(el('small', null, sub));
+  b.appendChild(label);
+  b.addEventListener('click', function () { go(repoId || current, f.path); setActive(b); });
+  b.dataset.path = f.path;
+  return b;
+}
+function renderDir(node, ul, depth) {
+  Object.keys(node.dirs).sort(function (a, b) { return a.localeCompare(b); }).forEach(function (name) {
+    var li = el('li'), b = el('button', 'node'), childUl = el('ul', 'tree'), rendered = false;
+    b.style.paddingLeft = (12 + depth * 16) + 'px';
+    b.appendChild(el('span', 'caret', '▸'));
+    b.appendChild(el('span', 'icon', '📁'));
+    b.appendChild(el('span', null, name));
+    b.setAttribute('aria-expanded', 'false');
+    childUl.hidden = true;
+    b.addEventListener('click', function () {
+      if (!rendered) { renderDir(node.dirs[name], childUl, depth + 1); rendered = true; }
+      var open = childUl.hidden;
+      childUl.hidden = !open;
+      li.classList.toggle('open', open);
+      b.setAttribute('aria-expanded', String(open));
+    });
+    li.appendChild(b); li.appendChild(childUl); ul.appendChild(li);
+  });
+  node.files.sort(function (a, b) { return a.name.localeCompare(b.name); }).forEach(function (x) {
+    var li = el('li'); li.appendChild(fileButton(x.name, x.file, depth)); ul.appendChild(li);
+  });
+}
+function renderTree() {
+  var side = $('side'); side.textContent = '';
+  var r = byId[current];
+  if (!r) { side.appendChild(el('div', 'empty', t('noRepos'))); return; }
+  if (!r.files.length) { side.appendChild(el('div', 'empty', t('empty'))); return; }
+  var ul = el('ul', 'tree'); renderDir(buildTree(r), ul, 0); side.appendChild(ul);
+}
+function renderSearch(q) {
+  var side = $('side'); side.textContent = '';
+  var needle = q.toLowerCase(), hits = [], LIMIT = 200, more = false;
+  outer: for (var i = 0; i < DATA.repos.length; i++) {
+    var r = DATA.repos[i];
+    for (var j = 0; j < r.files.length; j++) {
+      if (r.files[j].path.toLowerCase().indexOf(needle) !== -1) {
+        if (hits.length >= LIMIT) { more = true; break outer; }
+        hits.push([r.id, r.files[j]]);
+      }
+    }
+  }
+  side.appendChild(el('div', 'empty', hits.length ? t('results')(hits.length, more) : t('noResults')));
+  var ul = el('ul', 'tree');
+  hits.forEach(function (h) {
+    var li = el('li'), b = fileButton(h[1].path, h[1], 0, h[0], h[0]);
+    b.classList.add('hit');
+    li.appendChild(b); ul.appendChild(li);
+  });
+  side.appendChild(ul);
+}
+function setActive(b) {
+  if (activeBtn) activeBtn.classList.remove('active');
+  activeBtn = b; if (b) b.classList.add('active');
+}
+function renderFile(path) {
+  var view = $('view'); view.textContent = '';
+  var r = byId[current];
+  var f = r && r.files.filter(function (x) { return x.path === path; })[0];
+  if (!f) { document.body.classList.remove('file-open'); view.appendChild(el('div', 'empty', t('pick'))); return; }
+  document.body.classList.add('file-open');
+
+  var bar = el('div', 'filebar'), row = el('div', 'row');
+  var back = el('button', 'btn', '← ' + t('back')); back.id = 'back';
+  back.addEventListener('click', function () { go(current, null); });
+  row.appendChild(back);
+  var info = el('div', 'grow');
+  info.appendChild(el('div', 'path', f.path));
+  var lines = f.content !== undefined ? f.content.replace(/\n$/, '').split('\n').length : 0;
+  info.appendChild(el('div', 'meta', fmtSize(f.size) + (lines ? ' · ' + lines + ' ' + t('lines') : '')));
+  row.appendChild(info);
+  if (f.content !== undefined) {
+    var copy = el('button', 'btn', t('copy'));
+    copy.addEventListener('click', function () {
+      copyText(f.content).then(function () {
+        copy.textContent = t('copied'); setTimeout(function () { copy.textContent = t('copy'); }, 1500);
+      });
+    });
+    var wrapBtn = el('button', 'btn', t('wrap'));
+    wrapBtn.setAttribute('aria-pressed', String(wrapOn()));
+    wrapBtn.addEventListener('click', function () {
+      var on = !wrapOn();
+      store('rx.wrap', on ? '1' : '0');
+      wrapBtn.setAttribute('aria-pressed', String(on));
+      var c = view.querySelector('.code'); if (c) c.classList.toggle('wrap', on);
+    });
+    row.appendChild(wrapBtn);
+    row.appendChild(copy);
+  }
+  bar.appendChild(row); view.appendChild(bar);
+
+  if (f.content === undefined) {
+    var reason = 'skipped.' + (f.skipped || 'other');
+    view.appendChild(el('div', 'notice', I18N.en[reason] ? t(reason) : t('skipped.other')));
+    return;
+  }
+  var text = f.content.replace(/\n$/, '');
+  var big = text.length > 80000;
+  if (big) view.appendChild(el('div', 'meta', t('noHighlight'))).style.padding = '6px 12px';
+  var htmlLines = highlightLines(text, f.path, big);
+  var code = el('div', 'code' + (wrapOn() ? ' wrap' : '')), pre = el('pre');
+  code.style.setProperty('--gw', String(htmlLines.length).length + 'ch');
+  pre.innerHTML = '<span class="l">' + htmlLines.join('</span><span class="l">') + '</span>';
+  code.appendChild(pre); view.appendChild(code);
+  window.scrollTo(0, 0);
+}
+// Wrapping is the default (phone-first); the choice is remembered.
+function wrapOn() { return store('rx.wrap') !== '0'; }
+function copyText(s) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    return navigator.clipboard.writeText(s).catch(function () { return fallbackCopy(s); });
+  }
+  return fallbackCopy(s);
+}
+function fallbackCopy(s) {
+  var ta = el('textarea'); ta.value = s; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); } catch (e) {}
+  document.body.removeChild(ta);
+  return Promise.resolve();
+}
+
+/* ---------- routing: #<repo>:<path> (phone back button works) ---------- */
+function go(repoId, path) {
+  var h = '#' + encodeURIComponent(repoId) + (path ? ':' + encodeURIComponent(path) : '');
+  if (location.hash === h) route(); else location.hash = h;
+}
+function route() {
+  var h = location.hash.slice(1), i = h.indexOf(':');
+  var repoId = decodeURIComponent(i < 0 ? h : h.slice(0, i));
+  var path = i < 0 ? null : decodeURIComponent(h.slice(i + 1));
+  if (!byId[repoId]) repoId = current || store('rx.repo') || (DATA.repos[0] && DATA.repos[0].id);
+  if (!byId[repoId]) repoId = DATA.repos[0] && DATA.repos[0].id;
+  if (repoId !== current || !$('side').querySelector('ul')) {
+    current = repoId; store('rx.repo', repoId || '');
+    $('repo').value = repoId || '';
+    renderMeta();
+    if (!$('q').value) renderTree();
+  }
+  renderFile(path);
+  if (path && !$('q').value) {
+    var btns = $('side').querySelectorAll('.node[data-path]');
+    for (var k = 0; k < btns.length; k++) if (btns[k].dataset.path === path) { setActive(btns[k]); break; }
+  }
+}
+
+/* ---------- boot ---------- */
+applyStaticText();
+$('status').textContent = t('loading');
+$('lang').addEventListener('change', function () {
+  lang = this.value; store('rx.lang', lang); applyStaticText(); renderMeta(); route();
+  if ($('q').value) renderSearch($('q').value);
+});
+loadData().then(function (data) {
+  DATA = data || { repos: [] };
+  DATA.repos = DATA.repos || [];
+  DATA.repos.forEach(function (r) { r.files = r.files || []; byId[r.id] = r; });
+  applyStaticText();
+  if (!DATA.repos.length) { $('side').textContent = ''; $('side').appendChild(el('div', 'empty', t('noRepos'))); return; }
+  renderRepoSelect();
+  $('repo').addEventListener('change', function () { $('q').value = ''; go(this.value, null); });
+  var timer;
+  $('q').addEventListener('input', function () {
+    var q = this.value.trim();
+    // On phones the tree/results and the file view share one pane: show the results.
+    if (document.body.classList.contains('file-open') && window.matchMedia('(max-width: 899px)').matches) {
+      go(current, null);
+    }
+    clearTimeout(timer);
+    timer = setTimeout(function () { if (q) renderSearch(q); else { $('side').textContent = ''; renderTree(); } }, 150);
+  });
+  window.addEventListener('hashchange', route);
+  route();
+}).catch(function () {
+  $('status').textContent = t('loadError');
+});
+})();
+</script>
+</body>
+</html>

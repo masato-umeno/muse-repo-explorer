@@ -1,5 +1,24 @@
-snapshot.json
+# This repository is PUBLIC. Never commit real data.
+# (scripts/check_public_safety.py enforces this in pre-commit and CI.)
+
+# Snapshots contain full source code of your (private) repositories
+snapshot*.json
+.snapshot-*.tmp
+
+# Operational state / logs (contain real repository names)
 *.log
 .snapshot-dirty
+.snapshot.lock
 .page-synced-heads
+exclude.txt
+denylist.txt
+*.bak-repo-explorer
+
+# Credentials
+.env
+.env.*
+*.pem
+*.key
+hosts.yml
+
 __pycache__/
