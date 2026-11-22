@@ -48,6 +48,7 @@ a:focus-visible, button:focus-visible, select:focus-visible { outline: 2px solid
 h1 { font-size: 2rem; line-height: 1.3; font-weight: 700; margin: 24px 0 16px; }
 .intro { font-size: 17px; max-width: 34em; margin: 0 0 32px; word-break: auto-phrase; }
 .send-label { margin: 0 0 8px; color: var(--muted); font-size: 15px; word-break: auto-phrase; }
+.seg { display: inline-block; }
 .line { border: 1px solid var(--line); background: var(--soft); border-radius: 8px; padding: 12px 14px; max-width: 36rem; }
 .line code { display: block; font: 14px/1.6 var(--mono); overflow-wrap: anywhere; margin-bottom: 10px; }
 .line button { font: inherit; font-size: 14px; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 12px; cursor: pointer; }
@@ -169,7 +170,7 @@ var T = {
     "approvalNote": "セットアップ中に、GitHub へのサインインの承認とリポジトリの選択を求められます。スペースを作成する前に確認されることもあります。",
     "title": "muse-repo-explorer",
     "intro": "GitHub のリポジトリを、Muse のスペースでスマホから読めるようにするツールです。分からないところがあれば、行を選んでそのまま Muse に質問できます。",
-    "sendLabel": "次の1行を Muse にコピペしてください。",
+    "sendLabel": "使い始めるには、|次の1行を Muse にコピペしてください。",
     "copy": "コピー",
     "copied": "コピーしました",
     "demoCaption": "デモ：このリポジトリを Muse のスペースで表示した状態です。",
@@ -239,7 +240,13 @@ function str(k) { return (T[lang] && T[lang][k] !== undefined) ? T[lang][k] : T.
 function apply(l, fromUser) {
   lang = l;
   document.documentElement.lang = l;
-  document.querySelectorAll('[data-t]').forEach(function (e) { e.textContent = str(e.getAttribute('data-t')); });
+  document.querySelectorAll('[data-t]').forEach(function (e) {
+    // "|" marks where a line may break; each part stays on one line.
+    var parts = str(e.getAttribute('data-t')).split('|');
+    e.textContent = '';
+    if (parts.length === 1) { e.textContent = parts[0]; return; }
+    parts.forEach(function (t) { var sp = document.createElement('span'); sp.className = 'seg'; sp.textContent = t; e.appendChild(sp); });
+  });
   document.querySelectorAll('[data-alt]').forEach(function (e) { e.alt = str(e.getAttribute('data-alt')); });
   // Screenshots are taken in each language, with a sample question in that language.
   setShots();
