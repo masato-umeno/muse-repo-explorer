@@ -132,6 +132,10 @@ body.hdr-collapsed #hdrRepo { display: block; }
 .sheet-body { width: 100%; max-width: 640px; background: var(--bg); border-radius: 14px 14px 0 0; padding: 14px 14px max(14px, env(safe-area-inset-bottom)); }
 .sheet textarea { width: 100%; margin: 10px 0 6px; background: var(--bg2); border: 1px solid var(--line); border-radius: 8px; padding: 8px; font: inherit; color: inherit; resize: vertical; }
 .sheet label { gap: 8px; margin: 4px 0; }
+.ask-range { gap: 6px; margin: 4px 0; }
+.ask-range input { width: 5.5em; background: var(--bg2); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; color: inherit; font: inherit; }
+.ask-preview { max-height: 28vh; overflow: auto; margin: 6px 0; padding: 8px 10px; background: var(--bg2); border-radius: 8px;
+  font: 12px/1.5 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
 .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 30; background: var(--fg); color: var(--bg);
   padding: 8px 14px; border-radius: 8px; font-size: 13px; }
 </style>
@@ -177,7 +181,6 @@ body.hdr-collapsed #hdrRepo { display: block; }
     <div class="meta" id="setLangNote"></div>
     <h3 id="setViewLabel"></h3>
     <label class="row"><input type="checkbox" id="setWrap"> <span id="setWrapLabel"></span></label>
-    <label class="row"><input type="checkbox" id="setCode"> <span id="setCodeLabel"></span></label>
   </div>
 </div>
 <div id="askSheet" class="sheet" hidden role="dialog" aria-modal="true">
@@ -185,7 +188,13 @@ body.hdr-collapsed #hdrRepo { display: block; }
     <div class="row"><strong class="grow" id="askTitle"></strong><button class="btn" id="askClose">×</button></div>
     <div class="meta" id="askTarget"></div>
     <textarea id="askQ" rows="3"></textarea>
-    <label class="row"><input type="checkbox" id="askCode"> <span id="askCodeLabel"></span></label>
+    <div class="row ask-range">
+      <span id="askRangeLabel"></span>
+      <input id="askFrom" type="number" inputmode="numeric" min="1" aria-label="from"> –
+      <input id="askTo" type="number" inputmode="numeric" min="1" aria-label="to">
+      <span class="grow"></span><button class="btn" id="askWhole"></button>
+    </div>
+    <pre id="askPreview" class="ask-preview" hidden></pre>
     <div class="meta" id="askNote"></div>
     <div class="row" style="margin-top:8px"><span class="grow"></span>
       <button class="btn" id="askCopy"></button><button class="btn primary" id="askShare"></button></div>
@@ -219,13 +228,13 @@ var I18N = {
     'skipped.submodule': 'Submodule (not included).',
     'skipped.other': 'This file cannot be displayed.',
     wrap: 'Wrap',
-    settings: 'Settings', language: 'Language', view: 'Display and sharing', wrapDefault: 'Wrap long lines',
-    codeDefault: 'Include the code when asking Muse',
+    settings: 'Settings', language: 'Language', view: 'Display', wrapDefault: 'Wrap long lines',
     langNote: function (d) { return d ? 'Initial language: ' + d + ' (set up by Muse). Your choice here is remembered.' : 'Initial language: your browser language. Your choice here is remembered.'; },
     collapse: 'Hide', expand: 'Show',
     ask: 'Ask Muse', askTitle: 'Ask Muse about this code', askQ: 'Your question (optional)',
-    askCode: 'Include the code itself', askShare: 'Send to Muse', askCopied: 'Copied. Paste it into Muse.',
-    askNote: 'Muse reads these lines from its local clone, so the code does not need to be included. Leaving it out saves tokens.',
+    askShare: 'Send to Muse', askCopied: 'Copied. Paste it into Muse.',
+    askNote: 'Muse reads the specified lines from its local clone. Without line numbers, the whole file is used.',
+    askRange: 'Lines', askFileN: function (n) { return 'Whole file (' + n + ' lines)'; }, more: function (n) { return '… ' + n + ' more lines'; },
     askFile: 'Whole file', askRef: 'Code', askLocal: 'Read locally', clearSel: 'Clear',
     selected: function (a, b) { return a === b ? 'Line ' + a : 'Lines ' + a + '–' + b; },
     tapLines: 'Tap line numbers to select a range.',
@@ -252,13 +261,13 @@ var I18N = {
     'skipped.submodule': 'サブモジュール（含まれません）。',
     'skipped.other': 'このファイルは表示できません。',
     wrap: '折り返し',
-    settings: '設定', language: '言語', view: '表示と共有', wrapDefault: '長い行を折り返す',
-    codeDefault: 'Museに質問するときにコード本体も含める',
+    settings: '設定', language: '言語', view: '表示', wrapDefault: '長い行を折り返す',
     langNote: function (d) { return d ? '初期の言語：' + d + '（Muse がセットアップ時に設定）。ここでの選択は記憶されます。' : '初期の言語：ブラウザの言語。ここでの選択は記憶されます。'; },
     collapse: '畳む', expand: '開く',
     ask: 'Museに質問', askTitle: 'このコードについて Muse に質問', askQ: '質問（任意）',
-    askCode: 'コード本体も含める', askShare: 'Museに送る', askCopied: 'コピーしました。Muse に貼り付けてください。',
-    askNote: 'Muse は手元の clone からこの範囲を読むため、コード本体を含める必要はありません。含めない方がトークンを節約できます。',
+    askShare: 'Museに送る', askCopied: 'コピーしました。Muse に貼り付けてください。',
+    askNote: 'Muse は手元の clone から指定した行を読みます。行を指定しない場合は、ファイル全体が対象です。',
+    askRange: '行', askFileN: function (n) { return 'ファイル全体（' + n + ' 行）'; }, more: function (n) { return '… ほか ' + n + ' 行'; },
     askFile: 'ファイル全体', askRef: 'コード', askLocal: 'ローカルで読む', clearSel: '解除',
     selected: function (a, b) { return a === b ? a + ' 行目' : a + '–' + b + ' 行目'; },
     tapLines: '行番号をタップすると範囲を選択できます。',
@@ -285,13 +294,13 @@ var I18N = {
     'skipped.submodule': '子模块（未包含）。',
     'skipped.other': '无法显示此文件。',
     wrap: '自动换行',
-    settings: '设置', language: '语言', view: '显示与分享', wrapDefault: '长行自动换行',
-    codeDefault: '向 Muse 提问时包含代码本身',
+    settings: '设置', language: '语言', view: '显示', wrapDefault: '长行自动换行',
     langNote: function (d) { return d ? '初始语言：' + d + '（由 Muse 在搭建时设置）。此处的选择会被记住。' : '初始语言：浏览器语言。此处的选择会被记住。'; },
     collapse: '收起', expand: '展开',
     ask: '向 Muse 提问', askTitle: '就这段代码向 Muse 提问', askQ: '你的问题（可选）',
-    askCode: '包含代码本身', askShare: '发送给 Muse', askCopied: '已复制，请粘贴到 Muse。',
-    askNote: 'Muse 会从本地克隆读取这些行，因此无需包含代码。不包含代码可以节省 token。',
+    askShare: '发送给 Muse', askCopied: '已复制，请粘贴到 Muse。',
+    askNote: 'Muse 会从本地克隆读取指定的行。未指定行时，以整个文件为对象。',
+    askRange: '行', askFileN: function (n) { return '整个文件（' + n + ' 行）'; }, more: function (n) { return '… 另有 ' + n + ' 行'; },
     askFile: '整个文件', askRef: '代码', askLocal: '本地读取', clearSel: '清除',
     selected: function (a, b) { return a === b ? '第 ' + a + ' 行' : '第 ' + a + '–' + b + ' 行'; },
     tapLines: '点按行号即可选择范围。',
@@ -318,13 +327,13 @@ var I18N = {
     'skipped.submodule': '서브모듈(포함되지 않음).',
     'skipped.other': '이 파일은 표시할 수 없습니다.',
     wrap: '줄바꿈',
-    settings: '설정', language: '언어', view: '표시 및 공유', wrapDefault: '긴 줄 줄바꿈',
-    codeDefault: 'Muse에 질문할 때 코드 본문 포함',
+    settings: '설정', language: '언어', view: '표시', wrapDefault: '긴 줄 줄바꿈',
     langNote: function (d) { return d ? '초기 언어: ' + d + '(Muse가 설치 시 설정). 여기서 선택한 언어는 기억됩니다.' : '초기 언어: 브라우저 언어. 여기서 선택한 언어는 기억됩니다.'; },
     collapse: '접기', expand: '펼치기',
     ask: 'Muse에 질문', askTitle: '이 코드에 대해 Muse에 질문', askQ: '질문(선택)',
-    askCode: '코드 본문 포함', askShare: 'Muse로 보내기', askCopied: '복사했습니다. Muse에 붙여넣어 주십시오.',
-    askNote: 'Muse는 로컬 clone에서 이 범위를 읽으므로 코드 본문을 포함할 필요가 없습니다. 포함하지 않으면 토큰을 절약할 수 있습니다.',
+    askShare: 'Muse로 보내기', askCopied: '복사했습니다. Muse에 붙여넣어 주십시오.',
+    askNote: 'Muse는 로컬 clone에서 지정한 줄을 읽습니다. 줄을 지정하지 않으면 파일 전체가 대상입니다.',
+    askRange: '줄', askFileN: function (n) { return '파일 전체(' + n + '줄)'; }, more: function (n) { return '… 외 ' + n + '줄'; },
     askFile: '파일 전체', askRef: '코드', askLocal: '로컬에서 읽기', clearSel: '해제',
     selected: function (a, b) { return a === b ? a + '번째 줄' : a + '–' + b + '번째 줄'; },
     tapLines: '줄 번호를 탭하면 범위를 선택할 수 있습니다.',
@@ -1155,9 +1164,9 @@ function showContent(row, meta, body, f, content) {
   paint();
 }
 // Wrapping is the default (phone-first); the choice is remembered.
-/* ---------- "Ask Muse": hand a precise range to Muse (reference first, code optional) ---------- */
+/* ---------- "Ask Muse": hand a precise range to Muse by reference; Muse reads it locally ---------- */
 function shellQuote(p) { return /^[\w@%+=:,.\/-]+$/.test(p) ? p : "'" + p.replace(/'/g, "'\\''") + "'"; }
-function askText(repo, f, content, sel, question, withCode) {
+function askText(repo, f, sel, question) {
   var range = sel ? (sel.a === sel.b ? 'L' + sel.a : 'L' + sel.a + '-L' + sel.b) : '';
   var out = [];
   if (question) out.push(question, '');
@@ -1167,12 +1176,6 @@ function askText(repo, f, content, sel, question, withCode) {
     out.push(t('askLocal') + ': git -C ' + repo.local + ' show ' + repo.head + ':' + shellQuote(f.path) +
              (sel ? " | sed -n '" + sel.a + ',' + sel.b + "p'" : ''));
   }
-  if (withCode) {
-    var code = sel ? content.split('\n').slice(sel.a - 1, sel.b).join('\n') : content.replace(/\n$/, '');
-    var ext = (f.path.match(/\.([\w+-]+)$/) || [])[1] || '';
-    var fence = /```/.test(code) ? '~~~~' : '```';
-    out.push('', fence + ext, code, fence);
-  }
   return out.join('\n');
 }
 function toast(msg) {
@@ -1181,14 +1184,38 @@ function toast(msg) {
   setTimeout(function () { if (d.parentNode) d.parentNode.removeChild(d); }, 2200);
 }
 var askCtx = null;
+function askLines() { return askCtx.content.replace(/\n$/, '').split('\n'); }
+function askRange() {
+  var n = askLines().length, a = parseInt($('askFrom').value, 10), b = parseInt($('askTo').value, 10);
+  if (isNaN(a) && isNaN(b)) return null;
+  if (isNaN(a)) a = b; if (isNaN(b)) b = a;
+  a = Math.min(Math.max(a, 1), n); b = Math.min(Math.max(b, 1), n);
+  return a <= b ? { a: a, b: b } : { a: b, b: a };
+}
+// Shows what will be referred to, so the range can be checked before sending.
+function updateAsk() {
+  var lines = askLines(), sel = askRange(), pv = $('askPreview');
+  askCtx.sel = sel;
+  $('askTarget').textContent = askCtx.repo.id + ' · ' + askCtx.f.path + ' · ' +
+    (sel ? t('selected')(sel.a, sel.b) : t('askFileN')(lines.length));
+  if (!sel) { pv.hidden = true; return; }
+  var MAX = 30, end = Math.min(sel.b, sel.a + MAX - 1), w = String(end).length, out = [];
+  for (var i = sel.a; i <= end; i++) out.push(('        ' + i).slice(-w) + '  ' + lines[i - 1]);
+  if (end < sel.b) out.push(t('more')(sel.b - end));
+  pv.textContent = out.join('\n');
+  pv.hidden = false;
+}
 function openAsk(repo, f, content, sel) {
   askCtx = { repo: repo, f: f, content: content, sel: sel };
   $('askTitle').textContent = t('askTitle');
-  $('askTarget').textContent = repo.id + ' · ' + f.path + ' · ' + (sel ? t('selected')(sel.a, sel.b) : t('askFile'));
   $('askQ').placeholder = t('askQ');
-  $('askCodeLabel').textContent = t('askCode');
-  $('askCode').checked = store('rx.askcode') === '1';
+  $('askRangeLabel').textContent = t('askRange');
+  $('askFrom').max = $('askTo').max = String(askLines().length);
+  $('askFrom').value = sel ? sel.a : '';
+  $('askTo').value = sel ? sel.b : '';
+  $('askWhole').textContent = t('askFile');
   $('askNote').textContent = t('askNote');
+  updateAsk();
   $('askCopy').textContent = t('copy');
   $('askShare').textContent = t('askShare');
   $('askShare').hidden = !navigator.share;
@@ -1197,8 +1224,7 @@ function openAsk(repo, f, content, sel) {
 }
 function closeAsk() { $('askSheet').hidden = true; askCtx = null; }
 function currentAskText() {
-  store('rx.askcode', $('askCode').checked ? '1' : '0');
-  return askText(askCtx.repo, askCtx.f, askCtx.content, askCtx.sel, $('askQ').value.trim(), $('askCode').checked);
+  return askText(askCtx.repo, askCtx.f, askRange(), $('askQ').value.trim());
 }
 function wrapOn() { return store('rx.wrap') !== '0'; }
 function copyText(s) {
@@ -1252,9 +1278,7 @@ function openSettings() {
   $('setLangNote').textContent = t('langNote')(LANG_NAMES[built] || '');
   $('setViewLabel').textContent = t('view');
   $('setWrapLabel').textContent = t('wrapDefault');
-  $('setCodeLabel').textContent = t('codeDefault');
   $('setWrap').checked = wrapOn();
-  $('setCode').checked = store('rx.askcode') === '1';
   $('settingsSheet').hidden = false;
 }
 function closeSettings() { $('settingsSheet').hidden = true; }
@@ -1275,7 +1299,7 @@ $('setWrap').addEventListener('change', function () {
   store('rx.wrap', this.checked ? '1' : '0');
   if (DATA) route();
 });
-$('setCode').addEventListener('change', function () { store('rx.askcode', this.checked ? '1' : '0'); });
+
 document.body.classList.toggle('hdr-collapsed', store('rx.hdr') === '0');
 applyStaticText();
 setHeader(headerCollapsed());
@@ -1316,6 +1340,9 @@ loadData().then(function (data) {
   });
   $('hdrToggle').addEventListener('click', function () { setHeader(!headerCollapsed()); });
   $('askClose').addEventListener('click', closeAsk);
+  $('askFrom').addEventListener('input', updateAsk);
+  $('askTo').addEventListener('input', updateAsk);
+  $('askWhole').addEventListener('click', function () { $('askFrom').value = $('askTo').value = ''; updateAsk(); });
   $('askSheet').addEventListener('click', function (e) { if (e.target === this) closeAsk(); });
   $('askCopy').addEventListener('click', function () {
     var text = currentAskText();
