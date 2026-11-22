@@ -112,6 +112,9 @@ mark { background: rgba(255, 196, 0, .45); color: inherit; border-radius: 2px; }
 .mermaid-block pre { text-align: left; }
 footer { color: var(--fg2); font-size: 12px; padding: 12px; }
 h1 { flex: none; }
+#gear { padding: 2px 9px; }
+.settings h3 { margin: 14px 0 6px; font-size: 13px; color: var(--fg2); font-weight: 600; }
+.settings select { width: 100%; }
 #hdrRepo { color: var(--fg2); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: none; }
 #hdrToggle { padding: 2px 10px; }
 body.hdr-collapsed #hdrBody { display: none; }
@@ -138,6 +141,7 @@ body.hdr-collapsed #hdrRepo { display: block; }
   <div class="row">
     <h1 data-i18n="title">Repository Explorer</h1>
     <span id="hdrRepo" class="grow"></span>
+    <button class="btn" id="gear" aria-haspopup="dialog">⚙</button>
     <button class="btn" id="hdrToggle" aria-expanded="true" aria-controls="hdrBody"></button>
   </div>
   <div id="hdrBody">
@@ -162,6 +166,20 @@ body.hdr-collapsed #hdrRepo { display: block; }
   </div>
   </div>
 </header>
+<div id="settingsSheet" class="sheet" hidden role="dialog" aria-modal="true">
+  <div class="sheet-body settings">
+    <div class="row"><strong class="grow" id="setTitle"></strong><button class="btn" id="setClose">×</button></div>
+    <h3 id="setLangLabel"></h3>
+    <select id="lang">
+      <option value="en">English</option><option value="ja">日本語</option>
+      <option value="zh-CN">简体中文</option><option value="ko">한국어</option>
+    </select>
+    <div class="meta" id="setLangNote"></div>
+    <h3 id="setViewLabel"></h3>
+    <label class="row"><input type="checkbox" id="setWrap"> <span id="setWrapLabel"></span></label>
+    <label class="row"><input type="checkbox" id="setCode"> <span id="setCodeLabel"></span></label>
+  </div>
+</div>
 <div id="askSheet" class="sheet" hidden role="dialog" aria-modal="true">
   <div class="sheet-body">
     <div class="row"><strong class="grow" id="askTitle"></strong><button class="btn" id="askClose">×</button></div>
@@ -201,6 +219,9 @@ var I18N = {
     'skipped.submodule': 'Submodule (not included).',
     'skipped.other': 'This file cannot be displayed.',
     wrap: 'Wrap',
+    settings: 'Settings', language: 'Language', view: 'Display and sharing', wrapDefault: 'Wrap long lines',
+    codeDefault: 'Include the code when asking Muse',
+    langNote: function (d) { return d ? 'Initial language: ' + d + ' (set up by Muse). Your choice here is remembered.' : 'Initial language: your browser language. Your choice here is remembered.'; },
     collapse: 'Hide', expand: 'Show',
     ask: 'Ask Muse', askTitle: 'Ask Muse about this code', askQ: 'Your question (optional)',
     askCode: 'Include the code itself', askShare: 'Send to Muse', askCopied: 'Copied. Paste it into Muse.',
@@ -231,6 +252,9 @@ var I18N = {
     'skipped.submodule': 'サブモジュール（含まれません）。',
     'skipped.other': 'このファイルは表示できません。',
     wrap: '折り返し',
+    settings: '設定', language: '言語', view: '表示と共有', wrapDefault: '長い行を折り返す',
+    codeDefault: 'Museに質問するときにコード本体も含める',
+    langNote: function (d) { return d ? '初期の言語：' + d + '（Muse がセットアップ時に設定）。ここでの選択は記憶されます。' : '初期の言語：ブラウザの言語。ここでの選択は記憶されます。'; },
     collapse: '畳む', expand: '開く',
     ask: 'Museに質問', askTitle: 'このコードについて Muse に質問', askQ: '質問（任意）',
     askCode: 'コード本体も含める', askShare: 'Museに送る', askCopied: 'コピーしました。Muse に貼り付けてください。',
@@ -261,6 +285,9 @@ var I18N = {
     'skipped.submodule': '子模块（未包含）。',
     'skipped.other': '无法显示此文件。',
     wrap: '自动换行',
+    settings: '设置', language: '语言', view: '显示与分享', wrapDefault: '长行自动换行',
+    codeDefault: '向 Muse 提问时包含代码本身',
+    langNote: function (d) { return d ? '初始语言：' + d + '（由 Muse 在搭建时设置）。此处的选择会被记住。' : '初始语言：浏览器语言。此处的选择会被记住。'; },
     collapse: '收起', expand: '展开',
     ask: '向 Muse 提问', askTitle: '就这段代码向 Muse 提问', askQ: '你的问题（可选）',
     askCode: '包含代码本身', askShare: '发送给 Muse', askCopied: '已复制，请粘贴到 Muse。',
@@ -291,6 +318,9 @@ var I18N = {
     'skipped.submodule': '서브모듈(포함되지 않음).',
     'skipped.other': '이 파일은 표시할 수 없습니다.',
     wrap: '줄바꿈',
+    settings: '설정', language: '언어', view: '표시 및 공유', wrapDefault: '긴 줄 줄바꿈',
+    codeDefault: 'Muse에 질문할 때 코드 본문 포함',
+    langNote: function (d) { return d ? '초기 언어: ' + d + '(Muse가 설치 시 설정). 여기서 선택한 언어는 기억됩니다.' : '초기 언어: 브라우저 언어. 여기서 선택한 언어는 기억됩니다.'; },
     collapse: '접기', expand: '펼치기',
     ask: 'Muse에 질문', askTitle: '이 코드에 대해 Muse에 질문', askQ: '질문(선택)',
     askCode: '코드 본문 포함', askShare: 'Muse로 보내기', askCopied: '복사했습니다. Muse에 붙여넣어 주십시오.',
@@ -312,9 +342,11 @@ var I18N = {
 function store(k, v) {
   try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; }
 }
-/* The language is chosen when the page is built (data-lang, from the setup conversation).
-   If none was set, the browser language is used; English is the fallback. */
+/* Language: the viewer's own choice (selector, remembered) comes first, then a language fixed at
+   build time (setup --lang), then the browser language; English is the fallback. */
 function pickLang() {
+  var chosen = store('rx.lang');
+  if (chosen && I18N[chosen]) return chosen;
   var built = document.documentElement.getAttribute('data-lang');
   if (built && I18N[built]) return built;
   var navs = (navigator.languages || [navigator.language || 'en']);
@@ -743,6 +775,8 @@ function buildTree(repo) {
 /* ---------- rendering ---------- */
 function applyStaticText() {
   document.documentElement.lang = lang;
+  $('gear').title = t('settings');
+  $('gear').setAttribute('aria-label', t('settings'));
   document.querySelectorAll('[data-i18n]').forEach(function (e) { e.textContent = t(e.getAttribute('data-i18n')); });
   document.title = t('title');
   updateSearchOpts();
@@ -1208,7 +1242,40 @@ function route() {
   }
 }
 
+/* ---------- settings ---------- */
+var LANG_NAMES = { en: 'English', ja: '日本語', 'zh-CN': '简体中文', ko: '한국어' };
+function openSettings() {
+  var built = document.documentElement.getAttribute('data-lang');
+  $('setTitle').textContent = t('settings');
+  $('setLangLabel').textContent = t('language');
+  $('lang').value = lang;
+  $('setLangNote').textContent = t('langNote')(LANG_NAMES[built] || '');
+  $('setViewLabel').textContent = t('view');
+  $('setWrapLabel').textContent = t('wrapDefault');
+  $('setCodeLabel').textContent = t('codeDefault');
+  $('setWrap').checked = wrapOn();
+  $('setCode').checked = store('rx.askcode') === '1';
+  $('settingsSheet').hidden = false;
+}
+function closeSettings() { $('settingsSheet').hidden = true; }
+
 /* ---------- boot ---------- */
+$('gear').addEventListener('click', openSettings);
+$('setClose').addEventListener('click', closeSettings);
+$('settingsSheet').addEventListener('click', function (e) { if (e.target === this) closeSettings(); });
+$('lang').addEventListener('change', function () {
+  lang = this.value; store('rx.lang', lang);
+  applyStaticText(); setHeader(headerCollapsed()); openSettings();
+  if (!DATA) return;
+  renderMeta(); route();
+  if ($('q').value.trim()) runSearch();
+  if (!$('scopePanel').hidden) renderScopeList();
+});
+$('setWrap').addEventListener('change', function () {
+  store('rx.wrap', this.checked ? '1' : '0');
+  if (DATA) route();
+});
+$('setCode').addEventListener('change', function () { store('rx.askcode', this.checked ? '1' : '0'); });
 document.body.classList.toggle('hdr-collapsed', store('rx.hdr') === '0');
 applyStaticText();
 setHeader(headerCollapsed());

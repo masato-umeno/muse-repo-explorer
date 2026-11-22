@@ -7,7 +7,7 @@
 | Command | Description | Output |
 | --- | --- | --- |
 | `next` | Determines the current state, refreshes when repositories exist, and prints the single next action (`NEXT (n/5 …)`, `DONE` or `STOP`) | A few lines of instructions |
-| `setup [--lang en\|ja\|zh-CN\|ko]` | Installs ghq and gh into `~/.local/bin` and the verified Mermaid build if missing, records the page language, and reports the sign-in state | One line per item |
+| `setup [--lang en\|ja\|zh-CN\|ko\|auto]` | Installs ghq and gh into `~/.local/bin` and the verified Mermaid build if missing, records the page's initial language (`auto`: follow the browser), and reports the sign-in state | One line per item |
 | `login` | Starts the GitHub device flow in the background | URL and one-time code |
 | `login --wait` | Waits up to 15 minutes for approval, then runs `gh auth setup-git` | Account name |
 | `list [--all]` | Lists repositories of the account and its organizations; archived ones only with `--all` | One line per repository with flags |
@@ -25,8 +25,9 @@
 | `PAGE_UPDATE_NEEDED` | 0 | Followed by the files to upload and, if any, the files to delete |
 | `NO_REPOSITORIES` | 3 | No repository is cloned; at least one is required |
 
-When `setup` is run without `--lang` for the first time, the language is taken from `LC_ALL` or
-`LANG`. Unsupported languages are recorded as unset, and the page then follows the browser.
+`next` asks for `--lang` until an initial language has been recorded. Unsupported languages and
+`auto` are recorded as unset, and the page then follows the browser. Viewers can override the
+language in the page's settings.
 
 Lower-level scripts in `tools/` can also be used on their own:
 
@@ -55,7 +56,7 @@ All files are in `REPO_EXPLORER_HOME`.
 | `dist/explorer.html` | Single-file form of the page |
 | `vendor/mermaid-<version>.min.js` | Verified Mermaid build |
 | `exclude.txt` | Optional glob patterns for files to hide |
-| `.page-lang` | Page language (`en`, `ja`, `zh-CN`, `ko`, or empty for the browser setting) |
+| `.page-lang` | Initial page language (`en`, `ja`, `zh-CN`, `ko`, or empty for the browser setting) |
 | `.page-state.json` | Form of the space and checksums of the files it currently holds |
 | `.snapshot-dirty` | Present when commits have changed since the last update of the space |
 | `.snapshot.lock`, `.build.lock` | Prevent concurrent rebuilds |

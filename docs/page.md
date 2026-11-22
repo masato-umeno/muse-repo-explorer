@@ -45,9 +45,13 @@ appeared after 0.25 seconds, compared with 16 seconds when all content was loade
 share one pane; on screens 900 px or wider they are shown side by side. Light and dark themes
 follow the system setting.
 
-**Language.** English, Japanese, Simplified Chinese or Korean, chosen when the page is built
-(`setup --lang`). If none was chosen, the browser language is used, with English as the
-fallback. The page has no language selector.
+**Language.** English, Japanese, Simplified Chinese or Korean. The language is chosen in this
+order: the viewer's choice in the settings (remembered), the initial language set by Muse at
+setup (`setup --lang`, the language the user normally uses with Muse), and the browser language.
+English is the fallback.
+
+**Settings.** The gear button opens the settings: language, whether long lines wrap, and whether
+"Ask Muse" includes the code itself by default.
 
 **Navigation.**
 
