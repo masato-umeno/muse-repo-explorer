@@ -235,7 +235,7 @@ var I18N = {
     askHow: 'The question is copied to the clipboard. Paste it into your Muse chat and send it.',
     askNote: 'Muse reads the specified lines from its local clone. Without line numbers, the question is about the whole file.', askFileN: function (n) { return 'Whole file (' + n + ' lines)'; },
     askRange: 'Lines', more: function (n) { return '… ' + n + ' more lines'; },
-    askRef: 'Code', askLocal: 'Read locally', clearSel: 'Clear',
+    askHead: 'Reference', askBullet: '- ', askRepo: 'Repository: ', askFileL: 'File: ', askLinesL: 'Lines: ', askWholeL: 'entire file', askRead: 'Command: ', askOpen: ' (', askClose: ')', clearSel: 'Clear',
     selected: function (a, b) { return a === b ? 'Line ' + a : 'Lines ' + a + '–' + b; },
     tapLines: 'Tap line numbers to select a range.',
     fileCount: function (n) { return n + (n === 1 ? ' file' : ' files'); },
@@ -269,7 +269,7 @@ var I18N = {
     askHow: '質問文をクリップボードにコピーします。Muse のチャットに貼り付けて送信してください。',
     askNote: 'Muse は手元の clone から指定した行を読みます。行を指定しない場合は、ファイル全体についての質問になります。', askFileN: function (n) { return 'ファイル全体（' + n + ' 行）'; },
     askRange: '行', more: function (n) { return '… ほか ' + n + ' 行'; },
-    askRef: 'コード', askLocal: 'ローカルで読む', clearSel: '解除',
+    askHead: '参照先', askBullet: '・', askRepo: 'リポジトリ：', askFileL: 'ファイル：', askLinesL: '行：', askWholeL: 'ファイル全体', askRead: '取得コマンド：', askOpen: '（', askClose: '）', clearSel: '解除',
     selected: function (a, b) { return a === b ? a + ' 行目' : a + '–' + b + ' 行目'; },
     tapLines: '行番号をタップすると範囲を選択できます。',
     fileCount: function (n) { return n + ' ファイル'; },
@@ -303,7 +303,7 @@ var I18N = {
     askHow: '问题文本将复制到剪贴板。请粘贴到 Muse 聊天中发送。',
     askNote: 'Muse 会从本地克隆读取指定的行。未指定行时，问题针对整个文件。', askFileN: function (n) { return '整个文件（' + n + ' 行）'; },
     askRange: '行', more: function (n) { return '… 另有 ' + n + ' 行'; },
-    askRef: '代码', askLocal: '本地读取', clearSel: '清除',
+    askHead: '参考位置', askBullet: '• ', askRepo: '仓库：', askFileL: '文件：', askLinesL: '行：', askWholeL: '整个文件', askRead: '获取命令：', askOpen: '（', askClose: '）', clearSel: '清除',
     selected: function (a, b) { return a === b ? '第 ' + a + ' 行' : '第 ' + a + '–' + b + ' 行'; },
     tapLines: '点按行号即可选择范围。',
     fileCount: function (n) { return n + ' 个文件'; },
@@ -337,7 +337,7 @@ var I18N = {
     askHow: '질문이 클립보드에 복사됩니다. Muse 채팅에 붙여넣어 보내십시오.',
     askNote: 'Muse는 로컬 clone에서 지정한 줄을 읽습니다. 줄을 지정하지 않으면 파일 전체에 대한 질문이 됩니다.', askFileN: function (n) { return '파일 전체(' + n + '줄)'; },
     askRange: '줄', more: function (n) { return '… 외 ' + n + '줄'; },
-    askRef: '코드', askLocal: '로컬에서 읽기', clearSel: '해제',
+    askHead: '참조 위치', askBullet: '• ', askRepo: '저장소: ', askFileL: '파일: ', askLinesL: '줄: ', askWholeL: '파일 전체', askRead: '조회 명령: ', askOpen: ' (', askClose: ')', clearSel: '해제',
     selected: function (a, b) { return a === b ? a + '번째 줄' : a + '–' + b + '번째 줄'; },
     tapLines: '줄 번호를 탭하면 범위를 선택할 수 있습니다.',
     fileCount: function (n) { return n + '개 파일'; },
@@ -1170,14 +1170,19 @@ function showContent(row, meta, body, f, content) {
 // Wrapping is the default (phone-first); the choice is remembered.
 /* ---------- "Ask Muse": hand a precise range to Muse by reference; Muse reads it locally ---------- */
 function shellQuote(p) { return /^[\w@%+=:,.\/-]+$/.test(p) ? p : "'" + p.replace(/'/g, "'\\''") + "'"; }
+/* The message pasted into the Muse chat: the question, then a short "Reference" list with one item per
+   line, so it reads well in a chat bubble. The last item is the command Muse runs to read the lines. */
 function askText(repo, f, sel, question) {
-  var range = sel ? (sel.a === sel.b ? 'L' + sel.a : 'L' + sel.a + '-L' + sel.b) : '';
+  var lines = sel ? (sel.a === sel.b ? String(sel.a) : sel.a + '–' + sel.b) : t('askWholeL');
   var out = [];
+  var b = t('askBullet');
   if (question) out.push(question, '');
-  out.push(t('askRef') + ': ' + repo.id + ' ' + f.path + (range ? ' ' + range : '') +
-           ' (' + (repo.branch || '?') + ' @ ' + repo.head + ')');
+  out.push(t('askHead'));
+  out.push(b + t('askRepo') + repo.id + t('askOpen') + (repo.branch || '?') + ' @ ' + repo.head + t('askClose'));
+  out.push(b + t('askFileL') + f.path);
+  out.push(b + t('askLinesL') + lines);
   if (repo.local) {
-    out.push(t('askLocal') + ': git -C ' + repo.local + ' show ' + repo.head + ':' + shellQuote(f.path) +
+    out.push(b + t('askRead') + 'git -C ' + repo.local + ' show ' + repo.head + ':' + shellQuote(f.path) +
              (sel ? " | sed -n '" + sel.a + ',' + sel.b + "p'" : ''));
   }
   return out.join('\n');
