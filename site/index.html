@@ -186,7 +186,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; }
         <figure><img class="low" src="assets/ask.webp" width="780" height="1560" loading="lazy" alt="" data-alt="altAsk"></figure>
         <div>
           <h3 data-t="f4Title">Ask Muse about the exact lines</h3>
-          <p data-t="f4Body">Tap line numbers to choose a range, check it, add your question and send it to Muse. The message names the file, lines and commit, so Muse reads them from its own copy. Nothing needs to be pasted.</p>
+          <p data-t="f4Body">Tap line numbers to choose a range, check it and add your question. Copy the result and paste it into your Muse chat: it names the file, lines and commit, so Muse reads the code from its own copy instead of you pasting the code.</p>
         </div>
       </div>
     </section>
@@ -261,7 +261,7 @@ var T = {
     f3Title: 'ドキュメントはドキュメントとして',
     f3Body: 'Markdown は整形して表示します。表やタスクリストに対応し、ファイル間のリンクもたどれます。Mermaid の図はその場で描画されます。',
     f4Title: '気になる行を、そのまま Muse に',
-    f4Body: '行番号をタップして範囲を選び、内容を確かめて、質問を添えて Muse に送ります。メッセージにはファイル・行・コミットが入るので、Muse は手元のコピーから読みます。コードを貼り付ける必要はありません。',
+    f4Body: '行番号をタップして範囲を選び、内容を確かめて質問を書きます。できた質問文をコピーして Muse のチャットに貼り付けるだけです。質問文にはファイル・行・コミットが入るので、Muse はコードを手元のコピーから読みます。コード自体を貼る必要はありません。',
     setupTitle: '1行から、使えるスペースまで',
     setupIntro: '作業をするのは Muse です。ツールが各段階でやることを Muse に伝えるので、誰でも同じ手順になります。',
     s1Title: '1行を送る', s1Body: 'Muse がツールを取得し、1手順ずつ進めます。',
@@ -300,7 +300,7 @@ var T = {
     f3Title: '文档就该像文档',
     f3Body: 'Markdown 以排版后的形式显示，支持表格、任务列表以及文件之间的链接。Mermaid 图表直接绘制出来。',
     f4Title: '就具体的行向 Muse 提问',
-    f4Body: '点按行号选择范围，确认内容，写下问题后发送给 Muse。消息中包含文件、行和提交，Muse 会从自己的副本中读取，无需粘贴代码。',
+    f4Body: '点按行号选择范围，确认内容并写下问题，然后复制生成的问题文本，粘贴到 Muse 聊天中即可。问题文本包含文件、行和提交，Muse 会从自己的副本中读取代码，无需粘贴代码本身。',
     setupTitle: '从一行到可用的空间',
     setupIntro: '工作由 Muse 完成。工具会在每一步告诉 Muse 该做什么，所以每个人的步骤都相同。',
     s1Title: '发送这一行', s1Body: 'Muse 获取工具，并按步骤逐一进行。',
@@ -339,7 +339,7 @@ var T = {
     f3Title: '문서는 문서답게',
     f3Body: 'Markdown은 서식을 적용해 표시하며 표, 작업 목록, 파일 간 링크를 지원합니다. Mermaid 다이어그램은 그 자리에서 그려집니다.',
     f4Title: '궁금한 줄을 그대로 Muse에',
-    f4Body: '줄 번호를 탭해 범위를 고르고, 내용을 확인한 뒤 질문을 붙여 Muse에 보냅니다. 메시지에 파일·줄·커밋이 들어가므로 Muse는 자신의 사본에서 읽습니다. 코드를 붙여넣을 필요가 없습니다.',
+    f4Body: '줄 번호를 탭해 범위를 고르고, 내용을 확인한 뒤 질문을 씁니다. 완성된 질문을 복사해 Muse 채팅에 붙여넣기만 하면 됩니다. 질문에 파일·줄·커밋이 들어가므로 Muse는 코드를 자신의 사본에서 읽습니다. 코드 자체를 붙여넣을 필요는 없습니다.',
     setupTitle: '한 줄에서 쓸 수 있는 스페이스까지',
     setupIntro: '작업은 Muse가 합니다. 도구가 단계마다 할 일을 Muse에 알려 주므로 누구나 같은 절차를 거칩니다.',
     s1Title: '한 줄 보내기', s1Body: 'Muse가 도구를 받아 한 단계씩 진행합니다.',
