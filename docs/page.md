@@ -105,8 +105,13 @@ remembered.
   command that reads exactly those lines from Muse's local clone, for example:
 
   ```text
-  Code: your-org/your-repo src/app.py L18-L21 (main @ abc1234)
-  Read locally: git -C ~/ghq/github.com/your-org/your-repo show abc1234:src/app.py | sed -n '18,21p'
+  What does this function do?
+
+  Reference
+  - Repository: your-org/your-repo (main @ abc1234)
+  - File: src/app.py
+  - Lines: 18–21
+  - Command: git -C ~/ghq/github.com/your-org/your-repo show abc1234:src/app.py | sed -n '18,21p'
   ```
 
 - The code itself is never included: Muse reads it from its local clone, which keeps the
