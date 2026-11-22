@@ -54,12 +54,27 @@ fallback. The page has no language selector.
 - Repositories are selected from a list grouped by owner. The branch, commit ID, commit date
   and file count are shown for the selected repository.
 - The folder tree expands on demand.
-- The search field matches paths across all repositories. Selecting a result switches to its
-  repository and opens the file.
+- The search field has two modes, described under [Search](#search).
 - The URL fragment has the form `#<repo>:<path>`, so the browser's back button returns from a
   file to the tree.
 - The selected repository and the wrap setting are stored in `localStorage`. If storage is
   unavailable, defaults are used.
+
+**Search.**
+
+| Mode | Scope | Behavior |
+| --- | --- | --- |
+| Names | All repositories | Matches file paths using the index; results are immediate |
+| Contents | This repository (default) | Searches the file content of the selected repository, which is usually already loaded |
+| Contents | All repositories | Loads repositories one by one and shows results as they arrive |
+
+- Content search is case-insensitive and requires at least two characters.
+- Each result lists the file, the number of matches and up to three matching lines with line
+  numbers. Selecting a line opens the file at that line and highlights it; Markdown files open
+  in source view in this case.
+- Results are limited to 200 files or 2,000 matches.
+- The search runs in short slices so that the page remains responsive, and a new query cancels
+  the previous one.
 
 **Code view.**
 
