@@ -16,10 +16,11 @@ serves them in two ways:
 
 ## Setup
 
-Send this line to Muse:
+Send this line to Muse. It is in English for everyone; Muse keeps replying in the language you
+normally use with it.
 
 ```text
-Set up muse-repo-explorer for me by following https://github.com/masato-umeno/muse-repo-explorer/blob/main/MUSE_SETUP.md
+Set up muse-repo-explorer for me by following https://github.com/masato-umeno/muse-repo-explorer/blob/main/MUSE_SETUP.md (keep replying in the language we normally use)
 ```
 
 Muse reads [MUSE_SETUP.md](MUSE_SETUP.md) and is then guided step by step by the tool itself.
