@@ -81,17 +81,10 @@ h2 { font-size: clamp(1.7rem, 3vw, 2.4rem); line-height: 1.15; letter-spacing: -
 .feature:nth-child(even) figure::before { inset: 18px 18px -18px -18px; }
 .feature img { position: relative; display: block; width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; object-position: top;
   border-radius: 26px; border: 1px solid var(--line); background: var(--sheet); }
-.feature img.mid { object-position: center 62%; }
-.feature img.low { object-position: bottom; }
+.feature img.low { object-position: center 78%; }
 .feature h3 { font-size: 1.45rem; line-height: 1.25; letter-spacing: -.015em; margin: 0 0 12px; }
 .feature p { margin: 0; max-width: 32em; color: var(--ink-2); }
 
-/* setup: a real sequence, so it is numbered */
-.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px; counter-reset: step; }
-.steps li { counter-increment: step; }
-.steps li::before { content: counter(step); display: block; font-size: 3.2rem; font-weight: 800; line-height: 1; color: var(--blue); margin-bottom: 14px; letter-spacing: -.04em; }
-.steps h3 { font-size: 1.1rem; margin: 0 0 6px; }
-.steps p { margin: 0; color: var(--ink-2); font-size: 16px; }
 
 .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; }
 .pair ul { margin: 0; padding-left: 1.2em; color: var(--ink-2); }
@@ -109,14 +102,12 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; }
   .feature, .feature:nth-child(even) { grid-template-columns: 1fr; gap: 36px; }
   .feature:nth-child(even) figure { order: 0; }
   .feature figure { max-width: 300px; }
-  .steps { grid-template-columns: 1fr 1fr; }
   .pair { grid-template-columns: 1fr; gap: 40px; }
   .top nav a { display: none; }
 }
 @media (max-width: 520px) {
   .wrap { padding: 0 18px; }
   body { font-size: 16px; }
-  .steps { grid-template-columns: 1fr; }
   section { padding: 56px 0; }
 }
 </style>
@@ -130,7 +121,6 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; }
     </a>
     <nav>
       <a href="#features" data-t="navFeatures">Features</a>
-      <a href="#setup" data-t="navSetup">Setup</a>
       <a href="https://github.com/masato-umeno/muse-repo-explorer">GitHub</a>
     </nav>
     <select id="lang" aria-label="Language">
@@ -175,13 +165,6 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; }
         </div>
       </div>
       <div class="feature">
-        <figure><img class="mid" src="assets/markdown.webp" width="780" height="1560" loading="lazy" alt="" data-alt="altMarkdown"></figure>
-        <div>
-          <h3 data-t="f3Title">Markdown and Mermaid</h3>
-          <p data-t="f3Body">Documents are formatted, links between files work, and diagrams are drawn.</p>
-        </div>
-      </div>
-      <div class="feature">
         <figure><img class="low" src="assets/ask.webp" width="780" height="1560" loading="lazy" alt="" data-alt="altAsk"></figure>
         <div>
           <h3 data-t="f4Title">Ask Muse about specific lines</h3>
@@ -190,15 +173,6 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; }
       </div>
     </section>
 
-    <section id="setup">
-      <h2 data-t="setupTitle">Setup</h2>
-      <ol class="steps">
-        <li><h3 data-t="s1Title">Send the line</h3><p data-t="s1Body">Muse carries out the steps in order.</p></li>
-        <li><h3 data-t="s2Title">Approve the sign-in</h3><p data-t="s2Body">Enter a one-time code on GitHub. No password goes into the chat.</p></li>
-        <li><h3 data-t="s3Title">Choose repositories</h3><p data-t="s3Body">Or use this project as a sample.</p></li>
-        <li><h3 data-t="s4Title">Open the space</h3><p data-t="s4Body">Muse creates it, visible only to you.</p></li>
-      </ol>
-    </section>
 
     <section>
       <div class="pair">
@@ -240,7 +214,6 @@ var T = {
   "ja": {
       "title": "muse-repo-explorer：リポジトリをスマホで読み、気になる行を Muse に聞く",
       "navFeatures": "機能",
-      "navSetup": "セットアップ",
       "heroA": "リポジトリをスマホで読み、",
       "heroB": "気になる行を Muse に聞く。",
       "heroLead": "パーソナル AI エージェント Muse の中で動く、自分専用のコードブラウザです。",
@@ -253,25 +226,13 @@ var T = {
       "featuresTitle": "機能",
       "altBrowse": "コード表示の画面",
       "altSearch": "ファイル内検索の結果",
-      "altMarkdown": "Markdown と Mermaid の図のプレビュー",
       "altAsk": "行を指定して Muse への質問を作る画面",
       "f1Title": "スマホで読みやすい表示",
       "f1Body": "行番号と色付きで表示し、長い行は折り返します。横スクロールは不要です。",
       "f2Title": "ファイル名と内容の検索",
       "f2Body": "1つ、複数、またはすべてのリポジトリから検索できます。結果をタップするとその行が開きます。",
-      "f3Title": "Markdown と Mermaid",
-      "f3Body": "文書は整形して表示し、ファイル間のリンクも使えます。図も描画されます。",
       "f4Title": "行を指定して Muse に質問",
       "f4Body": "行を選んで質問を書き、Muse のチャットに貼り付けます。コードは Muse が自分で読みます。",
-      "setupTitle": "セットアップ",
-      "s1Title": "1行を送る",
-      "s1Body": "Muse が手順を順に進めます。",
-      "s2Title": "サインインを承認",
-      "s2Body": "GitHub でワンタイムコードを入力します。パスワードはチャットに出ません。",
-      "s3Title": "リポジトリを選ぶ",
-      "s3Body": "このプロジェクトをサンプルにすることもできます。",
-      "s4Title": "スペースを開く",
-      "s4Body": "Muse が自分だけに見えるスペースを作ります。",
       "tokensTitle": "トークン効率",
       "t1": "コードはコネクタ経由ではなく、ローカルのファイルから読みます。",
       "t2": "更新時は、変わったファイルだけをアップロードします。",
@@ -288,7 +249,6 @@ var T = {
   "zh-CN": {
       "title": "muse-repo-explorer：在手机上阅读仓库，就任意一行向 Muse 提问",
       "navFeatures": "功能",
-      "navSetup": "搭建",
       "heroA": "在手机上阅读仓库，",
       "heroB": "就任意一行向 Muse 提问。",
       "heroLead": "运行在个人 AI 助手 Muse 中的私密代码浏览器。",
@@ -301,25 +261,13 @@ var T = {
       "featuresTitle": "功能",
       "altBrowse": "代码视图",
       "altSearch": "文件内容搜索结果",
-      "altMarkdown": "Markdown 与 Mermaid 图表预览",
       "altAsk": "指定行并编写给 Muse 的问题",
       "f1Title": "适合在手机上阅读",
       "f1Body": "显示行号与语法着色，长行自动换行，无需横向滚动。",
       "f2Title": "搜索文件名和内容",
       "f2Body": "可在一个、多个或全部仓库中搜索。点按结果即可打开对应的行。",
-      "f3Title": "Markdown 与 Mermaid",
-      "f3Body": "文档排版显示，文件之间的链接可用，图表直接绘制。",
       "f4Title": "指定行向 Muse 提问",
       "f4Body": "选择行并写下问题，粘贴到 Muse 聊天中。代码由 Muse 自行读取。",
-      "setupTitle": "搭建",
-      "s1Title": "发送这一行",
-      "s1Body": "Muse 会依次完成各个步骤。",
-      "s2Title": "批准登录",
-      "s2Body": "在 GitHub 上输入一次性验证码。密码不会出现在聊天中。",
-      "s3Title": "选择仓库",
-      "s3Body": "也可以把本项目作为示例。",
-      "s4Title": "打开空间",
-      "s4Body": "Muse 会创建一个仅你可见的空间。",
       "tokensTitle": "节省 token",
       "t1": "从本地文件读取代码，而不是通过连接器。",
       "t2": "更新时只上传变化的文件。",
@@ -336,7 +284,6 @@ var T = {
   "ko": {
       "title": "muse-repo-explorer: 저장소를 스마트폰에서 읽고, 궁금한 줄을 Muse에 묻기",
       "navFeatures": "기능",
-      "navSetup": "설치",
       "heroA": "저장소를 스마트폰에서 읽고,",
       "heroB": "궁금한 줄을 Muse에 묻습니다.",
       "heroLead": "개인 AI 에이전트 Muse 안에서 동작하는 나만의 코드 브라우저입니다.",
@@ -349,25 +296,13 @@ var T = {
       "featuresTitle": "기능",
       "altBrowse": "코드 보기 화면",
       "altSearch": "파일 내용 검색 결과",
-      "altMarkdown": "Markdown과 Mermaid 다이어그램 미리보기",
       "altAsk": "줄을 지정해 Muse에 보낼 질문을 작성하는 화면",
       "f1Title": "스마트폰에서 읽기 쉬운 표시",
       "f1Body": "줄 번호와 색상을 적용하고 긴 줄은 줄바꿈합니다. 옆으로 스크롤할 필요가 없습니다.",
       "f2Title": "파일명과 내용 검색",
       "f2Body": "하나, 여러 개, 또는 모든 저장소에서 검색합니다. 결과를 탭하면 그 줄이 열립니다.",
-      "f3Title": "Markdown과 Mermaid",
-      "f3Body": "문서는 서식을 적용해 표시하고, 파일 간 링크도 동작합니다. 다이어그램도 그려집니다.",
       "f4Title": "줄을 지정해 Muse에 질문",
       "f4Body": "줄을 고르고 질문을 써서 Muse 채팅에 붙여넣습니다. 코드는 Muse가 직접 읽습니다.",
-      "setupTitle": "설치",
-      "s1Title": "한 줄 보내기",
-      "s1Body": "Muse가 단계를 차례로 진행합니다.",
-      "s2Title": "로그인 승인",
-      "s2Body": "GitHub에서 일회용 코드를 입력합니다. 비밀번호는 채팅에 나오지 않습니다.",
-      "s3Title": "저장소 고르기",
-      "s3Body": "이 프로젝트를 샘플로 쓸 수도 있습니다.",
-      "s4Title": "스페이스 열기",
-      "s4Body": "Muse가 나만 볼 수 있는 스페이스를 만듭니다.",
       "tokensTitle": "토큰 효율",
       "t1": "코드는 커넥터가 아닌 로컬 파일에서 읽습니다.",
       "t2": "업데이트할 때는 바뀐 파일만 업로드합니다.",
@@ -386,7 +321,7 @@ var EN = {};
 document.querySelectorAll('[data-t]').forEach(function (e) { EN[e.getAttribute('data-t')] = e.textContent; });
 EN.title = document.title; EN.copied = 'Copied';
 EN.altBrowse = 'Code view'; EN.altSearch = 'Search results inside files';
-EN.altMarkdown = 'Markdown preview with a Mermaid diagram'; EN.altAsk = 'Writing a question for Muse about selected lines';
+EN.altAsk = 'Writing a question for Muse about selected lines';
 
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
 function detect() {
