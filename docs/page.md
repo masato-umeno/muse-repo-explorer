@@ -50,8 +50,7 @@ order: the viewer's choice in the settings (remembered), the initial language se
 setup (`setup --lang`, the language the user normally uses with Muse), and the browser language.
 English is the fallback.
 
-**Settings.** The gear button opens the settings: language, whether long lines wrap, and whether
-"Ask Muse" includes the code itself by default.
+**Settings.** The gear button opens the settings: language and whether long lines wrap.
 
 **Navigation.**
 
@@ -94,8 +93,11 @@ remembered.
 
 - Tap a line number to select that line; tap another line number to select the range between
   them. A bar at the bottom shows the selection.
-- **Ask Muse** (in the file bar or the selection bar) opens a sheet with an optional question.
-  **Send to Muse** uses the system share sheet where available; **Copy** copies the same text.
+- **Ask Muse** (in the file bar or the selection bar) opens a sheet with an optional question and
+  the line range, pre-filled from the selection. The range can also be typed, which works from the
+  Markdown preview as well. The lines in the range are shown in the sheet so that they can be
+  checked before sending; without a range, the whole file is referred to.
+- **Send to Muse** uses the system share sheet where available; **Copy** copies the same text.
 - The message identifies the repository, file, line range, branch and commit, and includes a
   command that reads exactly those lines from Muse's local clone, for example:
 
@@ -104,8 +106,8 @@ remembered.
   Read locally: git -C ~/ghq/github.com/your-org/your-repo show abc1234:src/app.py | sed -n '18,21p'
   ```
 
-- The code itself is not included by default, because Muse can read it locally; this saves
-  tokens. "Include the code itself" adds it as a code block. The choice is remembered.
+- The code itself is never included: Muse reads it from its local clone, which keeps the
+  conversation short and saves tokens.
 - With a selection, **Copy** in the file bar copies only the selected lines.
 
 **Code view.**
