@@ -14,6 +14,8 @@ serves them in two ways:
   The page is shown in your language (English, Japanese, Chinese or Korean) and stays fast as
   the number of repositories grows, because each repository's content is loaded only when needed.
 
+Overview and live demo: <https://masato-umeno.github.io/muse-repo-explorer/>
+
 ## Setup
 
 Send this line to Muse. It is in English for everyone; Muse keeps replying in the language you

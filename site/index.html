@@ -39,7 +39,9 @@ a:focus-visible, button:focus-visible, select:focus-visible { outline: 3px solid
 
 /* ---------- hero ---------- */
 .hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 56px; align-items: center; padding: 40px 0 88px; }
-.hero h1 { font-size: clamp(2.3rem, 4.6vw, 3.9rem); line-height: 1.06; letter-spacing: -.035em; margin: 0 0 22px; font-weight: 800; max-width: 13ch; }
+.hero h1 { font-size: clamp(2.3rem, 4.6vw, 3.9rem); line-height: 1.06; letter-spacing: -.035em; margin: 0 0 22px; font-weight: 800; max-width: 13ch;
+  text-wrap: balance; word-break: auto-phrase; }
+h2, .feature h3 { text-wrap: balance; word-break: auto-phrase; }
 :lang(ja) .hero h1, :lang(zh-CN) .hero h1, :lang(ko) .hero h1 { letter-spacing: -.01em; line-height: 1.22; max-width: 15em; font-size: clamp(2rem, 3.8vw, 3.2rem); }
 .lead { font-size: 19px; color: var(--ink-2); max-width: 34em; margin: 0 0 34px; }
 .send-label { font-weight: 600; margin: 0 0 10px; }
@@ -57,7 +59,6 @@ a:focus-visible, button:focus-visible, select:focus-visible { outline: 3px solid
 /* phone with the live demo */
 .phone-col { display: flex; flex-direction: column; align-items: center; gap: 14px; }
 .phone { width: 340px; height: 690px; background: var(--ink); border-radius: 46px; padding: 12px; position: relative; }
-.phone::before { content: ""; position: absolute; top: 20px; left: 50%; width: 76px; height: 20px; margin-left: -38px; background: var(--ink); border-radius: 12px; z-index: 2; }
 .phone iframe { width: 100%; height: 100%; border: 0; border-radius: 34px; background: var(--sheet); display: block; }
 .phone-cap { font-size: 14px; color: var(--ink-2); text-align: center; max-width: 30em; }
 .demo-link { display: none; }
@@ -69,14 +70,17 @@ h2 { font-size: clamp(1.7rem, 3vw, 2.4rem); line-height: 1.15; letter-spacing: -
 .intro { color: var(--ink-2); max-width: 36em; margin: 0 0 48px; }
 
 /* features: screenshot and text, alternating */
-.feature { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 64px; align-items: center; margin: 0 0 72px; }
+.feature { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 64px; align-items: center; margin: 0 0 64px; }
 .feature:last-child { margin-bottom: 0; }
-.feature:nth-child(even) { grid-template-columns: minmax(0, 1fr) 300px; }
+.feature:nth-child(even) { grid-template-columns: minmax(0, 1fr) 320px; }
 .feature:nth-child(even) figure { order: 2; }
 .feature figure { margin: 0; position: relative; }
 .feature figure::before { content: ""; position: absolute; inset: 18px -18px -18px 18px; background: var(--pale); border-radius: 30px; }
 .feature:nth-child(even) figure::before { inset: 18px 18px -18px -18px; }
-.feature img { position: relative; display: block; width: 100%; height: auto; border-radius: 26px; border: 1px solid var(--line); background: var(--sheet); }
+.feature img { position: relative; display: block; width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; object-position: top;
+  border-radius: 26px; border: 1px solid var(--line); background: var(--sheet); }
+.feature img.mid { object-position: center 62%; }
+.feature img.low { object-position: bottom; }
 .feature h3 { font-size: 1.45rem; line-height: 1.25; letter-spacing: -.015em; margin: 0 0 12px; }
 .feature p { margin: 0; max-width: 32em; color: var(--ink-2); }
 
@@ -172,14 +176,14 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; }
         </div>
       </div>
       <div class="feature">
-        <figure><img src="assets/markdown.webp" width="780" height="1560" loading="lazy" alt="" data-alt="altMarkdown"></figure>
+        <figure><img class="mid" src="assets/markdown.webp" width="780" height="1560" loading="lazy" alt="" data-alt="altMarkdown"></figure>
         <div>
           <h3 data-t="f3Title">Documents read like documents</h3>
           <p data-t="f3Body">Markdown opens formatted, with tables, task lists and links that move between files. Mermaid diagrams are drawn in place.</p>
         </div>
       </div>
       <div class="feature">
-        <figure><img src="assets/ask.webp" width="780" height="1560" loading="lazy" alt="" data-alt="altAsk"></figure>
+        <figure><img class="low" src="assets/ask.webp" width="780" height="1560" loading="lazy" alt="" data-alt="altAsk"></figure>
         <div>
           <h3 data-t="f4Title">Ask Muse about the exact lines</h3>
           <p data-t="f4Body">Tap line numbers to choose a range, check it, add your question and send it to Muse. The message names the file, lines and commit, so Muse reads them from its own copy. Nothing needs to be pasted.</p>
