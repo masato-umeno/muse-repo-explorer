@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>muse-repo-explorer: read your repositories on your phone and ask Muse about any line</title>
-<meta name="description" content="Keep your GitHub repositories in Muse and read them on your phone in a private code browser. Search, preview Markdown and Mermaid, and ask Muse about exact lines. Set up with one line.">
+<meta name="description" content="A private code browser that runs inside Muse. Read your repositories on your phone and ask Muse about any line. Set up with one line.">
 <meta name="color-scheme" content="light">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='2' width='20' height='28' rx='5' fill='%2316233D'/%3E%3Crect x='9' y='9' width='14' height='3' rx='1' fill='%23FFC400'/%3E%3Crect x='9' y='15' width='10' height='2' rx='1' fill='%23EEF2F7'/%3E%3Crect x='9' y='20' width='12' height='2' rx='1' fill='%23EEF2F7'/%3E%3C/svg%3E">
 <style>
@@ -42,7 +42,7 @@ a:focus-visible, button:focus-visible, select:focus-visible { outline: 3px solid
 .hero h1 { font-size: clamp(2.1rem, 3.8vw, 3.2rem); line-height: 1.1; letter-spacing: -.03em; margin: 0 0 20px; font-weight: 800; max-width: 20ch;
   word-break: auto-phrase; }
 .hero h1 span { display: block; }
-h2, .feature h3 { text-wrap: balance; word-break: auto-phrase; }
+h2 { text-wrap: balance; word-break: auto-phrase; }
 :lang(ja) .hero h1, :lang(zh-CN) .hero h1, :lang(ko) .hero h1 { letter-spacing: -.01em; line-height: 1.3; max-width: none; font-size: clamp(1.55rem, 2.9vw, 2.45rem); }
 .lead { font-size: 19px; color: var(--ink-2); max-width: 34em; margin: 0 0 34px; }
 .send-label { font-weight: 600; margin: 0 0 10px; }
@@ -51,7 +51,6 @@ h2, .feature h3 { text-wrap: balance; word-break: auto-phrase; }
   max-width: 34em; font-size: 15px; line-height: 1.55; overflow-wrap: anywhere; }
 .bubble p { margin: 0 0 12px; }
 .bubble button { font: inherit; font-size: 14px; font-weight: 600; color: var(--ink); background: var(--amber); border: 0; border-radius: 999px; padding: 6px 14px; cursor: pointer; }
-.bubble-note { font-size: 14px; color: var(--ink-2); margin: 10px 0 0; max-width: 34em; }
 @media (prefers-reduced-motion: no-preference) {
   .bubble { animation: send .7s cubic-bezier(.2, .8, .2, 1) .25s both; }
   @keyframes send { from { opacity: 0; transform: translate(-18px, 14px) scale(.97); } to { opacity: 1; transform: none; } }
@@ -68,28 +67,15 @@ h2, .feature h3 { text-wrap: balance; word-break: auto-phrase; }
 section { padding: 72px 0; }
 section + section { border-top: 1px solid var(--line); }
 h2 { font-size: clamp(1.7rem, 3vw, 2.4rem); line-height: 1.15; letter-spacing: -.025em; margin: 0 0 40px; font-weight: 800; }
-.pair h2 { margin-bottom: 16px; }
 
 
-/* features: screenshot and text, alternating */
-.feature { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 64px; align-items: center; margin: 0 0 64px; }
-.feature:last-child { margin-bottom: 0; }
-.feature:nth-child(even) { grid-template-columns: minmax(0, 1fr) 320px; }
-.feature:nth-child(even) figure { order: 2; }
-.feature figure { margin: 0; position: relative; }
-.feature figure::before { content: ""; position: absolute; inset: 18px -18px -18px 18px; background: var(--pale); border-radius: 30px; }
-.feature:nth-child(even) figure::before { inset: 18px 18px -18px -18px; }
-.feature img { position: relative; display: block; width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; object-position: top;
-  border-radius: 26px; border: 1px solid var(--line); background: var(--sheet); }
-.feature img.low { object-position: center 78%; }
-.feature h3 { font-size: 1.45rem; line-height: 1.25; letter-spacing: -.015em; margin: 0 0 12px; }
-.feature p { margin: 0; max-width: 32em; color: var(--ink-2); }
-
-
-.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; }
-.pair ul { margin: 0; padding-left: 1.2em; color: var(--ink-2); }
-.pair li + li { margin-top: 8px; }
-.pair h2 { font-size: clamp(1.4rem, 2.4vw, 1.8rem); }
+/* features: three screens side by side, each with a one-line caption */
+.shots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; }
+.shots figure { margin: 0; }
+.shots img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; object-position: top;
+  border-radius: 22px; border: 1px solid var(--line); background: var(--sheet); }
+.shots img.low { object-position: center 78%; }
+.shots figcaption { margin-top: 16px; font-size: 1.15rem; font-weight: 700; line-height: 1.35; text-wrap: balance; word-break: auto-phrase; }
 
 footer { padding: 36px 0 56px; border-top: 1px solid var(--line); font-size: 15px; color: var(--ink-2); }
 footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; }
@@ -99,10 +85,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; }
   .hero { grid-template-columns: 1fr; gap: 36px; padding-bottom: 56px; }
   .phone-col { display: none; }
   .demo-link { display: inline-block; margin-top: 18px; font-weight: 600; }
-  .feature, .feature:nth-child(even) { grid-template-columns: 1fr; gap: 36px; }
-  .feature:nth-child(even) figure { order: 0; }
-  .feature figure { max-width: 300px; }
-  .pair { grid-template-columns: 1fr; gap: 40px; }
+  .shots { grid-template-columns: 1fr; gap: 44px; max-width: 340px; }
   .top nav a { display: none; }
 }
 @media (max-width: 520px) {
@@ -120,7 +103,6 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; }
       muse-repo-explorer
     </a>
     <nav>
-      <a href="#features" data-t="navFeatures">Features</a>
       <a href="https://github.com/masato-umeno/muse-repo-explorer">GitHub</a>
     </nav>
     <select id="lang" aria-label="Language">
@@ -133,75 +115,45 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; }
     <div class="hero">
       <div>
         <h1><span data-t="heroA">Read your repositories on your phone.</span> <span data-t="heroB">Ask Muse about any line.</span></h1>
-        <p class="lead" data-t="heroLead">A private code browser that runs inside Muse, your personal AI agent.</p>
-        <p class="send-label" data-t="sendLabel">To set it up, send this line to Muse:</p>
+        <p class="lead" data-t="heroLead">A private code browser that runs inside Muse.</p>
+        <p class="send-label" data-t="sendLabel">Send this line to Muse to set it up.</p>
         <div class="bubble">
           <p id="line">Set up muse-repo-explorer for me by following https://github.com/masato-umeno/muse-repo-explorer/blob/main/MUSE_SETUP.md (keep replying in the language we normally use)</p>
           <button type="button" id="copyLine" data-t="copy">Copy</button>
         </div>
-        <p class="bubble-note" data-t="sendNote">Send the same line later to update. Muse keeps replying in your language.</p>
         <a class="demo-link" href="demo/index.html#masato-umeno%2Fmuse-repo-explorer:README.md" data-t="openDemo">Open the live demo</a>
       </div>
       <div class="phone-col">
         <div class="phone"><iframe id="demo" title="Live demo" src="demo/index.html#masato-umeno%2Fmuse-repo-explorer:README.md" loading="lazy"></iframe></div>
-        <p class="phone-cap" data-t="demoCaption">Live demo, showing this project's own repository.</p>
+        <p class="phone-cap" data-t="demoCaption">Live demo</p>
       </div>
     </div>
 
     <section id="features">
       <h2 data-t="featuresTitle">Features</h2>
-      <div class="feature">
-        <figure><img src="assets/browse.webp" width="780" height="1560" loading="lazy" alt="" data-alt="altBrowse"></figure>
-        <div>
-          <h3 data-t="f1Title">Made for reading on a phone</h3>
-          <p data-t="f1Body">Line numbers and syntax colours, with long lines wrapped. No sideways scrolling.</p>
-        </div>
-      </div>
-      <div class="feature">
-        <figure><img src="assets/search.webp" width="780" height="1560" loading="lazy" alt="" data-alt="altSearch"></figure>
-        <div>
-          <h3 data-t="f2Title">Search file names and contents</h3>
-          <p data-t="f2Body">Search one repository, several, or all of them. Tap a result to open that line.</p>
-        </div>
-      </div>
-      <div class="feature">
-        <figure><img class="low" src="assets/ask.webp" width="780" height="1560" loading="lazy" alt="" data-alt="altAsk"></figure>
-        <div>
-          <h3 data-t="f4Title">Ask Muse about specific lines</h3>
-          <p data-t="f4Body">Select lines, write a question, and paste it into your Muse chat. Muse reads the code itself.</p>
-        </div>
+      <div class="shots">
+        <figure>
+          <img src="assets/browse.webp" width="780" height="1560" loading="lazy" alt="" data-alt="altBrowse">
+          <figcaption data-t="f1Title">Made for reading on a phone</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/search.webp" width="780" height="1560" loading="lazy" alt="" data-alt="altSearch">
+          <figcaption data-t="f2Title">Search file names and contents</figcaption>
+        </figure>
+        <figure>
+          <img class="low" src="assets/ask.webp" width="780" height="1560" loading="lazy" alt="" data-alt="altAsk">
+          <figcaption data-t="f4Title">Ask Muse about specific lines</figcaption>
+        </figure>
       </div>
     </section>
 
 
-    <section>
-      <div class="pair">
-        <div>
-          <h2 data-t="tokensTitle">Token efficiency</h2>
-          <ul>
-            <li data-t="t1">Code is read from local files, not through a connector.</li>
-            <li data-t="t2">Updates upload only the files that changed.</li>
-            <li data-t="t3">Questions point to lines instead of pasting code.</li>
-          </ul>
-        </div>
-        <div>
-          <h2 data-t="privacyTitle">Privacy</h2>
-          <ul>
-            <li data-t="p1">The space is private. Do not create a public link.</li>
-            <li data-t="p2">Only committed files are included, and you can exclude more.</li>
-            <li data-t="p3">The page sends nothing to other sites.</li>
-          </ul>
-        </div>
-      </div>
-    </section>
   </main>
 </div>
 
 <footer>
   <div class="wrap">
-    <a href="https://github.com/masato-umeno/muse-repo-explorer" data-t="footSource">Source on GitHub</a>
-    <a href="https://github.com/masato-umeno/muse-repo-explorer/tree/main/docs" data-t="footDocs">Documentation</a>
-    <a href="https://github.com/masato-umeno/muse-repo-explorer/blob/main/docs/security.md" data-t="footSecurity">Security</a>
+    <a href="https://github.com/masato-umeno/muse-repo-explorer">GitHub</a>
     <span data-t="footLicense">MIT License</span>
   </div>
 </footer>
@@ -213,107 +165,59 @@ var T = {
   en: null, // English is the text in the HTML above
   "ja": {
       "title": "muse-repo-explorer：リポジトリをスマホで読み、気になる行を Muse に聞く",
-      "navFeatures": "機能",
       "heroA": "リポジトリをスマホで読み、",
       "heroB": "気になる行を Muse に聞く。",
-      "heroLead": "パーソナル AI エージェント Muse の中で動く、自分専用のコードブラウザです。",
+      "heroLead": "Muse の中で動く、自分専用のコードブラウザです。",
       "sendLabel": "次の1行を Muse に送るとセットアップされます。",
       "copy": "コピー",
       "copied": "コピーしました",
-      "sendNote": "更新するときも同じ1行を送ります。Muse の応答はいつもの言語のままです。",
       "openDemo": "ライブデモを開く",
-      "demoCaption": "ライブデモ（このプロジェクト自身のリポジトリを表示）",
+      "demoCaption": "ライブデモ",
       "featuresTitle": "機能",
       "altBrowse": "コード表示の画面",
       "altSearch": "ファイル内検索の結果",
       "altAsk": "行を指定して Muse への質問を作る画面",
       "f1Title": "スマホで読みやすい表示",
-      "f1Body": "行番号と色付きで表示し、長い行は折り返します。横スクロールは不要です。",
       "f2Title": "ファイル名と内容の検索",
-      "f2Body": "1つ、複数、またはすべてのリポジトリから検索できます。結果をタップするとその行が開きます。",
       "f4Title": "行を指定して Muse に質問",
-      "f4Body": "行を選んで質問を書き、Muse のチャットに貼り付けます。コードは Muse が自分で読みます。",
-      "tokensTitle": "トークン効率",
-      "t1": "コードはコネクタ経由ではなく、ローカルのファイルから読みます。",
-      "t2": "更新時は、変わったファイルだけをアップロードします。",
-      "t3": "質問はコードを貼らずに、行を指し示します。",
-      "privacyTitle": "プライバシー",
-      "p1": "スペースは非公開です。公開リンクは作らないでください。",
-      "p2": "含まれるのはコミット済みのファイルだけで、追加で除外もできます。",
-      "p3": "ページは他のサイトへ何も送信しません。",
-      "footSource": "GitHub のソース",
-      "footDocs": "ドキュメント",
-      "footSecurity": "セキュリティ",
       "footLicense": "MIT ライセンス"
   },
   "zh-CN": {
       "title": "muse-repo-explorer：在手机上阅读仓库，就任意一行向 Muse 提问",
-      "navFeatures": "功能",
       "heroA": "在手机上阅读仓库，",
       "heroB": "就任意一行向 Muse 提问。",
-      "heroLead": "运行在个人 AI 助手 Muse 中的私密代码浏览器。",
-      "sendLabel": "把下面这一行发给 Muse 即可完成搭建：",
+      "heroLead": "运行在 Muse 中的私密代码浏览器。",
+      "sendLabel": "把这一行发给 Muse 即可完成搭建。",
       "copy": "复制",
       "copied": "已复制",
-      "sendNote": "更新时同样发送这一行。Muse 会继续使用你的语言回复。",
       "openDemo": "打开在线演示",
-      "demoCaption": "在线演示（显示本项目自己的仓库）",
+      "demoCaption": "在线演示",
       "featuresTitle": "功能",
       "altBrowse": "代码视图",
       "altSearch": "文件内容搜索结果",
       "altAsk": "指定行并编写给 Muse 的问题",
       "f1Title": "适合在手机上阅读",
-      "f1Body": "显示行号与语法着色，长行自动换行，无需横向滚动。",
       "f2Title": "搜索文件名和内容",
-      "f2Body": "可在一个、多个或全部仓库中搜索。点按结果即可打开对应的行。",
       "f4Title": "指定行向 Muse 提问",
-      "f4Body": "选择行并写下问题，粘贴到 Muse 聊天中。代码由 Muse 自行读取。",
-      "tokensTitle": "节省 token",
-      "t1": "从本地文件读取代码，而不是通过连接器。",
-      "t2": "更新时只上传变化的文件。",
-      "t3": "提问时指向具体的行，而不是粘贴代码。",
-      "privacyTitle": "隐私",
-      "p1": "空间是私密的，请勿创建公开链接。",
-      "p2": "只包含已提交的文件，还可以额外排除文件。",
-      "p3": "页面不会向其他网站发送任何数据。",
-      "footSource": "GitHub 源代码",
-      "footDocs": "文档",
-      "footSecurity": "安全",
       "footLicense": "MIT 许可证"
   },
   "ko": {
       "title": "muse-repo-explorer: 저장소를 스마트폰에서 읽고, 궁금한 줄을 Muse에 묻기",
-      "navFeatures": "기능",
       "heroA": "저장소를 스마트폰에서 읽고,",
       "heroB": "궁금한 줄을 Muse에 묻습니다.",
-      "heroLead": "개인 AI 에이전트 Muse 안에서 동작하는 나만의 코드 브라우저입니다.",
+      "heroLead": "Muse 안에서 동작하는 나만의 코드 브라우저입니다.",
       "sendLabel": "다음 한 줄을 Muse에 보내면 설치됩니다.",
       "copy": "복사",
       "copied": "복사됨",
-      "sendNote": "업데이트할 때도 같은 한 줄을 보냅니다. Muse는 평소 언어로 계속 응답합니다.",
       "openDemo": "라이브 데모 열기",
-      "demoCaption": "라이브 데모(이 프로젝트 자체의 저장소를 표시)",
+      "demoCaption": "라이브 데모",
       "featuresTitle": "기능",
       "altBrowse": "코드 보기 화면",
       "altSearch": "파일 내용 검색 결과",
       "altAsk": "줄을 지정해 Muse에 보낼 질문을 작성하는 화면",
       "f1Title": "스마트폰에서 읽기 쉬운 표시",
-      "f1Body": "줄 번호와 색상을 적용하고 긴 줄은 줄바꿈합니다. 옆으로 스크롤할 필요가 없습니다.",
       "f2Title": "파일명과 내용 검색",
-      "f2Body": "하나, 여러 개, 또는 모든 저장소에서 검색합니다. 결과를 탭하면 그 줄이 열립니다.",
       "f4Title": "줄을 지정해 Muse에 질문",
-      "f4Body": "줄을 고르고 질문을 써서 Muse 채팅에 붙여넣습니다. 코드는 Muse가 직접 읽습니다.",
-      "tokensTitle": "토큰 효율",
-      "t1": "코드는 커넥터가 아닌 로컬 파일에서 읽습니다.",
-      "t2": "업데이트할 때는 바뀐 파일만 업로드합니다.",
-      "t3": "질문은 코드를 붙여넣지 않고 줄을 가리킵니다.",
-      "privacyTitle": "개인정보",
-      "p1": "스페이스는 비공개입니다. 공개 링크를 만들지 마십시오.",
-      "p2": "커밋된 파일만 포함되며, 추가로 제외할 수도 있습니다.",
-      "p3": "페이지는 다른 사이트로 아무것도 보내지 않습니다.",
-      "footSource": "GitHub 소스",
-      "footDocs": "문서",
-      "footSecurity": "보안",
       "footLicense": "MIT 라이선스"
   }
 };
