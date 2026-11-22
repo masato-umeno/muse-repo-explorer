@@ -258,6 +258,8 @@ def main(argv=None):
             'branch': git(d, 'branch', '--show-current'),
             'head': git(d, 'rev-parse', '--short', 'HEAD'),
             'committed_at': git(d, 'log', '-1', '--format=%cI'),
+            # where Muse can read the same commit locally ("~" instead of the home path)
+            'local': '~' + d[len(os.path.expanduser('~')):] if d.startswith(os.path.expanduser('~') + os.sep) else d,
             'files': files,
         })
         if not args.quiet or status.startswith('pull failed'):

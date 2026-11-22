@@ -375,7 +375,7 @@ def build_files():
                                                      separators=(',', ':')).encode('utf-8'))
         index['repos'].append({
             'id': r['id'], 'key': key, 'branch': r['branch'], 'head': r['head'],
-            'committed_at': r.get('committed_at', ''),
+            'committed_at': r.get('committed_at', ''), 'local': r.get('local', ''),
             # [path, size, skipped-reason or 0]
             'files': [[f['path'], f['size'], f.get('skipped', 0)] for f in r['files']],
         })
@@ -579,7 +579,9 @@ def cmd_next(args):
     print('Tell the user in at most 3 lines, in their language: the account, the number of '
           'repositories, and the space. Remember for later: when the user asks to refresh the '
           f'explorer, run `git -C {os.path.dirname(TOOLS)} pull --ff-only`, then repeat '
-          f'`{C} next` until it prints DONE.')
+          f'`{C} next` until it prints DONE. When the user sends a question from the explorer, it '
+          'contains a `git -C ... show ...` command: run it to read exactly those lines from the local '
+          'clone instead of asking for the code.')
     return 0
 
 

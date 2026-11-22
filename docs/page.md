@@ -82,6 +82,28 @@ a scope button shared by both:
 - The search runs in short slices so that the page remains responsive, and a new query cancels
   the previous one.
 
+**Header.** The button at the right of the title row collapses the repository selector, search
+field and scope panel to a single line that shows the selected repository. The state is
+remembered.
+
+**Asking Muse.**
+
+- Tap a line number to select that line; tap another line number to select the range between
+  them. A bar at the bottom shows the selection.
+- **Ask Muse** (in the file bar or the selection bar) opens a sheet with an optional question.
+  **Send to Muse** uses the system share sheet where available; **Copy** copies the same text.
+- The message identifies the repository, file, line range, branch and commit, and includes a
+  command that reads exactly those lines from Muse's local clone, for example:
+
+  ```text
+  Code: your-org/your-repo src/app.py L18-L21 (main @ abc1234)
+  Read locally: git -C ~/ghq/github.com/your-org/your-repo show abc1234:src/app.py | sed -n '18,21p'
+  ```
+
+- The code itself is not included by default, because Muse can read it locally; this saves
+  tokens. "Include the code itself" adds it as a code block. The choice is remembered.
+- With a selection, **Copy** in the file bar copies only the selected lines.
+
 **Code view.**
 
 - Long lines wrap by default. The Wrap button switches to horizontal scrolling.

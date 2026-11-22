@@ -74,6 +74,7 @@ All files are in `REPO_EXPLORER_HOME`.
       "branch": "main",
       "head": "abc1234",
       "committed_at": "2026-11-21T18:02:11+09:00",
+      "local": "~/ghq/github.com/your-org/your-repo",
       "files": [
         {"path": "src/main.ts", "size": 1234, "content": "file text (UTF-8)"},
         {"path": "assets/logo.png", "size": 5678, "skipped": "binary"}
