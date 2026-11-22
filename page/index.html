@@ -178,7 +178,6 @@ body.hdr-collapsed #hdrRepo { display: block; }
       <option value="en">English</option><option value="ja">日本語</option>
       <option value="zh-CN">简体中文</option><option value="ko">한국어</option>
     </select>
-    <div class="meta" id="setLangNote"></div>
     <h3 id="setViewLabel"></h3>
     <label class="row"><input type="checkbox" id="setWrap"> <span id="setWrapLabel"></span></label>
   </div>
@@ -192,7 +191,6 @@ body.hdr-collapsed #hdrRepo { display: block; }
       <span id="askRangeLabel"></span>
       <input id="askFrom" type="number" inputmode="numeric" min="1" aria-label="from"> –
       <input id="askTo" type="number" inputmode="numeric" min="1" aria-label="to">
-      <span class="grow"></span><button class="btn" id="askWhole"></button>
     </div>
     <pre id="askPreview" class="ask-preview" hidden></pre>
     <div class="meta" id="askNote"></div>
@@ -229,13 +227,12 @@ var I18N = {
     'skipped.other': 'This file cannot be displayed.',
     wrap: 'Wrap',
     settings: 'Settings', language: 'Language', view: 'Display', wrapDefault: 'Wrap long lines',
-    langNote: function (d) { return d ? 'Initial language: ' + d + ' (set up by Muse). Your choice here is remembered.' : 'Initial language: your browser language. Your choice here is remembered.'; },
     collapse: 'Hide', expand: 'Show',
     ask: 'Ask Muse', askTitle: 'Ask Muse about this code', askQ: 'Your question (optional)',
     askShare: 'Send to Muse', askCopied: 'Copied. Paste it into Muse.',
-    askNote: 'Muse reads the specified lines from its local clone. Without line numbers, the whole file is used.',
-    askRange: 'Lines', askFileN: function (n) { return 'Whole file (' + n + ' lines)'; }, more: function (n) { return '… ' + n + ' more lines'; },
-    askFile: 'Whole file', askRef: 'Code', askLocal: 'Read locally', clearSel: 'Clear',
+    askNote: 'Muse reads the specified lines from its local clone. Without line numbers, the question is about the whole file.', askFileN: function (n) { return 'Whole file (' + n + ' lines)'; },
+    askRange: 'Lines', more: function (n) { return '… ' + n + ' more lines'; },
+    askRef: 'Code', askLocal: 'Read locally', clearSel: 'Clear',
     selected: function (a, b) { return a === b ? 'Line ' + a : 'Lines ' + a + '–' + b; },
     tapLines: 'Tap line numbers to select a range.',
     hitCount: function (n) { return n + (n === 1 ? ' match' : ' matches'); },
@@ -262,13 +259,12 @@ var I18N = {
     'skipped.other': 'このファイルは表示できません。',
     wrap: '折り返し',
     settings: '設定', language: '言語', view: '表示', wrapDefault: '長い行を折り返す',
-    langNote: function (d) { return d ? '初期の言語：' + d + '（Muse がセットアップ時に設定）。ここでの選択は記憶されます。' : '初期の言語：ブラウザの言語。ここでの選択は記憶されます。'; },
     collapse: '畳む', expand: '開く',
     ask: 'Museに質問', askTitle: 'このコードについて Muse に質問', askQ: '質問（任意）',
     askShare: 'Museに送る', askCopied: 'コピーしました。Muse に貼り付けてください。',
-    askNote: 'Muse は手元の clone から指定した行を読みます。行を指定しない場合は、ファイル全体が対象です。',
-    askRange: '行', askFileN: function (n) { return 'ファイル全体（' + n + ' 行）'; }, more: function (n) { return '… ほか ' + n + ' 行'; },
-    askFile: 'ファイル全体', askRef: 'コード', askLocal: 'ローカルで読む', clearSel: '解除',
+    askNote: 'Muse は手元の clone から指定した行を読みます。行を指定しない場合は、ファイル全体についての質問になります。', askFileN: function (n) { return 'ファイル全体（' + n + ' 行）'; },
+    askRange: '行', more: function (n) { return '… ほか ' + n + ' 行'; },
+    askRef: 'コード', askLocal: 'ローカルで読む', clearSel: '解除',
     selected: function (a, b) { return a === b ? a + ' 行目' : a + '–' + b + ' 行目'; },
     tapLines: '行番号をタップすると範囲を選択できます。',
     hitCount: function (n) { return n + ' 件'; },
@@ -295,13 +291,12 @@ var I18N = {
     'skipped.other': '无法显示此文件。',
     wrap: '自动换行',
     settings: '设置', language: '语言', view: '显示', wrapDefault: '长行自动换行',
-    langNote: function (d) { return d ? '初始语言：' + d + '（由 Muse 在搭建时设置）。此处的选择会被记住。' : '初始语言：浏览器语言。此处的选择会被记住。'; },
     collapse: '收起', expand: '展开',
     ask: '向 Muse 提问', askTitle: '就这段代码向 Muse 提问', askQ: '你的问题（可选）',
     askShare: '发送给 Muse', askCopied: '已复制，请粘贴到 Muse。',
-    askNote: 'Muse 会从本地克隆读取指定的行。未指定行时，以整个文件为对象。',
-    askRange: '行', askFileN: function (n) { return '整个文件（' + n + ' 行）'; }, more: function (n) { return '… 另有 ' + n + ' 行'; },
-    askFile: '整个文件', askRef: '代码', askLocal: '本地读取', clearSel: '清除',
+    askNote: 'Muse 会从本地克隆读取指定的行。未指定行时，问题针对整个文件。', askFileN: function (n) { return '整个文件（' + n + ' 行）'; },
+    askRange: '行', more: function (n) { return '… 另有 ' + n + ' 行'; },
+    askRef: '代码', askLocal: '本地读取', clearSel: '清除',
     selected: function (a, b) { return a === b ? '第 ' + a + ' 行' : '第 ' + a + '–' + b + ' 行'; },
     tapLines: '点按行号即可选择范围。',
     hitCount: function (n) { return n + ' 处匹配'; },
@@ -328,13 +323,12 @@ var I18N = {
     'skipped.other': '이 파일은 표시할 수 없습니다.',
     wrap: '줄바꿈',
     settings: '설정', language: '언어', view: '표시', wrapDefault: '긴 줄 줄바꿈',
-    langNote: function (d) { return d ? '초기 언어: ' + d + '(Muse가 설치 시 설정). 여기서 선택한 언어는 기억됩니다.' : '초기 언어: 브라우저 언어. 여기서 선택한 언어는 기억됩니다.'; },
     collapse: '접기', expand: '펼치기',
     ask: 'Muse에 질문', askTitle: '이 코드에 대해 Muse에 질문', askQ: '질문(선택)',
     askShare: 'Muse로 보내기', askCopied: '복사했습니다. Muse에 붙여넣어 주십시오.',
-    askNote: 'Muse는 로컬 clone에서 지정한 줄을 읽습니다. 줄을 지정하지 않으면 파일 전체가 대상입니다.',
-    askRange: '줄', askFileN: function (n) { return '파일 전체(' + n + '줄)'; }, more: function (n) { return '… 외 ' + n + '줄'; },
-    askFile: '파일 전체', askRef: '코드', askLocal: '로컬에서 읽기', clearSel: '해제',
+    askNote: 'Muse는 로컬 clone에서 지정한 줄을 읽습니다. 줄을 지정하지 않으면 파일 전체에 대한 질문이 됩니다.', askFileN: function (n) { return '파일 전체(' + n + '줄)'; },
+    askRange: '줄', more: function (n) { return '… 외 ' + n + '줄'; },
+    askRef: '코드', askLocal: '로컬에서 읽기', clearSel: '해제',
     selected: function (a, b) { return a === b ? a + '번째 줄' : a + '–' + b + '번째 줄'; },
     tapLines: '줄 번호를 탭하면 범위를 선택할 수 있습니다.',
     hitCount: function (n) { return n + '건'; },
@@ -1198,7 +1192,7 @@ function updateAsk() {
   askCtx.sel = sel;
   $('askTarget').textContent = askCtx.repo.id + ' · ' + askCtx.f.path + ' · ' +
     (sel ? t('selected')(sel.a, sel.b) : t('askFileN')(lines.length));
-  if (!sel) { pv.hidden = true; return; }
+  if (!sel) { pv.hidden = true; return; } // no lines given: the question is about the whole file
   var MAX = 30, end = Math.min(sel.b, sel.a + MAX - 1), w = String(end).length, out = [];
   for (var i = sel.a; i <= end; i++) out.push(('        ' + i).slice(-w) + '  ' + lines[i - 1]);
   if (end < sel.b) out.push(t('more')(sel.b - end));
@@ -1211,9 +1205,10 @@ function openAsk(repo, f, content, sel) {
   $('askQ').placeholder = t('askQ');
   $('askRangeLabel').textContent = t('askRange');
   $('askFrom').max = $('askTo').max = String(askLines().length);
+  $('askFrom').placeholder = '1';
+  $('askTo').placeholder = String(askLines().length);
   $('askFrom').value = sel ? sel.a : '';
   $('askTo').value = sel ? sel.b : '';
-  $('askWhole').textContent = t('askFile');
   $('askNote').textContent = t('askNote');
   updateAsk();
   $('askCopy').textContent = t('copy');
@@ -1269,13 +1264,10 @@ function route() {
 }
 
 /* ---------- settings ---------- */
-var LANG_NAMES = { en: 'English', ja: '日本語', 'zh-CN': '简体中文', ko: '한국어' };
 function openSettings() {
-  var built = document.documentElement.getAttribute('data-lang');
   $('setTitle').textContent = t('settings');
   $('setLangLabel').textContent = t('language');
   $('lang').value = lang;
-  $('setLangNote').textContent = t('langNote')(LANG_NAMES[built] || '');
   $('setViewLabel').textContent = t('view');
   $('setWrapLabel').textContent = t('wrapDefault');
   $('setWrap').checked = wrapOn();
@@ -1342,7 +1334,7 @@ loadData().then(function (data) {
   $('askClose').addEventListener('click', closeAsk);
   $('askFrom').addEventListener('input', updateAsk);
   $('askTo').addEventListener('input', updateAsk);
-  $('askWhole').addEventListener('click', function () { $('askFrom').value = $('askTo').value = ''; updateAsk(); });
+
   $('askSheet').addEventListener('click', function (e) { if (e.target === this) closeAsk(); });
   $('askCopy').addEventListener('click', function () {
     var text = currentAskText();

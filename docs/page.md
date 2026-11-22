@@ -96,7 +96,8 @@ remembered.
 - **Ask Muse** (in the file bar or the selection bar) opens a sheet with an optional question and
   the line range, pre-filled from the selection. The range can also be typed, which works from the
   Markdown preview as well. The lines in the range are shown in the sheet so that they can be
-  checked before sending; without a range, the whole file is referred to.
+  checked before sending. Without a range, the question refers to the whole file (the fields
+  show the first and last line numbers as a guide).
 - **Send to Muse** uses the system share sheet where available; **Copy** copies the same text.
 - The message identifies the repository, file, line range, branch and commit, and includes a
   command that reads exactly those lines from Muse's local clone, for example:
