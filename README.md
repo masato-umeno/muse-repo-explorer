@@ -2,56 +2,40 @@
 
 **English** | [日本語](README.ja.md) | [简体中文](README.zh-CN.md) | [한국어](README.ko.md)
 
-https://github.com/user-attachments/assets/88320094-3a39-4f5a-8100-42c470ea2940
+A repository viewer that runs in Muse. It keeps local clones of your GitHub repositories in the
+Muse environment, so that:
 
-muse-repo-viewer keeps local clones of your GitHub repositories in the Muse environment and
-serves them in two ways:
+- **you** can read and search the code on your phone in a private Muse space, and ask Muse about
+  the lines you select;
+- **Muse** reads source code from local files, which is faster than a connector and uses fewer
+  tokens.
 
-- **To Muse:** source code is read from local files, which is faster than a connector and
-  uses considerably fewer tokens.
-- **To you:** a private, mobile-first code browser (a Muse space) built from a snapshot of the
-  clones. File names and file contents can be searched, a selected range of code can be sent to
-  Muse with a question, Markdown files are shown as formatted documents, and Mermaid diagrams are
-  rendered.
-  The page is shown in your language (English, Japanese, Chinese or Korean) and stays fast as
-  the number of repositories grows, because each repository's content is loaded only when needed.
-
-Overview and live demo: <https://masato-umeno.github.io/muse-repo-viewer/>
+Overview: <https://masato-umeno.github.io/muse-repo-viewer/>
 
 ## Setup
 
-Copy this line and paste it into Muse. It is in English for everyone; Muse keeps replying in the language you
-normally use with it.
+Copy this line and paste it into Muse. Muse keeps replying in the language you normally use.
 
 ```text
 Set up muse-repo-viewer for me by following https://github.com/masato-umeno/muse-repo-viewer/blob/main/MUSE_SETUP.md (keep replying in the language we normally use)
 ```
 
-Muse reads [MUSE_SETUP.md](MUSE_SETUP.md) and is then guided step by step by the tool itself.
-You will be asked to approve the GitHub sign-in and to choose the repositories to include. At
-least one repository is required; this repository can be used as a sample. Depending on its
-safety settings, Muse may also pause before a step such as creating the space and ask whether to
-continue; reply that it may go ahead. The page is built in
-the language you normally use with Muse, and it can be changed in the page's settings (the gear
-button). Sending the same line again later is safe: completed steps are skipped, and an existing
-installation, including one made with an earlier version, is updated to the latest version.
-
-The line makes Muse follow instructions stored in this repository. To use a fixed version, replace
-`main` in the URL with a commit ID or release tag.
+During setup you approve the GitHub sign-in and choose the repositories to include (this
+repository works as a sample). If Muse pauses to ask whether to continue, for example before
+creating the space, reply that it may go ahead. To update later, send the same line again.
 
 ## Usage
 
-- **Updating the page:** ask Muse to "refresh the viewer", or send the setup line again. The space is changed only when a
-  repository has new commits, and only the files of those repositories are uploaded.
-- **Adding repositories:** ask Muse to clone them, then refresh.
-- **Hiding files:** list glob patterns (for example `.env*` or `*.pem`) in
-  `~/workspace/repo-viewer/exclude.txt`. See [Operations](docs/operations.md).
+- **Refresh:** ask Muse to "refresh the viewer". Only repositories with new commits are uploaded.
+- **Add repositories:** ask Muse to clone them, then refresh.
+- **Hide files:** list glob patterns such as `.env*` in `~/workspace/repo-viewer/exclude.txt`.
+- **Language:** change it in the page settings (gear button).
 
 ## Security
 
-The snapshot contains the full source code of every included repository. Keep the viewer
-page private, never commit or share `snapshot.json`, and sign in only through the device flow.
-See [Security](docs/security.md) for the complete guidance.
+The space contains the full source code of the included repositories, so keep it private. The
+setup line makes Muse follow instructions stored in this repository; to pin a version, replace
+`main` in the URL with a commit ID or tag. See [Security](docs/security.md).
 
 ## Documentation
 
